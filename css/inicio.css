@@ -1,0 +1,1501 @@
+/* ============================================================
+   FENDA MUSIC — TELA INICIAL · VIDRO PROFUNDO v2
+   - Header com avatar Supabase
+   - Tocadas recentemente: CARROSSEL
+   - Descobrir no lugar de Momentos
+   - Artistas refinados (sem glow pulse staggered)
+   ============================================================ */
+
+:root {
+    --vp-ink:        #f0eaff;
+    --vp-ink-mid:    rgba(255, 255, 255, 0.7);
+    --vp-ink-low:    rgba(255, 255, 255, 0.5);
+    --vp-ink-faint:  rgba(255, 255, 255, 0.35);
+
+    --vp-bg:         #0a0612;
+    --vp-surface:    rgba(25, 22, 38, 0.7);
+    --vp-surface-2:  rgba(35, 30, 55, 0.85);
+
+    --vp-violet:     #7c3aed;
+    --vp-violet-hi:  #b07fff;
+    --vp-violet-up:  #c084fc;
+    --vp-violet-line: rgba(146, 76, 255, 0.25);
+}
+
+#inicio { position: relative; }
+
+#inicio::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -10%;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.28), transparent 65%);
+    filter: blur(40px);
+    z-index: 0;
+    pointer-events: none;
+    animation: orbFloat1 20s ease-in-out infinite;
+}
+
+#inicio::after {
+    content: '';
+    position: absolute;
+    top: 480px;
+    right: -15%;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(176, 127, 255, 0.22), transparent 65%);
+    filter: blur(50px);
+    z-index: 0;
+    pointer-events: none;
+    animation: orbFloat2 24s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(40px, 30px) scale(1.1); }
+}
+@keyframes orbFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(-30px, 50px) scale(1.08); }
+}
+
+#inicio > * { position: relative; z-index: 1; }
+
+/* ============================================================
+   01 — HEADER PESSOAL
+   ============================================================ */
+
+.inicio-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+    padding: 4px 0 2px;
+}
+
+.inicio-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    border: 2px solid rgba(176, 127, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow:
+        0 6px 20px -8px rgba(124, 58, 237, 0.6),
+        0 0 0 4px rgba(124, 58, 237, 0.12);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.inicio-avatar:hover {
+    transform: scale(1.05);
+    border-color: var(--vp-violet-up);
+}
+
+.inicio-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+.inicio-avatar-initial {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    z-index: 1;
+}
+
+.inicio-avatar:not(.fallback) .inicio-avatar-initial { display: none; }
+
+.inicio-header-text { flex: 1; min-width: 0; }
+
+.inicio-greeting {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--vp-violet-hi);
+    margin: 0;
+    letter-spacing: 0.05em;
+}
+
+.inicio-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin: 2px 0 1px;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inicio-date {
+    font-size: 11px;
+    color: var(--vp-ink-low);
+    margin: 0;
+    text-transform: capitalize;
+    letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   HERO — Recomendação do Dia
+   ============================================================ */
+
+.featured-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 26px;
+    min-height: 240px;
+    cursor: pointer;
+    isolation: isolate;
+    background: linear-gradient(135deg, #1a1030, #0a0612);
+    border: 1px solid var(--vp-violet-line);
+    box-shadow:
+        0 12px 40px -10px rgba(124, 58, 237, 0.35),
+        0 0 0 1px rgba(176, 127, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: transform 0.3s, box-shadow 0.4s, border-color 0.3s;
+}
+
+.featured-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(176, 127, 255, 0.5);
+    box-shadow:
+        0 20px 50px -10px rgba(124, 58, 237, 0.5),
+        0 0 0 1px rgba(176, 127, 255, 0.15);
+}
+
+.featured-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(32px) saturate(1.3) brightness(0.55);
+    transform: scale(1.2);
+    opacity: 0.7;
+    z-index: 0;
+}
+
+.featured-card::before {
+    content: '';
+    position: absolute;
+    inset: -10%;
+    background:
+        radial-gradient(circle at 25% 35%, rgba(176, 127, 255, 0.4), transparent 45%),
+        radial-gradient(circle at 75% 70%, rgba(124, 58, 237, 0.5), transparent 50%);
+    filter: blur(30px);
+    z-index: 1;
+    animation: heroBreathe 20s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes heroBreathe {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.9; }
+    50%      { transform: translate(2%, -2%) scale(1.06); opacity: 1; }
+}
+
+.featured-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(10, 6, 18, 0.15) 0%,
+        rgba(10, 6, 18, 0.6) 55%,
+        rgba(10, 6, 18, 0.92) 100%);
+    z-index: 2;
+}
+
+.featured-content {
+    position: relative;
+    z-index: 3;
+    padding: 26px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 240px;
+    justify-content: flex-end;
+}
+
+.featured-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(124, 58, 237, 0.28);
+    border: 1px solid rgba(176, 127, 255, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #e0d0ff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    width: fit-content;
+    margin-bottom: 8px;
+}
+
+.featured-badge .material-symbols-rounded {
+    font-size: 14px;
+    color: var(--vp-violet-up);
+}
+
+.featured-content h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.4px;
+    line-height: 1.15;
+    text-shadow: 0 2px 24px rgba(124, 58, 237, 0.4);
+}
+
+.featured-content p {
+    font-size: 14px;
+    color: var(--vp-ink-mid);
+    margin: 0;
+}
+
+.featured-play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #fff;
+    color: #1a0f2e;
+    border: none;
+    border-radius: 100px;
+    padding: 10px 22px 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 14px;
+    width: fit-content;
+    transition: transform 0.15s, background 0.2s, box-shadow 0.25s;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 24px rgba(176, 127, 255, 0.3);
+}
+
+.featured-play-btn:hover {
+    background: var(--vp-violet-up);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5), 0 0 30px rgba(176, 127, 255, 0.5);
+}
+
+.featured-play-btn:active { transform: scale(0.96); }
+.featured-play-btn .material-symbols-rounded { font-size: 20px; }
+
+/* ============================================================
+   02 — CONTINUE OUVINDO
+   ============================================================ */
+
+/* ============================================================
+   CONTINUE OUVINDO — redesenhado com fundo borrado + timestamps
+   ============================================================ */
+
+.continue-section { margin-bottom: 28px; }
+
+.continue-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(176, 127, 255, 0.3);
+    box-shadow:
+        0 12px 32px -10px rgba(124, 58, 237, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: transform 0.2s, box-shadow 0.25s, border-color 0.2s;
+    min-height: 100px;
+}
+
+.continue-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(176, 127, 255, 0.55);
+    box-shadow:
+        0 18px 40px -10px rgba(124, 58, 237, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Fundo borrado com a capa */
+.continue-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px) saturate(1.3) brightness(0.45);
+    transform: scale(1.15);
+    z-index: 0;
+}
+
+/* Escurecimento sobre o fundo */
+.continue-dark {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+        rgba(10, 6, 18, 0.55) 0%,
+        rgba(30, 14, 60, 0.6) 100%);
+    z-index: 1;
+}
+
+/* Conteúdo */
+.continue-body {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px 14px 14px;
+}
+
+.continue-cover {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow:
+        0 8px 20px -6px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+
+.continue-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.continue-label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: var(--vp-violet-up);
+    text-transform: uppercase;
+    margin-bottom: 1px;
+}
+
+.continue-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.3px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+}
+
+.continue-artist {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    margin: 0 0 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Linha timestamps + barra */
+.continue-progress-wrap {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 7px;
+    margin-top: 2px;
+}
+
+.continue-time {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
+.continue-bar {
+    height: 5px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 100px;
+    overflow: visible;
+    position: relative;
+}
+
+.continue-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--vp-violet-hi), var(--vp-violet-up));
+    border-radius: 100px;
+    position: relative;
+    transition: width 0.5s ease;
+    min-width: 6px;
+}
+
+/* Bolinha no fim da barra */
+.continue-thumb {
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(176, 127, 255, 0.7);
+}
+
+/* "Faltam X min" */
+.continue-remaining {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--vp-violet-up);
+    letter-spacing: 0.02em;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Botão play */
+.continue-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    color: #1a0f2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(176,127,255,0.3);
+}
+
+.continue-btn:hover {
+    background: var(--vp-violet-up);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(124,58,237,0.5), 0 0 28px rgba(176,127,255,0.5);
+}
+
+.continue-btn:active { transform: scale(0.94); }
+.continue-btn .material-symbols-rounded { font-size: 24px; }
+
+@media (max-width: 480px) {
+    .continue-body { grid-template-columns: 70px 1fr auto; gap: 12px; padding: 12px 14px 12px 12px; }
+    .continue-cover { width: 70px; height: 70px; }
+    .continue-title { font-size: 14px; }
+    .continue-btn { width: 42px; height: 42px; }
+    .continue-btn .material-symbols-rounded { font-size: 22px; }
+}
+
+/* ============================================================
+   03 — ATALHOS RÁPIDOS
+   ============================================================ */
+
+.quick-picks-section { margin-bottom: 40px; }
+
+.quick-picks-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.quick-pick {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px 6px 6px;
+    background: var(--vp-surface);
+    border: 1px solid var(--vp-violet-line);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    overflow: hidden;
+    text-align: left;
+    color: inherit;
+    font-family: inherit;
+}
+
+.quick-pick:hover {
+    background: var(--vp-surface-2);
+    border-color: rgba(176, 127, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.quick-pick img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+
+.quick-pick-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.1px;
+}
+
+/* ============================================================
+   04 — DESCOBRIR (grid 2x2 com imagem grande + overlay)
+   ============================================================ */
+
+.discover-section { margin-bottom: 40px; }
+
+.discover-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.discover-card {
+    position: relative;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
+    background: var(--vp-surface);
+    transition: transform 0.2s, box-shadow 0.25s;
+    font-family: inherit;
+    color: inherit;
+}
+
+.discover-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.discover-card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 12px 28px -8px rgba(0, 0, 0, 0.5),
+        0 0 28px -8px rgba(176, 127, 255, 0.45);
+}
+
+.discover-card:hover img { transform: scale(1.08); }
+
+.discover-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(10, 6, 18, 0.2) 40%,
+        rgba(10, 6, 18, 0.92) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 14px;
+    text-align: left;
+    z-index: 1;
+}
+
+.discover-label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: var(--vp-violet-up);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.discover-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 2px;
+    letter-spacing: -0.2px;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+.discover-artist {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.discover-play {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a0f2e;
+    font-size: 22px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.discover-card:hover .discover-play {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ============================================================
+   SEÇÕES — header padrão
+   ============================================================ */
+
+.home-section { margin-bottom: 38px; }
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    padding: 0 2px;
+}
+
+.section-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.section-header h2 .material-symbols-rounded {
+    font-size: 22px;
+    color: var(--vp-violet-hi);
+    filter: drop-shadow(0 0 8px rgba(176, 127, 255, 0.5));
+}
+
+.section-see-all {
+    background: none;
+    border: none;
+    color: var(--vp-ink-low);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 30px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.section-see-all:hover {
+    color: var(--vp-violet-up);
+    background: rgba(146, 76, 255, 0.1);
+}
+
+/* ============================================================
+   05 — TOCADAS RECENTEMENTE — CARROSSEL HORIZONTAL
+   ============================================================ */
+
+.recent-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -16px;
+    padding: 4px 16px 12px;
+    cursor: grab;
+}
+
+.recent-grid::-webkit-scrollbar { display: none; }
+.recent-grid:active { cursor: grabbing; }
+
+.recent-grid .music-card-horizontal {
+    flex: 0 0 150px;
+    scroll-snap-align: start;
+    width: 150px;
+    background: var(--vp-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--vp-violet-line);
+    border-radius: 18px;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform 0.22s, background 0.25s, border-color 0.25s, box-shadow 0.3s;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 4px 12px -6px rgba(0, 0, 0, 0.5);
+}
+
+.recent-grid .music-card-horizontal:hover {
+    transform: translateY(-4px);
+    background: var(--vp-surface-2);
+    border-color: rgba(176, 127, 255, 0.5);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 10px 24px -8px rgba(124, 58, 237, 0.45),
+        0 0 30px -12px rgba(176, 127, 255, 0.45);
+}
+
+.recent-grid .music-card-horizontal img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.6);
+}
+
+.recent-grid .music-card-horizontal h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.recent-grid .music-card-horizontal p {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--vp-ink-low);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   06 — ARTISTAS FAVORITOS — refinado (sem glow pulse)
+   ============================================================ */
+
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.artist-card {
+    background: transparent;
+    border: none;
+    padding: 12px 4px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.18s;
+    position: relative;
+}
+
+.artist-card::before { display: none; }
+.artist-card:active { transform: scale(0.95); }
+
+.artist-avatar {
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 12px;
+    background: linear-gradient(145deg, #2d1a5a, #120a2a);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid rgba(176, 127, 255, 0.3);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    /* SEM animation glow pulse — era a fonte do delay visual */
+    box-shadow:
+        0 8px 24px -10px rgba(124, 58, 237, 0.5),
+        0 0 0 1px rgba(176, 127, 255, 0.1);
+}
+
+.artist-card:hover .artist-avatar {
+    transform: scale(1.06);
+    border-color: var(--vp-violet-up);
+    box-shadow:
+        0 10px 28px -8px rgba(176, 127, 255, 0.55),
+        0 0 24px -4px rgba(176, 127, 255, 0.4);
+}
+
+.artist-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+.artist-avatar span {
+    font-size: 38px;
+    color: var(--vp-violet-hi);
+}
+
+.artist-card p {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--vp-ink);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    text-align: center;
+    padding: 0 4px;
+    letter-spacing: -0.2px;
+    line-height: 1.2;
+}
+
+/* Contagem de plays — mais proeminente */
+.artist-card-plays {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--vp-violet-up);
+    margin-top: 5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(176, 127, 255, 0.25);
+    padding: 2px 8px;
+    border-radius: 100px;
+}
+
+/* ============================================================
+   07 — CARROSSEL (novos lançamentos)
+   ============================================================ */
+
+.carousel-container {
+    position: relative;
+    overflow: hidden;
+    margin: 0 -16px;
+    padding: 0 16px;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 4px 12px;
+    cursor: grab;
+}
+
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-track:active { cursor: grabbing; }
+
+.carousel-track .music-card-horizontal {
+    flex: 0 0 150px;
+    scroll-snap-align: start;
+    width: 150px;
+    background: var(--vp-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--vp-violet-line);
+    border-radius: 18px;
+    padding: 10px;
+    transition: transform 0.22s, background 0.25s, border-color 0.25s, box-shadow 0.3s;
+}
+
+.carousel-track .music-card-horizontal:hover {
+    transform: translateY(-4px);
+    background: var(--vp-surface-2);
+    border-color: rgba(176, 127, 255, 0.5);
+}
+
+.carousel-track .music-card-horizontal img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.carousel-track .music-card-horizontal h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.carousel-track .music-card-horizontal p {
+    font-size: 11px;
+    color: var(--vp-ink-low);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   08 — PRA TERMINAR O DIA
+   ============================================================ */
+
+.night-section { margin-bottom: 40px; }
+
+.night-card {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 27, 75, 0.5));
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 18px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 8px 24px -10px rgba(0, 0, 0, 0.5);
+}
+
+.night-card:hover {
+    border-color: rgba(176, 127, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.night-cover {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px -6px rgba(0,0,0,0.6);
+}
+
+.night-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.night-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #93c5fd;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.night-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.night-artist {
+    font-size: 12px;
+    color: var(--vp-ink-low);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.night-play {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    color: #0a0612;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s, background 0.2s;
+}
+
+.night-play:hover { background: var(--vp-violet-up); color: #fff; }
+.night-play:active { transform: scale(0.94); }
+.night-play .material-symbols-rounded { font-size: 22px; }
+
+/* ============================================================
+   RESPONSIVO
+   ============================================================ */
+
+@media (max-width: 480px) {
+    .inicio-avatar { width: 50px; height: 50px; }
+    .inicio-avatar-initial { font-size: 20px; }
+    .inicio-name { font-size: 20px; }
+
+    .featured-card { min-height: 220px; }
+    .featured-content { min-height: 220px; padding: 22px 20px 20px; }
+    .featured-content h2 { font-size: 23px; }
+
+    .section-header h2 { font-size: 18px; }
+
+    .quick-picks-grid { gap: 6px; }
+    .quick-pick img { width: 40px; height: 40px; }
+    .quick-pick-title { font-size: 12px; }
+
+    .discover-grid { gap: 8px; }
+    .discover-title { font-size: 13px; }
+    .discover-artist { font-size: 10px; }
+
+    .recent-grid .music-card-horizontal,
+    .carousel-track .music-card-horizontal {
+        flex: 0 0 140px;
+        width: 140px;
+    }
+
+    .artists-grid { gap: 4px; }
+    .artist-avatar { width: 82px; height: 82px; }
+    .artist-avatar span { font-size: 34px; }
+    .artist-card p { font-size: 12px; }
+    .artist-card-plays { font-size: 8px; padding: 2px 6px; }
+
+    .night-cover { width: 70px; height: 70px; }
+}
+
+@media (max-width: 360px) {
+    .featured-content h2 { font-size: 21px; }
+    .artist-avatar { width: 76px; height: 76px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .featured-card::before,
+    #inicio::before,
+    #inicio::after { animation: none; }
+}
+
+/* ============================================================
+   TOP DA SEMANA — lista numerada 1-5
+   ============================================================ */
+
+.weekly-section { margin-bottom: 38px; }
+
+.weekly-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.weekly-item {
+    display: grid;
+    grid-template-columns: 28px 52px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    border-radius: 0;
+    background: transparent;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    transition: background 0.18s;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    width: 100%;
+}
+
+.weekly-item:first-child { border-top: 1px solid rgba(255,255,255,0.06); }
+
+.weekly-item:hover,
+.weekly-item:active {
+    background: rgba(124, 58, 237, 0.08);
+}
+
+.weekly-rank {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--vp-violet-hi);
+    line-height: 1;
+    text-align: center;
+    letter-spacing: -0.5px;
+    /* top 3 mais destacados */
+}
+
+.weekly-item:nth-child(1) .weekly-rank { color: #fbbf24; }
+.weekly-item:nth-child(2) .weekly-rank { color: #94a3b8; }
+.weekly-item:nth-child(3) .weekly-rank { color: #cd7c4f; }
+
+.weekly-cover {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px -4px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+}
+
+.weekly-info { min-width: 0; }
+
+.weekly-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.weekly-artist {
+    font-size: 12px;
+    color: var(--vp-ink-low);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.weekly-plays {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--vp-violet-up);
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(176, 127, 255, 0.2);
+    padding: 3px 8px;
+    border-radius: 100px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   PLAYLISTS EM DESTAQUE — carrossel horizontal
+   ============================================================ */
+
+.playlists-section { margin-bottom: 38px; }
+
+.playlists-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -16px;
+    padding: 4px 16px 12px;
+    cursor: grab;
+}
+
+.playlists-track::-webkit-scrollbar { display: none; }
+.playlists-track:active { cursor: grabbing; }
+
+.playlist-card {
+    flex: 0 0 148px;
+    scroll-snap-align: start;
+    width: 148px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    transition: transform 0.2s;
+}
+
+.playlist-card:hover { transform: translateY(-3px); }
+.playlist-card:active { transform: scale(0.97); }
+
+.playlist-cover-wrap {
+    width: 148px;
+    height: 148px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+    box-shadow:
+        0 8px 20px -8px rgba(0,0,0,0.6),
+        0 0 0 1px var(--vp-violet-line);
+}
+
+.playlist-cover-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.playlist-card:hover .playlist-cover-wrap img {
+    transform: scale(1.06);
+}
+
+/* Placeholder quando não tem capa */
+.playlist-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--vp-violet), #1e0a3c);
+}
+
+.playlist-cover-placeholder span {
+    font-size: 48px;
+    color: rgba(255,255,255,0.6);
+}
+
+.playlist-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.playlist-count {
+    font-size: 11px;
+    color: var(--vp-ink-low);
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .weekly-item { grid-template-columns: 24px 46px 1fr auto; gap: 10px; }
+    .weekly-cover { width: 46px; height: 46px; }
+    .weekly-rank  { font-size: 16px; }
+    .weekly-title { font-size: 13px; }
+
+    .playlist-card         { flex: 0 0 132px; width: 132px; }
+    .playlist-cover-wrap   { width: 132px; height: 132px; }
+}
+
+/* ============================================================
+   POPULARES ENTRE USUÁRIOS — carrossel com badge de fogo
+   ============================================================ */
+
+.popular-section { margin-bottom: 38px; }
+
+.popular-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -16px;
+    padding: 4px 16px 12px;
+    cursor: grab;
+}
+
+.popular-track::-webkit-scrollbar { display: none; }
+.popular-track:active { cursor: grabbing; }
+
+.popular-card {
+    flex: 0 0 140px;
+    scroll-snap-align: start;
+    width: 140px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    transition: transform 0.2s;
+}
+
+.popular-card:hover { transform: translateY(-3px); }
+.popular-card:active { transform: scale(0.97); }
+
+.popular-cover-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    box-shadow:
+        0 8px 20px -8px rgba(0,0,0,0.6),
+        0 0 0 1px var(--vp-violet-line);
+}
+
+.popular-cover-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.popular-card:hover .popular-cover-wrap img { transform: scale(1.07); }
+
+/* Badge de fogo — canto superior direito */
+.popular-fire {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 20px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    z-index: 2;
+    animation: firePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes firePulse {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.15); }
+}
+
+.popular-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.popular-artist {
+    font-size: 11px;
+    color: var(--vp-ink-low);
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popular-count {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--vp-violet-up);
+    letter-spacing: 0.04em;
+}
+
+@media (max-width: 480px) {
+    .popular-card       { flex: 0 0 128px; width: 128px; }
+    .popular-cover-wrap { width: 128px; height: 128px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .popular-fire { animation: none; }
+}
+
+/* ============================================================
+   RECOMENDADAS PARA VOCÊ
+   Carrossel horizontal de 10 músicas pontuadas pelo algoritmo
+   de recomendação em inicio-extras.js (renderRecommended).
+   Reutiliza as mesmas variáveis CSS do Vidro Profundo.
+   ============================================================ */
+
+.recommended-section { margin-bottom: 38px; }
+
+/* Trilha do carrossel (mesmo padrão de .popular-track e .playlists-track) */
+.recommended-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -16px;
+    padding: 4px 16px 12px;
+    cursor: grab;
+}
+
+.recommended-track::-webkit-scrollbar { display: none; }
+.recommended-track:active { cursor: grabbing; }
+
+/* Card individual */
+.recommended-card {
+    flex: 0 0 140px;
+    scroll-snap-align: start;
+    width: 140px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    transition: transform 0.2s;
+}
+
+.recommended-card:hover { transform: translateY(-3px); }
+.recommended-card:active { transform: scale(0.97); }
+
+/* Capa */
+.recommended-cover-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    box-shadow:
+        0 8px 20px -8px rgba(0, 0, 0, 0.6),
+        0 0 0 1px var(--vp-violet-line);
+}
+
+.recommended-cover-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.recommended-card:hover .recommended-cover-wrap img {
+    transform: scale(1.06);
+}
+
+/* Metadados */
+.recommended-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.recommended-artist {
+    font-size: 11px;
+    color: var(--vp-ink-low);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+    .recommended-card       { flex: 0 0 128px; width: 128px; }
+    .recommended-cover-wrap { width: 128px; height: 128px; }
+}

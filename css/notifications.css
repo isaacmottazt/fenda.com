@@ -1,0 +1,337 @@
+/* ============================================================
+   FENDA MUSIC — NOTIFICATIONS CSS (notifications.css)
+   ============================================================ */
+
+/* ── OVERLAY BASE ── */
+.notifications-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3500;
+    background: #0a0812;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0, 0.15, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.notifications-overlay.active {
+    transform: translateX(0);
+}
+
+/* ── HEADER DA TELA ── */
+.notif-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 52px 20px 16px;
+    flex-shrink: 0;
+    background: rgba(10, 8, 18, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.notif-header-icon {
+    font-size: 26px;
+    color: #c084fc;
+}
+
+.notif-header h1 {
+    flex: 1;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.4px;
+}
+
+.notif-clear-btn {
+    margin-left: auto;
+    margin-right: 10px;
+    padding: 6px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.notif-clear-btn:active { background: rgba(255, 255, 255, 0.1); }
+
+.notif-close-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.08);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255,255,255,0.6);
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.notif-close-btn:active {
+    background: rgba(192,132,252,0.2);
+    color: #fff;
+    transform: scale(0.92);
+}
+.notif-close-btn .material-symbols-rounded { font-size: 20px; }
+
+/* ── TABS ── */
+.notif-tabs {
+    display: flex;
+    padding: 12px 20px 0;
+    gap: 0;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.notif-tab {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.38);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.18s;
+    letter-spacing: 0.01em;
+    font-family: inherit;
+}
+.notif-tab.active {
+    color: #c084fc;
+    border-bottom-color: #c084fc;
+}
+
+/* ── LISTA ── */
+.notif-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 0 100px;
+    scrollbar-width: none;
+}
+.notif-list::-webkit-scrollbar { display: none; }
+
+/* ── CARD DE ATIVAÇÃO PUSH ── */
+.notif-prompt-card {
+    margin: 16px 16px 8px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(109,40,217,0.12));
+    border: 1px solid rgba(192,132,252,0.25);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.notif-prompt-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(124,58,237,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.notif-prompt-icon .material-symbols-rounded {
+    font-size: 24px;
+    color: #c084fc;
+}
+.notif-prompt-text { flex: 1; min-width: 0; }
+.notif-prompt-text strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+}
+.notif-prompt-text span {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.4;
+}
+.notif-activate-btn {
+    background: linear-gradient(135deg, #9333ea, #7c3aed);
+    border: none;
+    border-radius: 12px;
+    padding: 9px 16px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.4);
+    font-family: inherit;
+}
+.notif-activate-btn:active {
+    transform: scale(0.96);
+    opacity: 0.88;
+}
+
+/* ── GRUPO DE DATA ── */
+.notif-group { margin-bottom: 4px; }
+.notif-group-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.28);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 18px 20px 8px;
+}
+
+/* ── CARD DE NOTIFICAÇÃO ── */
+.notif-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background 0.14s;
+    position: relative;
+}
+.notif-card + .notif-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 80px;
+    right: 20px;
+    height: 1px;
+    background: rgba(255,255,255,0.05);
+}
+.notif-card:active { background: rgba(192,132,252,0.08); }
+.notif-card.notif-unread { background: rgba(124,58,237,0.06); }
+.notif-card.notif-unread + .notif-card::before { opacity: 0; }
+
+/* Thumbnail */
+.notif-thumb {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+}
+.notif-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 14px;
+}
+.notif-thumb-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+}
+.notif-thumb-icon .material-symbols-rounded {
+    font-size: 26px;
+    color: #fff;
+}
+
+/* Conteúdo */
+.notif-content { flex: 1; min-width: 0; }
+.notif-title {
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    margin: 0 0 4px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.notif-title strong {
+    color: #fff;
+    font-weight: 700;
+}
+.notif-time {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    display: block;
+}
+
+/* Indicador de não lida */
+.notif-dot-indicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #a855f7;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(168,85,247,0.6);
+}
+
+/* ── ESTADO VAZIO ── */
+.notif-empty {
+    text-align: center;
+    padding: 80px 20px 40px;
+    color: rgba(255,255,255,0.3);
+}
+.notif-empty .material-symbols-rounded {
+    font-size: 52px;
+    display: block;
+    margin-bottom: 16px;
+    color: rgba(192,132,252,0.35);
+}
+.notif-empty p {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ── SINO NO HEADER DA HOME ── */
+.inicio-notif-btn {
+    position: relative;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255,255,255,0.75);
+    transition: all 0.18s;
+    flex-shrink: 0;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.inicio-notif-btn .material-symbols-rounded { font-size: 22px; }
+.inicio-notif-btn:active {
+    background: rgba(168,85,247,0.2);
+    color: #c084fc;
+    transform: scale(0.92);
+}
+
+/* Bolinha de notificação não lida */
+.inicio-notif-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    background: #a855f7;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px rgba(168,85,247,0.7), 0 0 0 2px #0a0812;
+    padding: 0 3px;
+    line-height: 1;
+}

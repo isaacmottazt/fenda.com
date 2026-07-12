@@ -1,0 +1,280 @@
+/* THEME-OVERRIDES.CSS - Sobrescreve TODOS os roxos hardcoded */
+/* Este arquivo deve ser carregado DEPOIS de theme-variables.css mas ANTES dos outros CSS */
+
+/* ========== INICIO.CSS OVERRIDES ========== */
+
+/* Hero gradient */
+.home-hero,
+.hero-section,
+.featured-hero {
+  background: var(--primary-grad-dark) !important;
+}
+
+/* ========== BIBLIOTECA.CSS OVERRIDES ========== */
+
+/* Gradientes do mês em resumo */
+.lib-month-summary,
+.month-card,
+.summary-card-bg {
+  background: linear-gradient(120deg, rgba(255,255,255,0.1) 25%, var(--primary-glow) 65%, var(--primary-soft) 100%) !important;
+}
+
+/* Gradientes de playlists */
+.lib-playlist-gradient,
+.playlist-card-gradient {
+  background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-base) 55%, var(--primary-dark) 100%) !important;
+}
+
+/* Avatar gradiente */
+.artist-avatar-gradient,
+.user-avatar-gradient {
+  background: radial-gradient(circle, var(--primary-hi), var(--primary-base)) !important;
+}
+
+/* Cor de texto em cards */
+.lib-card-text,
+.card-artist-name {
+  color: var(--primary-up) !important;
+}
+
+/* Gradiente artista destaque */
+.artist-featured-gradient {
+  background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-base) 55%, var(--primary-dark) 100%) !important;
+}
+
+/* Gradientes de cards com magenta */
+.lib-magenta-gradient,
+.playlist-magenta-gradient {
+  background: linear-gradient(135deg, #c026d3, var(--primary-base)) !important;
+}
+
+/* Gradiente hero com magenta */
+.lib-hero-gradient {
+  background: linear-gradient(135deg, #be185d, var(--primary-base)) !important;
+}
+
+/* Gradiente profile */
+.profile-gradient,
+.lib-profile-gradient {
+  background: linear-gradient(145deg, var(--primary-base) 0%, var(--primary-darker) 50%, #1e0938 100%) !important;
+}
+
+/* ========== ELEMENTOS ESPECÍFICOS ========== */
+
+/* Badges e pills */
+.badge-primary,
+.lib-badge,
+.badge-violet {
+  background: var(--primary-soft) !important;
+  color: var(--primary-hi) !important;
+  border-color: var(--primary-line) !important;
+}
+
+/* Botões com cor primária */
+.btn-violet,
+.btn-primary,
+.lib-btn-primary {
+  background: var(--primary-base) !important;
+  color: white !important;
+}
+
+.btn-violet:hover,
+.btn-primary:hover {
+  background: var(--primary-hi) !important;
+}
+
+/* Ícones com cor primária */
+.icon-primary,
+.icon-violet,
+.lib-icon-violet {
+  color: var(--primary-base) !important;
+  stroke: var(--primary-base) !important;
+  fill: var(--primary-base) !important;
+}
+
+/* Borders */
+.border-violet,
+.lib-border-violet {
+  border-color: var(--primary-base) !important;
+}
+
+.border-soft-violet {
+  border-color: var(--primary-line) !important;
+}
+
+/* Shadows com cor primária */
+.shadow-violet,
+.shadow-primary {
+  box-shadow: 0 0 20px var(--primary-glow) !important;
+}
+
+/* Backgrounds suaves */
+.bg-soft-violet,
+.bg-soft-primary {
+  background: var(--primary-soft) !important;
+}
+
+/* Linhas e dividers */
+.divider-violet,
+.line-violet {
+  background: var(--primary-line) !important;
+}
+
+/* Textos */
+.text-violet,
+.text-primary {
+  color: var(--primary-base) !important;
+}
+
+.text-violet-hi {
+  color: var(--primary-hi) !important;
+}
+
+.text-violet-up {
+  color: var(--primary-up) !important;
+}
+
+/* ========== VARIÁVEIS CSS ORIGINAIS OVERRIDE ========== */
+
+:root {
+  /* Sobrescreve as variáveis do inicio.css */
+  --vp-violet: var(--primary-base) !important;
+  --vp-violet-hi: var(--primary-hi) !important;
+  --vp-violet-up: var(--primary-up) !important;
+  --vp-violet-line: var(--primary-line) !important;
+
+  /* Sobrescreve as variáveis do biblioteca.css */
+  --lib-violet: var(--primary-base) !important;
+  --lib-violet-hi: var(--primary-hi) !important;
+  --lib-violet-up: var(--primary-up) !important;
+  --lib-violet-glow: var(--primary-glow) !important;
+}
+
+/* ========== GRADIENTES ESPECÍFICOS SOBRESCRITA ========== */
+
+/* Qualquer elemento com classe contendo "gradient" ou "grad" */
+[class*="gradient"],
+[class*="grad"] {
+  /* Força re-computação das variáveis */
+}
+
+/* Featured cards */
+.featured-gradient,
+.featured-card-gradient {
+  background: var(--primary-grad) !important;
+}
+
+/* Backgrounds de modais */
+.modal-gradient,
+.modal-header-gradient {
+  background: var(--primary-grad) !important;
+}
+
+/* Player backgrounds */
+.player-gradient,
+.player-hero-gradient {
+  background: var(--primary-grad-dark) !important;
+}
+
+/* Buttons com gradient */
+.btn-gradient,
+.button-gradient {
+  background: var(--primary-grad) !important;
+}
+
+/* ========== FILL E STROKE SVG ========== */
+
+svg [fill*="#7c3a"],
+svg [fill*="#a855"],
+svg [fill*="#c084"],
+svg [fill*="#9333"],
+svg [fill*="#5b21"],
+svg [fill*="#d8b4"],
+svg [fill*="#be18"],
+svg [fill*="#c026"],
+svg [stroke*="#7c3a"],
+svg [stroke*="#a855"],
+svg [stroke*="#c084"],
+svg [stroke*="#9333"],
+svg [stroke*="#5b21"],
+svg [stroke*="#d8b4"],
+svg [stroke*="#be18"],
+svg [stroke*="#c026"] {
+  fill: var(--primary-base) !important;
+  stroke: var(--primary-base) !important;
+}
+
+/* ========== DADOS ATTRIBUTES ========== */
+
+[data-color="violet"],
+[data-theme="violet"],
+[data-color-primary] {
+  color: var(--primary-base) !important;
+}
+
+[data-bg-color="violet"],
+[data-bg-theme="violet"],
+[data-bg-primary] {
+  background: var(--primary-base) !important;
+}
+
+[data-gradient="violet"],
+[data-gradient-primary] {
+  background: var(--primary-grad) !important;
+}
+
+/* ========== FALLBACK PARA CORES INLINE ========== */
+
+/* Se houver elementos com style inline com roxo, tenta forçar */
+[style*="#7c3aed"],
+[style*="#a855f7"],
+[style*="#c084fc"],
+[style*="#9333ea"],
+[style*="#5b21b6"],
+[style*="#d8b4fe"],
+[style*="#be185d"],
+[style*="#c026d3"] {
+  /* Não conseguimos sobrescrever inline direto, mas o tema pode ajustar via JS */
+}
+
+/* ========== ELEMENTOS ESPECÍFICOS DO FENDA MUSIC ========== */
+
+/* Playlists */
+.playlist-icon,
+.playlist-cover {
+  background: var(--primary-grad) !important;
+}
+
+/* Artists */
+.artist-circle,
+.artist-avatar {
+  background: var(--primary-base) !important;
+  border-color: var(--primary-hi) !important;
+}
+
+/* Play buttons */
+.play-btn-primary,
+.play-button-primary {
+  background: var(--primary-base) !important;
+  color: white !important;
+}
+
+/* Mini players */
+.mini-player-gradient {
+  background: var(--primary-grad) !important;
+}
+
+/* Pulsos e animações */
+.pulse-primary,
+.pulse-violet {
+  box-shadow: 0 0 0 0 var(--primary-glow) !important;
+}
+
+/* ========== IMPORTANTE: FORÇA RE-RENDER ========== */
+
+/* Força o browser re-computar variáveis CSS em todos os elementos */
+* {
+  --primary-base: var(--primary-base);
+  --primary-hi: var(--primary-hi);
+  --primary-grad: var(--primary-grad);
+}

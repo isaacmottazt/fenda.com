@@ -1,0 +1,349 @@
+/* =========================================================
+   PAINEL DE FILA — BOTTOM SHEET (estilo Spotify)
+   Painel oficial: id="queuePanel" / id="queuePanelList"
+   Controlado por player-menus-core.js (openQueuePanel/closeQueuePanel)
+   ========================================================= */
+
+:root {
+    --qp-bg: #121016;
+    --qp-bg-elevated: #1c1a24;
+    --qp-border: rgba(255, 255, 255, 0.08);
+    --qp-accent: #a855f7;
+    --qp-accent-2: #ec4899;
+    --qp-danger: #f87171;
+}
+
+/* Backdrop */
+.queue-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 4500;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.queue-backdrop.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Painel — sobe de baixo */
+.queue-panel {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    top: auto;
+    right: auto;
+    width: 100%;
+    max-width: 480px;
+    height: min(78vh, 640px);
+    height: min(78dvh, 640px);
+    z-index: 4600;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateX(-50%) translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+
+    background: linear-gradient(180deg, var(--qp-bg-elevated) 0%, var(--qp-bg) 100%);
+    border-radius: 22px 22px 0 0;
+    border-left: none;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
+}
+.queue-panel.active {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Handle visual (arrastar) */
+.queue-drag-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--qp-border);
+    margin: 10px auto 4px;
+    flex-shrink: 0;
+}
+
+/* ── Cabeçalho ── */
+.queue-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 8px 20px 14px;
+    flex-shrink: 0;
+    background: none;
+    border-bottom: none;
+}
+.queue-header-title h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+}
+/* Compatibilidade: título antigo era <h3> */
+.queue-panel-header h3 {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    margin: 0;
+}
+
+.queue-header-close,
+.queue-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+.queue-header-close:active,
+.queue-close-btn:active {
+    background: rgba(168, 85, 247, 0.2);
+    color: #fff;
+}
+.queue-header-close .material-symbols-rounded,
+.queue-close-btn .material-symbols-rounded {
+    font-size: 18px;
+}
+
+/* ── Lista ── */
+.queue-panel-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 8px 24px;
+}
+.queue-panel-list::-webkit-scrollbar { display: none; }
+
+/* ── Label de seção ── */
+.qp-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.3);
+    padding: 16px 12px 8px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.qp-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Item da fila ── */
+.qp-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    border-radius: 12px;
+    transition: background 0.15s;
+}
+.qp-item:active { background: rgba(168, 85, 247, 0.08); }
+
+.qp-item--current {
+    background: rgba(168, 85, 247, 0.12);
+}
+
+/* Barra lateral esquerda colorida na música atual */
+.qp-item--current::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: linear-gradient(180deg, var(--qp-accent), var(--qp-accent-2));
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+}
+
+/* Número do índice */
+.qp-index {
+    width: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.2);
+    font-variant-numeric: tabular-nums;
+    padding: 10px 0;
+}
+.qp-item--current .qp-index {
+    color: var(--qp-accent);
+}
+
+/* Barrinhas animadas na música atual */
+.qp-eq {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+}
+.qp-eq span {
+    width: 2px;
+    border-radius: 2px;
+    background: var(--qp-accent-2);
+    animation: qpEq 0.9s ease-in-out infinite;
+}
+.qp-eq span:nth-child(1) { height: 40%; animation-delay: 0s; }
+.qp-eq span:nth-child(2) { height: 100%; animation-delay: 0.2s; }
+.qp-eq span:nth-child(3) { height: 60%; animation-delay: 0.4s; }
+@keyframes qpEq {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+}
+
+/* Cover compacto (miniatura) */
+.qp-cover {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+}
+.qp-cover--ph {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: rgba(168, 85, 247, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.qp-cover--ph .material-symbols-rounded {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.25);
+}
+.qp-item--current .qp-cover {
+    box-shadow: 0 0 0 1.5px rgba(168, 85, 247, 0.5);
+}
+
+/* Info */
+.qp-info {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 8px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.qp-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+.qp-item--current .qp-title {
+    color: var(--qp-accent-2);
+    font-weight: 700;
+}
+.qp-artist {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.35);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+/* Botão remover (fila manual) */
+.qp-remove {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.25);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 8px;
+    transition: color 0.12s, background 0.12s;
+    margin-right: 4px;
+}
+.qp-remove:active {
+    color: var(--qp-danger);
+    background: rgba(248, 113, 113, 0.1);
+}
+.qp-remove .material-symbols-rounded { font-size: 16px; }
+
+/* Separador entre items */
+.qp-item + .qp-item {
+    margin-top: 1px;
+}
+
+/* ── Estado vazio ── */
+.qp-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 64px 24px;
+    text-align: center;
+}
+.qp-empty .material-symbols-rounded {
+    font-size: 48px;
+    color: rgba(168, 85, 247, 0.3);
+}
+.qp-empty p {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.5);
+}
+.qp-empty span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Responsivo ── */
+@media (max-width: 380px) {
+    .queue-panel-header {
+        padding: 6px 16px 12px;
+    }
+    .queue-header-title h2 {
+        font-size: 15px;
+    }
+    .qp-cover, .qp-cover--ph {
+        width: 40px;
+        height: 40px;
+    }
+    .qp-title {
+        font-size: 12.5px;
+    }
+    .qp-artist {
+        font-size: 11px;
+    }
+}
