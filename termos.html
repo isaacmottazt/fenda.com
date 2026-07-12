@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Termos de Uso — Fenda Music</title>
+    <meta name="theme-color" content="#0a0612" />
+    <link rel="stylesheet" href="fonts/material-symbols.css" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        background: #0a0612;
+        color: #f0eaff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .legal-container {
+        max-width: 720px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #0f0b1a 0%, #07050c 100%);
+      }
+
+      /* Header fixo, mesmo padrão visual do resto do app */
+      .legal-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        background: rgba(10, 6, 18, 0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .legal-back {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        text-decoration: none;
+      }
+      .legal-back:active { background: rgba(255, 255, 255, 0.14); }
+
+      .legal-header h1 {
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -0.2px;
+      }
+
+      .legal-body {
+        padding: 28px 20px 60px;
+      }
+
+      .legal-hero {
+        margin-bottom: 28px;
+      }
+
+      .legal-hero h2 {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+        background: linear-gradient(135deg, #fff, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 6px;
+      }
+
+      .legal-hero p {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .legal-section {
+        margin-bottom: 26px;
+      }
+
+      .legal-section h3 {
+        font-size: 15px;
+        font-weight: 800;
+        color: #c4b5fd;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .legal-section h3 .material-symbols-rounded {
+        font-size: 18px;
+        color: #a855f7;
+      }
+
+      .legal-section p,
+      .legal-section li {
+        font-size: 14.5px;
+        color: rgba(255, 255, 255, 0.72);
+        margin-bottom: 10px;
+      }
+
+      .legal-section ul,
+      .legal-section ol {
+        padding-left: 20px;
+        margin-bottom: 10px;
+      }
+
+      .legal-section li {
+        margin-bottom: 6px;
+      }
+
+      .legal-section strong {
+        color: #f0eaff;
+        font-weight: 700;
+      }
+
+      .legal-callout {
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(146, 76, 255, 0.2);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin: 14px 0;
+        font-size: 13.5px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+
+      .legal-callout strong {
+        color: #d8b4fe;
+      }
+
+      .legal-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 28px 0;
+      }
+
+      .legal-contact {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 18px;
+        padding: 18px;
+        text-align: center;
+      }
+
+      .legal-contact p {
+        font-size: 13.5px;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 10px;
+      }
+
+      .legal-contact a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #c4b5fd;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+      }
+
+      .legal-contact a .material-symbols-rounded {
+        font-size: 18px;
+      }
+
+      .legal-crosslink {
+        display: block;
+        text-align: center;
+        margin-top: 18px;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.4);
+        text-decoration: none;
+      }
+      .legal-crosslink strong { color: #a855f7; }
+
+      .legal-updated {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.3);
+        text-align: center;
+        margin-top: 30px;
+      }
+
+      @media (min-width: 560px) {
+        .legal-hero h2 { font-size: 30px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="legal-container">
+      <div class="legal-header">
+        <a href="javascript:void(0)" class="legal-back" onclick="history.length > 1 ? history.back() : (window.location.href='player.html')">
+          <span class="material-symbols-rounded">arrow_back</span>
+        </a>
+        <h1>Termos de Uso</h1>
+      </div>
+
+      <div class="legal-body">
+        <div class="legal-hero">
+          <h2>Termos de Uso</h2>
+          <p>Fenda Music · Streaming de música gospel e cristã</p>
+        </div>
+
+        <div class="legal-callout">
+          <strong>Antes de usar o Fenda Music</strong>, leia estes termos com atenção. Ao criar uma conta ou usar o app, você concorda com o que está descrito aqui.
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">description</span>1. Sobre o Fenda Music</h3>
+          <p>O Fenda Music é uma plataforma de streaming dedicada à música gospel e cristã, oferecida de forma gratuita e sem fins lucrativos. Nosso objetivo é conectar pessoas a músicas que edificam a fé, com um catálogo mantido pela própria comunidade de usuários.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">person</span>2. Sua conta</h3>
+          <ul>
+            <li>Você precisa fornecer informações verdadeiras ao criar sua conta.</li>
+            <li>É responsável por manter sua senha em sigilo e por tudo que acontecer na sua conta.</li>
+            <li>Você deve ter idade mínima permitida pela legislação do seu país para criar uma conta sem supervisão de um responsável.</li>
+            <li>Podemos suspender ou encerrar contas que violem estes termos, sem aviso prévio em casos de abuso grave.</li>
+          </ul>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">library_music</span>3. Uso do catálogo musical</h3>
+          <p>As músicas disponíveis são para uso pessoal e não comercial, dentro do aplicativo. Você concorda em não:</p>
+          <ul>
+            <li>Copiar, redistribuir ou revender o conteúdo disponível na plataforma;</li>
+            <li>Usar engenharia reversa, scraping ou qualquer meio automatizado para extrair músicas ou dados do catálogo;</li>
+            <li>Utilizar o Fenda Music para fins comerciais sem autorização prévia por escrito.</li>
+          </ul>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">upload</span>4. Envio de músicas para o catálogo</h3>
+          <p>Ao sugerir uma música através da função "Enviar música", você declara que:</p>
+          <ul>
+            <li>Possui os direitos necessários para compartilhar o conteúdo, ou que ele é de domínio público;</li>
+            <li>O conteúdo enviado é condizente com a proposta do app (música gospel/cristã) e não viola direitos autorais de terceiros;</li>
+            <li>Entende que toda submissão passa por análise e pode ser recusada, a critério da equipe do Fenda Music.</li>
+          </ul>
+          <p>Reservamo-nos o direito de remover qualquer conteúdo do catálogo a qualquer momento, incluindo após aprovação, caso identifiquemos violação de direitos autorais ou destes termos.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">gavel</span>5. Conduta na plataforma</h3>
+          <p>Ao usar o Fenda Music, você concorda em não:</p>
+          <ul>
+            <li>Enviar conteúdo ofensivo, discriminatório ou que viole a proposta cristã da plataforma;</li>
+            <li>Tentar acessar áreas restritas do sistema, contas de outros usuários, ou comprometer a segurança do app;</li>
+            <li>Utilizar bots, scripts automatizados ou qualquer ferramenta para manipular estatísticas, curtidas ou o sistema de recomendação.</li>
+          </ul>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">wifi_off</span>6. Downloads e uso offline</h3>
+          <p>O recurso de download permite salvar músicas no seu dispositivo para ouvir sem conexão à internet. Esses arquivos são de uso pessoal, ficam armazenados localmente no seu aparelho e não devem ser extraídos, compartilhados ou distribuídos por fora do aplicativo.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">block</span>7. Isenção de responsabilidade</h3>
+          <p>O Fenda Music é oferecido "como está". Não garantimos que o serviço estará disponível de forma ininterrupta ou livre de erros. Não nos responsabilizamos por perdas de dados, indisponibilidade temporária, ou por conteúdo enviado por terceiros que eventualmente viole direitos de outras pessoas — nesses casos, pedimos que nos contate para que possamos remover o conteúdo o quanto antes.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">edit_note</span>8. Alterações nestes termos</h3>
+          <p>Podemos atualizar estes Termos de Uso periodicamente para refletir mudanças no app ou na legislação. Alterações significativas serão comunicadas dentro do aplicativo. O uso contínuo do Fenda Music após uma atualização significa que você concorda com os novos termos.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-contact">
+          <p>Dúvidas sobre estes termos? Fale com a gente.</p>
+          <a href="mailto:contato@fendamusic.com.br">
+            <span class="material-symbols-rounded">mail</span>
+            contato@fendamusic.com.br
+          </a>
+        </div>
+
+        <a href="privacidade.html" class="legal-crosslink">Ver também a <strong>Política de Privacidade</strong></a>
+
+        <p class="legal-updated">Última atualização: julho de 2026</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Fenda Music</title>
+    <script>
+      // ── DIAGNÓSTICO TEMPORÁRIO: mostra qualquer erro JS na tela ──
+      // Sem isso, um erro de sintaxe ou exceção não tratada em qualquer
+      // script falha 100% silenciosamente no ambiente mobile-only (sem
+      // acesso a devtools/console). Isso intercepta TUDO, desde erros de
+      // carregamento de <script> até promises rejeitadas sem .catch().
+      window._fendaErrors = [];
+      function _showFendaError(msg) {
+        window._fendaErrors.push(msg);
+        try {
+          let box = document.getElementById('_fendaErrorBox');
+          if (!box) {
+            box = document.createElement('div');
+            box.id = '_fendaErrorBox';
+            box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#7f1d1d;color:#fff;font:12px/1.4 monospace;padding:8px 10px;max-height:45vh;overflow-y:auto;white-space:pre-wrap;word-break:break-all;border-bottom:3px solid #fca5a5';
+            document.documentElement.appendChild(box);
+          }
+          const line = document.createElement('div');
+          line.style.cssText = 'padding:4px 0;border-top:1px solid rgba(255,255,255,.2)';
+          line.textContent = '[' + window._fendaErrors.length + '] ' + msg;
+          box.appendChild(line);
+        } catch (e) {}
+      }
+      window.addEventListener('error', (e) => {
+        const src = e.filename ? e.filename.split('/').pop() : '?';
+        _showFendaError('ERRO em ' + src + ':' + e.lineno + ' — ' + (e.message || e.error));
+      });
+      window.addEventListener('unhandledrejection', (e) => {
+        _showFendaError('PROMISE REJEITADA — ' + (e.reason?.message || e.reason || '?'));
+      });
+    </script>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="fonts/material-symbols.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/inicio.css" />
+    <link rel="stylesheet" href="css/busca.css" />
+    <link rel="stylesheet" href="css/biblioteca.css" />
+    <link rel="stylesheet" href="css/perfil.css" />
+    <link rel="stylesheet" href="css/notifications.css" />
+    <link rel="stylesheet" href="css/artist-detail.css" />
+    <link rel="stylesheet" href="css/painel.css" />
+    <link rel="stylesheet" href="css/theme-overrides.css" />
+    <!-- Painel de fila (bottom sheet, id="queuePanel") estilizado em painel.css -->
+    <style>
+      /* Garante grid 3 colunas independente de cache do browser */
+      .lib-artists-top {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+      .lib-artists-top-row2 {
+        display: contents !important;
+      }
+      .lib-top-artist-card {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+      }
+      .artists-grid-lib {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+      .artist-card-lib {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+      }
+      .artist-card-lib-arrow {
+        display: none !important;
+      }
+
+      /* ── FIX BUSCA: sem quadro nem sombra na barra ──
+         themes.js injeta background em todo <input> via runtime */
+      .search-bar-new {
+        box-shadow: none !important;
+      }
+      .search-top::after {
+        content: none !important;
+      }
+      .search-bar-new input,
+      .search-bar-new input:focus,
+      .artists-search input,
+      .artists-search input:focus {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+
+      /* ── FIX PLAYER EXPANDIDO (sobrescreve cache do SW) ── */
+      .lyrics-full-screen {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: translateY(100%) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100dvh !important;
+        z-index: 2000 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1) !important;
+      }
+      .lyrics-full-screen.expanded {
+        transform: translateY(0%) !important;
+      }
+      .player-scroll-area {
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+      }
+      .player-page-one {
+        min-height: 100dvh !important;
+        height: auto !important;
+        flex-shrink: 0 !important;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+  </head>
+  <body>
+    <audio id="audio" style="display: none"></audio>
+
+    <div class="app-container">
+      <main class="main-content">
+        <!-- ABA INÍCIO -->
+        <div id="inicio" class="tab-content active">
+          <div class="featured-card" id="featuredBanner">
+            <div class="featured-bg" id="featuredBg"></div>
+            <div class="featured-overlay"></div>
+            <div class="featured-content">
+              <span class="featured-badge">
+                <span class="material-symbols-rounded">auto_awesome</span>
+                <span data-i18n="home_recommendation">Recomendação do dia</span>
+              </span>
+              <h2 id="featuredTitle" data-i18n="loading">Carregando...</h2>
+              <p id="featuredArtist">-</p>
+              <button id="featuredPlayBtn" class="featured-play-btn">
+                <span class="material-symbols-rounded">play_arrow</span>
+                <span data-i18n="home_listen_now">Ouvir agora</span>
+              </button>
+            </div>
+          </div>
+
+          <section class="home-section">
+            <div class="section-header">
+              <h2>
+                <span class="material-symbols-rounded">favorite</span>
+                <span data-i18n="home_fav_artists">Seus artistas favoritos</span>
+              </h2>
+              <button class="section-see-all" id="seeAllArtists" data-i18n="home_see_all">
+                Ver todos
+              </button>
+            </div>
+            <div id="favoriteArtistsList" class="artists-grid"></div>
+          </section>
+
+          <section class="home-section">
+            <div class="section-header">
+              <h2>
+                <span class="material-symbols-rounded">history</span>
+                <span data-i18n="home_recent">Tocadas recentemente</span>
+              </h2>
+              <button class="section-see-all" id="seeAllRecent" data-i18n="home_see_all_2">
+                Ver tudo
+              </button>
+            </div>
+            <div id="recentlyPlayedList" class="recent-grid"></div>
+          </section>
+
+          <section class="home-section">
+            <div class="section-header">
+              <h2>
+                <span class="material-symbols-rounded">new_releases</span>
+                <span data-i18n="home_new">Adicionadas recentemente</span>
+              </h2>
+            </div>
+            <div id="popularPlaylistsList" class="playlists-grid"></div>
+          </section>
+        </div>
+
+        <!-- ABA BUSCAR -->
+        <div id="buscar" class="tab-content">
+          <!-- Barra de busca -->
+          <div class="search-top">
+            <div class="search-bar-new">
+              <button
+                class="search-back-btn"
+                id="searchBackBtn"
+                style="display: none"
+              >
+                <span class="material-symbols-rounded">arrow_back</span>
+              </button>
+              <span class="material-symbols-rounded search-icon-static"
+                >search</span
+              >
+              <input
+                type="text"
+                id="globalSearchInput"
+                placeholder="Músicas, artistas..."
+                data-i18n-placeholder="search_placeholder"
+              />
+              <button
+                class="search-clear-btn"
+                id="searchClearBtn"
+                style="display: none"
+              >
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Resultados -->
+          <div id="searchResults" style="display: none"></div>
+
+          <!-- Estado padrão -->
+          <div id="searchDefaultView">
+            <div id="recentSearchesSection">
+              <div class="search-section-header">
+                <span data-i18n="search_recent">Buscas recentes</span>
+                <button id="clearRecentSearchesBtn" data-i18n="search_clear">Limpar</button>
+              </div>
+              <div id="recentSearchesList"></div>
+            </div>
+            <div id="featuredArtistsSection" class="search-featured-section">
+              <div class="search-section-header">
+                <span data-i18n="search_artists">Artistas</span>
+              </div>
+              <div id="featuredArtistsList" class="search-artists-row"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA BIBLIOTECA -->
+        <div id="biblioteca" class="tab-content">
+          <div id="playlistsRootView">
+            <div class="library-container">
+              <!-- Header -->
+              <div class="library-header">
+                <h1 data-i18n="lib_title">Biblioteca</h1>
+                <div class="library-header-actions">
+                  <button class="lib-icon-btn" id="libSearchBtn" title="Buscar">
+                    <span class="material-symbols-rounded">search</span>
+                  </button>
+                  <button
+                    class="lib-icon-btn"
+                    id="libAddBtn"
+                    title="Nova playlist"
+                    onclick="
+                      window.openCreatePlaylistModal &&
+                        window.openCreatePlaylistModal()
+                    "
+                  >
+                    <span class="material-symbols-rounded">add</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filtros -->
+              <div class="library-main-tabs">
+                <button class="lib-main-tab active" data-filter="all" data-i18n="lib_all">
+                  Tudo
+                </button>
+                <button class="lib-main-tab" data-filter="playlists" data-i18n="lib_playlists">
+                  Playlists
+                </button>
+                <button class="lib-main-tab" data-filter="history" data-i18n="lib_history">
+                  Histórico
+                </button>
+                <button class="lib-main-tab" data-filter="artists" data-i18n="lib_artists">
+                  Artistas
+                </button>
+                <button class="lib-main-tab" data-filter="downloads" data-i18n="lib_downloads">
+                  Downloads
+                </button>
+              </div>
+
+              <!-- Cards de resumo -->
+              <div id="summaryCards" class="summary-grid">
+                <div class="summary-card" data-type="downloads">
+                  <div class="summary-card-icon">
+                    <span class="material-symbols-rounded">download</span>
+                  </div>
+                  <div>
+                    <h3 id="downloadsCount">0</h3>
+                    <p data-i18n="lib_downloads_card">Downloads</p>
+                  </div>
+                </div>
+                <div class="summary-card" data-type="recent">
+                  <div class="summary-card-icon">
+                    <span class="material-symbols-rounded">history</span>
+                  </div>
+                  <div>
+                    <h3 id="recentCount">0</h3>
+                    <p data-i18n="lib_listened_card">Ouvidas</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Playlists -->
+              <div id="playlistsSection" class="library-section">
+                <div class="section-header">
+                  <h2 data-i18n="lib_playlists">Playlists</h2>
+                </div>
+                <div id="playlistsGrid" class="playlists-grid-modern"></div>
+              </div>
+
+              <!-- Artistas -->
+              <div
+                id="artistsSection"
+                class="library-section"
+                style="display: none"
+              >
+                <div class="section-header"><h2 data-i18n="lib_artists">Artistas</h2></div>
+                <div id="artistsGrid" class="lib-artists-container"></div>
+              </div>
+
+              <!-- Histórico inserido dinamicamente -->
+            </div>
+          </div>
+
+          <!-- Detalhe da playlist -->
+          <div id="playlistDetailView" style="display: none">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                padding: 8px 0 0;
+                margin-bottom: 4px;
+              "
+            >
+              <button
+                id="backToPlaylistsBtn"
+                style="
+                  background: rgba(255, 255, 255, 0.06);
+                  border: none;
+                  width: 38px;
+                  height: 38px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  cursor: pointer;
+                  color: rgba(255, 255, 255, 0.7);
+                  flex-shrink: 0;
+                "
+              >
+                <span class="material-symbols-rounded">arrow_back</span>
+              </button>
+            </div>
+            <div class="playlist-detail-header">
+              <div class="playlist-detail-cover" id="playlistDetailCover">
+                <span class="material-symbols-rounded">queue_music</span>
+              </div>
+              <h2 id="playlistDetailName">Playlist</h2>
+              <p id="playlistDetailCount">0 músicas</p>
+              <div class="playlist-detail-actions">
+                <button class="playlist-play-all-btn" id="playlistPlayAllBtn">
+                  <span class="material-symbols-rounded">play_arrow</span>
+                  <span data-i18n="lib_play_all">Tocar tudo</span>
+                </button>
+                <button class="playlist-shuffle-btn" id="playlistShuffleBtn">
+                  <span class="material-symbols-rounded">shuffle</span>
+                  <span data-i18n="lib_shuffle">Aleatório</span>
+                </button>
+              </div>
+            </div>
+            <div id="playlistTracksList" class="playlist-tracks-list"></div>
+          </div>
+        </div>
+        <!-- ABA PERFIL -->
+        <div id="perfil" class="tab-content">
+          <div class="profile-page">
+            <!-- Hero: banner colorido com avatar + frase ao lado -->
+            <div class="profile-hero">
+              <div class="profile-banner" id="profileBanner"></div>
+              <div class="profile-hero-content">
+                <div class="profile-avatar-wrap">
+                  <img
+                    id="profileAvatarImg"
+                    src=""
+                    alt=""
+                    style="display: none"
+                  />
+                  <span
+                    class="material-symbols-rounded profile-avatar-icon"
+                    id="profileAvatarIcon"
+                    >account_circle</span
+                  >
+                </div>
+                <div class="profile-hero-text">
+                  <p id="profileBio" class="profile-bio-text" data-i18n="profile_passionate">
+                    Apaixonado por música.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nome e handle -->
+            <div class="profile-identity">
+              <h1 id="profileName" data-i18n="loading">Carregando...</h1>
+              <p id="profileUsername" class="profile-handle">@usuario</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="profile-stats-row">
+              <div class="profile-stat">
+                <span class="material-symbols-rounded">queue_music</span>
+                <span class="profile-stat-num" id="totalPlaylists">0</span>
+                <span class="profile-stat-label" data-i18n="profile_playlists">Playlists</span>
+              </div>
+              <div class="profile-stat">
+                <span class="material-symbols-rounded">favorite</span>
+                <span class="profile-stat-num" id="totalFavorites">0</span>
+                <span class="profile-stat-label" data-i18n="profile_likes">Curtidas</span>
+              </div>
+              <div class="profile-stat">
+                <span class="material-symbols-rounded">schedule</span>
+                <span class="profile-stat-num" id="totalTimeStat">0 min</span>
+                <span class="profile-stat-label" data-i18n="profile_listened">Ouvido</span>
+              </div>
+            </div>
+
+            <!-- Menu -->
+            <div class="profile-menu">
+              <button class="profile-menu-item" id="likedSongsNavBtn">
+                <div class="profile-menu-icon pmi-pink">
+                  <span class="material-symbols-rounded">favorite</span>
+                </div>
+                <div class="profile-menu-text">
+                  <span class="profile-menu-title" data-i18n="profile_liked_songs">Músicas curtidas</span>
+                  <span class="profile-menu-sub" data-i18n="profile_liked_songs_sub">Ver todas as curtidas</span>
+                </div>
+                <span class="material-symbols-rounded profile-menu-arrow"
+                  >chevron_right</span
+                >
+              </button>
+
+              <button class="profile-menu-item" id="downloadsNavBtn">
+                <div class="profile-menu-icon pmi-green">
+                  <span class="material-symbols-rounded">download</span>
+                </div>
+                <div class="profile-menu-text">
+                  <span class="profile-menu-title" data-i18n="lib_downloads_card">Downloads</span>
+                  <span class="profile-menu-sub" data-i18n="profile_downloads_sub">Músicas salvas offline</span>
+                </div>
+                <span class="material-symbols-rounded profile-menu-arrow"
+                  >chevron_right</span
+                >
+              </button>
+
+              <button class="profile-menu-item" id="recentNavBtn">
+                <div class="profile-menu-icon pmi-yellow">
+                  <span class="material-symbols-rounded">history</span>
+                </div>
+                <div class="profile-menu-text">
+                  <span class="profile-menu-title" data-i18n="profile_recent">Ouvidas recentemente</span>
+                  <span class="profile-menu-sub" data-i18n="profile_recent_sub">Seu histórico</span>
+                </div>
+                <span class="material-symbols-rounded profile-menu-arrow"
+                  >chevron_right</span
+                >
+              </button>
+
+              <!-- Enviar música para análise -->
+              <button class="profile-menu-item" id="submitMusicNavBtn">
+                <div class="profile-menu-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+                  <span class="material-symbols-rounded">upload</span>
+                </div>
+                <div class="profile-menu-text">
+                  <span class="profile-menu-title" data-i18n="profile_submit">Enviar música</span>
+                  <span class="profile-menu-sub" data-i18n="profile_submit_sub">Sugira uma música para o catálogo</span>
+                </div>
+                <span class="material-symbols-rounded profile-menu-arrow">chevron_right</span>
+              </button>
+
+              <button class="profile-menu-item" id="settingsNavBtn">
+                <div class="profile-menu-icon pmi-gray">
+                  <span class="material-symbols-rounded">settings</span>
+                </div>
+                <div class="profile-menu-text">
+                  <span class="profile-menu-title" data-i18n="profile_settings">Configurações</span>
+                  <span class="profile-menu-sub" data-i18n="profile_settings_sub">Conta, tema, reprodução e mais</span>
+                </div>
+                <span class="material-symbols-rounded profile-menu-arrow"
+                  >chevron_right</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Player inferior (Liquid Glass) -->
+      <div id="playerBottomBar" class="player-bottom-bar" style="display: none">
+        <!-- Cover + anel -->
+        <div class="mini-cover-wrap" id="miniCoverWrap">
+          <svg class="mini-progress-ring" viewBox="0 0 52 52">
+            <circle class="mini-ring-bg" cx="26" cy="26" r="23" />
+            <circle
+              class="mini-ring-fill"
+              id="miniRingFill"
+              cx="26"
+              cy="26"
+              r="23"
+            />
+          </svg>
+          <img
+            id="playerBottomCover"
+            src=""
+            alt=""
+            class="player-bottom-cover"
+            onerror="this.style.display = 'none'"
+            onload="this.style.display = 'block'"
+          />
+        </div>
+
+        <!-- Info (toca ao clicar) -->
+        <div class="mini-info" id="miniInfoArea">
+          <h4 id="playerBottomTitle">Título da Música</h4>
+          <p id="playerBottomArtist">Artista</p>
+        </div>
+
+        <!-- Controles -->
+        <div class="mini-controls">
+          <button class="mini-ctrl-btn" id="miniPrevBtnBar">
+            <span class="material-symbols-rounded">skip_previous</span>
+          </button>
+          <button class="mini-ctrl-play" id="playerBottomPlayBtn">
+            <span class="material-symbols-rounded">play_arrow</span>
+          </button>
+          <button class="mini-ctrl-btn" id="miniNextBtnBar">
+            <span class="material-symbols-rounded">skip_next</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de navegação inferior -->
+      <nav class="nav-bar">
+        <button class="nav-btn active" data-tab="inicio">
+          <span class="material-symbols-rounded">home</span>
+          <p data-i18n="nav_home">Início</p>
+        </button>
+        <button class="nav-btn" data-tab="buscar">
+          <span class="material-symbols-rounded">search</span>
+          <p data-i18n="nav_search">Buscar</p>
+        </button>
+        <button class="nav-btn" data-tab="biblioteca">
+          <span class="material-symbols-rounded">library_music</span>
+          <p data-i18n="nav_library">Biblioteca</p>
+        </button>
+        <button class="nav-btn" data-tab="perfil">
+          <span class="material-symbols-rounded">person</span>
+          <p data-i18n="nav_profile">Perfil</p>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Player expandido estilo Spotify -->
+    <div id="lyricsFullScreen" class="lyrics-full-screen">
+      <!-- Fundo dinâmico (cor extraída da capa) -->
+      <div class="player-bg" id="playerBg"></div>
+
+      <!-- Painel de fila (bottom sheet) -->
+      <div id="queueBackdrop" class="queue-backdrop" onclick="window.closeQueuePanel()"></div>
+      <div id="queuePanel" class="queue-panel">
+        <div class="queue-drag-handle"></div>
+        <div class="queue-panel-header">
+          <div class="queue-header-title">
+            <h2 data-i18n="player_next_songs">Próximas músicas</h2>
+          </div>
+          <button onclick="window.closeQueuePanel()" class="queue-header-close">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div id="queuePanelList" class="queue-panel-list"></div>
+      </div>
+
+      <!-- Área rolável completa -->
+      <div class="player-scroll-area" id="playerScrollArea">
+        <!-- ── PÁGINA 1: Cover + Controles ── -->
+        <div class="player-page-one">
+          <!-- Header -->
+          <div class="player-top-bar">
+            <button
+              onclick="window.collapseLyricsScreen()"
+              class="player-icon-btn"
+            >
+              <span class="material-symbols-rounded">keyboard_arrow_down</span>
+            </button>
+            <div class="player-top-meta">
+              <span class="player-top-context" id="playerContext"
+                >FENDA MUSIC</span
+              >
+              <span class="player-top-playlist" id="lyricsTrackTitle"
+                >Título</span
+              >
+            </div>
+            <button class="player-icon-btn" id="playerMoreBtn">
+              <span class="material-symbols-rounded">more_vert</span>
+            </button>
+          </div>
+
+          <!-- Cover grande -->
+          <div class="player-cover-area">
+            <img
+              id="playerExpandedCover"
+              class="player-expanded-cover"
+              src=""
+              alt=""
+            />
+          </div>
+
+          <!-- Info + favorito -->
+          <div class="player-info-row">
+            <div class="player-info-text">
+              <h2 id="playerExpandedTitle">Título</h2>
+              <p id="playerExpandedArtist">Artista</p>
+            </div>
+            <button class="player-fav-big" id="playerExpandedFavBtn">
+              <span class="material-symbols-rounded">favorite_border</span>
+            </button>
+          </div>
+
+          <!-- Seek bar -->
+          <div class="player-progress-area">
+            <div class="player-seek-bar" id="progressBar">
+              <div class="player-seek-fill" id="progressFill"></div>
+              <div class="player-seek-thumb" id="progressThumb"></div>
+            </div>
+            <div class="player-time-row">
+              <span id="currentTime" class="time-txt">0:00</span>
+              <span id="totalTime" class="time-txt">0:00</span>
+            </div>
+          </div>
+
+          <!-- Controles -->
+          <div class="player-controls-row">
+            <button id="shuffleBtn" class="ctrl-extra">
+              <span class="material-symbols-rounded">shuffle</span>
+            </button>
+            <button id="prevBtn" class="ctrl-main">
+              <span class="material-symbols-rounded">skip_previous</span>
+            </button>
+            <button id="bigPlayBtn" class="ctrl-play">
+              <span class="material-symbols-rounded">play_arrow</span>
+            </button>
+            <button id="nextBtn" class="ctrl-main">
+              <span class="material-symbols-rounded">skip_next</span>
+            </button>
+            <button id="repeatBtn" class="ctrl-extra">
+              <span class="material-symbols-rounded">repeat</span>
+            </button>
+          </div>
+
+          <!-- Ações extras -->
+          <div class="player-bottom-actions">
+            <button class="player-action-btn" id="playerMenuBtn" title="Menu">
+              <span class="material-symbols-rounded">more_vert</span>
+            </button>
+            <button class="player-action-btn" id="playerBottomQueueBtn" onclick="window.openQueuePanel?.()" title="Fila de Reprodução">
+              <span class="material-symbols-rounded">queue_music</span>
+            </button>
+          </div>
+
+          <!-- Indicador de scroll para letras -->
+          <div class="player-scroll-hint">
+            <span class="material-symbols-rounded">expand_more</span>
+            <span data-i18n="player_lyrics">Letra</span>
+          </div>
+        </div>
+        <!-- fim player-page-one -->
+
+        <!-- ── PÁGINA 2: Letras ── -->
+        <div class="player-page-lyrics">
+          <div class="player-lyrics-header">
+            <span class="material-symbols-rounded">lyrics</span>
+            <span data-i18n="player_lyrics">Letra</span>
+          </div>
+          <div id="lyricsContainer" class="lyrics-container-content"></div>
+          <div style="height: 120px"></div>
+        </div>
+      </div>
+      <!-- fim player-scroll-area -->
+
+      <!-- Controles fixos mini (aparecem ao rolar para letras) -->
+      <div class="player-mini-controls" id="playerMiniControls">
+        <img id="playerMiniCover" class="player-mini-cover" src="" alt="" />
+        <div class="player-mini-info">
+          <span id="playerMiniTitle">Título</span>
+          <span id="playerMiniArtist">Artista</span>
+        </div>
+        <div class="player-mini-btns">
+          <button class="ctrl-extra" id="miniPrevBtn">
+            <span class="material-symbols-rounded">skip_previous</span>
+          </button>
+          <button class="player-mini-play" id="miniPlayBtn">
+            <span class="material-symbols-rounded">play_arrow</span>
+          </button>
+          <button class="ctrl-extra" id="miniNextBtn">
+            <span class="material-symbols-rounded">skip_next</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ID antigo para compat -->
+      <div id="lyricsScroller" style="display: none"></div>
+    </div>
+
+    <!-- OVERLAY DE NOTIFICAÇÕES -->
+    <div id="notificationsOverlay" class="notifications-overlay">
+        <div class="notif-header">
+            <span class="material-symbols-rounded notif-header-icon">notifications</span>
+            <h1 data-i18n="notif_title">Notificações</h1>
+            <button class="notif-close-btn" id="notifCloseBtn">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+
+        <div class="notif-tabs">
+            <button class="notif-tab active" data-tab="all" data-i18n="notif_all">Todas</button>
+            <button class="notif-tab" data-tab="unread" data-i18n="notif_unread">Não lidas</button>
+        </div>
+
+        <!-- Prompt para ativar push (some após ativar) -->
+        <div class="notif-prompt-card" id="notifPromptCard">
+            <div class="notif-prompt-icon">
+                <span class="material-symbols-rounded">notifications_active</span>
+            </div>
+            <div class="notif-prompt-text">
+                <strong data-i18n="notif_enable_title">Ative as notificações</strong>
+                <span data-i18n="notif_enable_sub">Receba novidades e recomendações exclusivas no seu dia a dia.</span>
+            </div>
+            <button class="notif-activate-btn" id="notifActivateBtn" data-i18n="notif_activate">Ativar</button>
+        </div>
+
+        <div class="notif-list" id="notifList"></div>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="playlistModal" class="modal-backdrop">
+      <div class="modal-content-box">
+        <h3 id="modalPlaylistTitle" data-i18n="modal_new_playlist">Nova Playlist</h3>
+        <div class="playlist-modal-new">
+          <div class="playlist-modal-cover-preview" id="playlistCoverPreview">
+            <span class="material-symbols-rounded">add_photo_alternate</span>
+            <span class="playlist-modal-cover-hint" data-i18n="modal_cover">Capa</span>
+          </div>
+          <input
+            type="text"
+            id="newPlaylistName"
+            placeholder="Nome da playlist..."
+            data-i18n-placeholder="modal_playlist_name"
+            autocomplete="off"
+          />
+          <input
+            type="file"
+            id="playlistCoverFile"
+            accept="image/*"
+            style="display: none"
+          />
+        </div>
+        <div class="modal-actions-wrapper">
+          <button id="cancelModalBtn" data-i18n="modal_cancel">Cancelar</button>
+          <button id="confirmModalBtn" data-i18n="modal_save">Salvar</button>
+        </div>
+      </div>
+    </div>
+    <div id="addToPlaylistModal" class="modal-backdrop">
+      <div
+        class="modal-content-box"
+        style="max-width: 380px; padding: 0; border-radius: 28px"
+      >
+        <div
+          style="
+            padding: 20px 20px 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          "
+        >
+          <h3 style="margin: 0 0 8px 0; font-size: 20px" data-i18n="modal_add_to_playlist">
+            Adicionar à playlist
+          </h3>
+          <input
+            type="text"
+            id="playlistSearchInput"
+            placeholder="Procurar playlist..."
+            data-i18n-placeholder="modal_search_playlist"
+            style="
+              width: 100%;
+              background: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              border-radius: 40px;
+              padding: 10px 16px;
+              color: white;
+              font-size: 14px;
+              margin-top: 8px;
+            "
+          />
+        </div>
+        <div
+          id="playlistSelectList"
+          style="max-height: 320px; overflow-y: auto; padding: 8px 12px"
+        ></div>
+        <div
+          style="
+            padding: 12px 20px 20px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+          "
+        >
+          <button
+            id="openCreatePlaylistFromAddBtn"
+            style="
+              width: 100%;
+              background: rgba(255, 255, 255, 0.05);
+              border: none;
+              border-radius: 40px;
+              padding: 12px;
+              color: white;
+              font-weight: 600;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              cursor: pointer;
+            "
+          >
+            <span class="material-symbols-rounded">add</span>
+            <span data-i18n="modal_new_playlist_btn">Nova Playlist</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="createPlaylistSubModal" class="modal-backdrop">
+      <div class="modal-content-box" style="max-width: 320px">
+        <h3 style="margin-bottom: 16px" data-i18n="modal_new_playlist">Criar playlist</h3>
+        <input
+          type="text"
+          id="subNewPlaylistName"
+          placeholder="Nome da playlist"
+          data-i18n-placeholder="modal_playlist_name"
+          style="margin-bottom: 20px"
+        />
+        <div class="modal-actions-wrapper">
+          <button id="cancelSubModalBtn" data-i18n="modal_cancel">Cancelar</button
+          ><button
+            id="confirmSubModalBtn"
+            style="background: #924cff; color: white"
+            data-i18n="modal_create"
+          >
+            Criar
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="contextMenuBackdrop" class="context-menu-backdrop"></div>
+    <div id="contextMenuModal" class="context-menu-modal"></div>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Modal de confirmação genérico -->
+    <div id="confirmModal" class="modal-backdrop">
+      <div
+        class="modal-content-box"
+        style="max-width: 320px; text-align: center"
+      >
+        <h3 id="confirmModalTitle" data-i18n="modal_confirm">Confirmar</h3>
+        <p
+          id="confirmModalMessage"
+          style="
+            margin: 16px 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+          "
+        ></p>
+        <div class="modal-actions-wrapper">
+          <button id="confirmModalCancelBtn" class="modal-btn-cancel" data-i18n="modal_cancel">
+            Cancelar
+          </button>
+          <button id="confirmModalOkBtn" class="modal-btn-ok" data-i18n="modal_ok">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/player-core.js"></script>
+    <script src="js/player-audio-lyrics.js"></script>
+    <script src="js/player-ui.js"></script>
+    <script src="js/player-playlists.js"></script>
+    <script src="js/player-menus-core.js"></script>
+    <script src="js/player-music-actions.js"></script>
+    <script src="js/search.js"></script>
+    <!-- player-smart-queue.js removido: sobrescrevia window.handleNextTrack com uma
+         versão incompatível (assinatura diferente, só calculava e retornava a próxima
+         faixa sem tocar nada), quebrando o avanço automático de música. O único fix
+         real que ele trazia (buildAutoQueue tolerante a tipo de id) foi incorporado
+         direto em player-core.js. -->
+    <script src="js/notifications.js"></script>
+    <script src="js/inicio-extras.js"></script>
+    <!-- Novos módulos -->
+    <script src="js/settings.js"></script>
+    <script src="js/playback-engine.js"></script>
+    <script src="js/themes-v6.js"></script>
+    <script src="js/notifications-follow.js"></script>
+    <!-- Sistema de fila paralelo (queue-advanced.js, queue-initializer.js, queue-visual.js)
+         removido: usava IndexedDB próprio, nunca conectado ao AppState real do player,
+         e causava conflito de id/classe com o painel de fila oficial (#queuePanel,
+         gerenciado por player-menus-core.js). -->
+    <script src="js/player-recommendations.js"></script>
+
+    <script>
+      // Inicializar módulos após login
+      document.addEventListener('fenda:userLoaded', (e) => {
+        const userId = e.detail?.userId;
+        if (userId) {
+          fendaArtistNotifications.init(userId);
+          fendaArtistNotifications.requestNotificationPermission();
+          
+          // NOVO: Inicializar Recomendações
+          if (typeof recommendationEngine !== 'undefined') recommendationEngine.init?.(userId);
+        }
+      });
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        // Recarrega a página UMA VEZ quando um Service Worker novo assume o
+        // controle. Sem isso, o SKIP_WAITING troca o SW em segundo plano,
+        // mas a aba já aberta continua rodando o HTML/CSS/JS antigos até o
+        // usuário fechar e reabrir o app manualmente — o que já causou
+        // telas com CSS desatualizado (cartão de perfil com dimensões de
+        // uma versão anterior, por exemplo) mesmo depois do deploy de uma
+        // correção. A flag evita loop se o evento disparar mais de uma vez.
+        let _swReloaded = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (_swReloaded) return;
+          _swReloaded = true;
+          window.location.reload();
+        });
+
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { scope: "/", updateViaCache: "none" })
+            .then((reg) => {
+              console.log("[SW] Registrado:", reg.scope);
+              // Verifica atualização toda vez que o app é aberto — sem isso,
+              // o navegador pode servir uma cópia em cache do PRÓPRIO
+              // arquivo sw.js (cache HTTP comum, fora do controle do
+              // Service Worker), fazendo com que uma versão nova do sw.js
+              // nunca chegue a ser sequer avaliada. O parâmetro ?v= e
+              // updateViaCache:'none' evitam isso; reg.update() força a
+              // checagem ativa a cada boot.
+              reg.update().catch(() => {});
+              // Força atualização se há SW esperando
+              if (reg.waiting)
+                reg.waiting.postMessage({ type: "SKIP_WAITING" });
+              reg.addEventListener("updatefound", () => {
+                const sw = reg.installing;
+                sw.addEventListener("statechange", () => {
+                  if (
+                    sw.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    sw.postMessage({ type: "SKIP_WAITING" });
+                  }
+                });
+              });
+            })
+            .catch((err) => console.warn("[SW] Falha:", err));
+        });
+      }
+    </script>
+  </body>
+</html>

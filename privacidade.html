@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Política de Privacidade — Fenda Music</title>
+    <meta name="theme-color" content="#0a0612" />
+    <link rel="stylesheet" href="fonts/material-symbols.css" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        background: #0a0612;
+        color: #f0eaff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .legal-container {
+        max-width: 720px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #0f0b1a 0%, #07050c 100%);
+      }
+
+      .legal-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        background: rgba(10, 6, 18, 0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .legal-back {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        text-decoration: none;
+      }
+      .legal-back:active { background: rgba(255, 255, 255, 0.14); }
+
+      .legal-header h1 {
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -0.2px;
+      }
+
+      .legal-body {
+        padding: 28px 20px 60px;
+      }
+
+      .legal-hero {
+        margin-bottom: 28px;
+      }
+
+      .legal-hero h2 {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+        background: linear-gradient(135deg, #fff, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 6px;
+      }
+
+      .legal-hero p {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .legal-section {
+        margin-bottom: 26px;
+      }
+
+      .legal-section h3 {
+        font-size: 15px;
+        font-weight: 800;
+        color: #c4b5fd;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .legal-section h3 .material-symbols-rounded {
+        font-size: 18px;
+        color: #a855f7;
+      }
+
+      .legal-section p,
+      .legal-section li {
+        font-size: 14.5px;
+        color: rgba(255, 255, 255, 0.72);
+        margin-bottom: 10px;
+      }
+
+      .legal-section ul,
+      .legal-section ol {
+        padding-left: 20px;
+        margin-bottom: 10px;
+      }
+
+      .legal-section li {
+        margin-bottom: 6px;
+      }
+
+      .legal-section strong {
+        color: #f0eaff;
+        font-weight: 700;
+      }
+
+      .legal-callout {
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(146, 76, 255, 0.2);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin: 14px 0;
+        font-size: 13.5px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+
+      .legal-callout strong {
+        color: #d8b4fe;
+      }
+
+      /* Tabela de dados coletados */
+      .legal-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0 16px;
+        font-size: 13px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .legal-table th {
+        background: rgba(146, 76, 255, 0.12);
+        color: #d8b4fe;
+        text-align: left;
+        padding: 10px 12px;
+        font-weight: 700;
+        font-size: 11.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .legal-table td {
+        padding: 10px 12px;
+        color: rgba(255, 255, 255, 0.68);
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .legal-table tr:nth-child(even) td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .legal-badge-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0 16px;
+      }
+
+      .legal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .legal-badge .material-symbols-rounded {
+        font-size: 15px;
+        color: #a855f7;
+      }
+
+      .legal-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 28px 0;
+      }
+
+      .legal-contact {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 18px;
+        padding: 18px;
+        text-align: center;
+      }
+
+      .legal-contact p {
+        font-size: 13.5px;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 10px;
+      }
+
+      .legal-contact a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #c4b5fd;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+      }
+
+      .legal-contact a .material-symbols-rounded {
+        font-size: 18px;
+      }
+
+      .legal-crosslink {
+        display: block;
+        text-align: center;
+        margin-top: 18px;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.4);
+        text-decoration: none;
+      }
+      .legal-crosslink strong { color: #a855f7; }
+
+      .legal-updated {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.3);
+        text-align: center;
+        margin-top: 30px;
+      }
+
+      @media (min-width: 560px) {
+        .legal-hero h2 { font-size: 30px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="legal-container">
+      <div class="legal-header">
+        <a href="javascript:void(0)" class="legal-back" onclick="history.length > 1 ? history.back() : (window.location.href='player.html')">
+          <span class="material-symbols-rounded">arrow_back</span>
+        </a>
+        <h1>Política de Privacidade</h1>
+      </div>
+
+      <div class="legal-body">
+        <div class="legal-hero">
+          <h2>Política de Privacidade</h2>
+          <p>Fenda Music · Como cuidamos dos seus dados</p>
+        </div>
+
+        <div class="legal-callout">
+          Levamos sua privacidade a sério. Esta política explica <strong>quais dados coletamos, por quê, e como você pode controlá-los</strong> — em linguagem direta, sem juridiquês.
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">folder_open</span>1. Quais dados coletamos</h3>
+          <p>Para o Fenda Music funcionar, coletamos as seguintes informações:</p>
+          <table class="legal-table">
+            <thead>
+              <tr><th>Dado</th><th>Para quê</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>E-mail e senha</td><td>Criar e proteger sua conta</td></tr>
+              <tr><td>Nome, nome de usuário e foto</td><td>Personalizar seu perfil</td></tr>
+              <tr><td>Histórico de reprodução</td><td>Recomendações e estatísticas pessoais</td></tr>
+              <tr><td>Playlists e favoritos</td><td>Guardar suas escolhas na conta</td></tr>
+              <tr><td>Dados técnicos do aparelho</td><td>Notificações e funcionamento offline</td></tr>
+            </tbody>
+          </table>
+          <p>Não coletamos dados de pagamento — o Fenda Music é gratuito e não processa transações financeiras.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">database</span>2. Onde seus dados ficam armazenados</h3>
+          <p>Seus dados de conta ficam armazenados de forma segura em nossa infraestrutura na nuvem (Supabase), com controle de acesso restrito. Além disso:</p>
+          <div class="legal-badge-list">
+            <span class="legal-badge"><span class="material-symbols-rounded">smartphone</span>Cache local no seu aparelho</span>
+            <span class="legal-badge"><span class="material-symbols-rounded">download</span>Downloads offline no seu dispositivo</span>
+            <span class="legal-badge"><span class="material-symbols-rounded">lock</span>Senhas sempre criptografadas</span>
+          </div>
+          <p>O app guarda uma cópia local de parte dos seus dados (playlists, histórico recente, perfil) para funcionar mesmo sem internet. Essa cópia é apagada se você limpar o armazenamento do app ou desinstalá-lo.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">visibility</span>3. Quem vê seus dados</h3>
+          <ul>
+            <li><strong>Você</strong>: sempre tem acesso total aos seus próprios dados dentro do app;</li>
+            <li><strong>Nossa equipe</strong>: acessa dados apenas quando necessário para suporte técnico ou moderação de conteúdo enviado;</li>
+            <li><strong>Terceiros</strong>: nunca vendemos seus dados. Não compartilhamos suas informações pessoais com anunciantes ou terceiros para fins de marketing.</li>
+          </ul>
+          <p>Utilizamos o Supabase como provedor de infraestrutura (banco de dados e autenticação). Eles processam dados em nosso nome, seguindo as mesmas obrigações de proteção descritas aqui.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">notifications</span>4. Notificações</h3>
+          <p>Se você ativar notificações, podemos te avisar sobre recomendações, novidades de artistas que você segue e lembretes de uso. Você pode desativar cada tipo de notificação individualmente em <strong>Configurações → Notificações</strong>, a qualquer momento.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">tune</span>5. Seus direitos e controles</h3>
+          <p>Direto no app, sem precisar nos contatar, você pode:</p>
+          <ul>
+            <li>Editar seu nome, foto, nome de usuário e frase de perfil a qualquer momento;</li>
+            <li>Trocar sua senha em Configurações → Conta;</li>
+            <li>Limpar os downloads salvos no seu aparelho;</li>
+            <li><strong>Excluir sua conta permanentemente</strong>, apagando todos os seus dados, favoritos e histórico, em Configurações → Conta → Excluir conta.</li>
+          </ul>
+          <p>Se preferir, também pode solicitar a exclusão ou uma cópia dos seus dados diretamente pelo nosso e-mail de contato.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">child_care</span>6. Uso por menores de idade</h3>
+          <p>O Fenda Music não é direcionado especificamente a crianças. Se você é menor de idade, recomendamos o uso com orientação de um responsável. Se identificarmos uma conta de criança criada sem consentimento adequado, ela poderá ser removida.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">shield</span>7. Segurança</h3>
+          <p>Usamos práticas padrão de segurança para proteger seus dados, incluindo criptografia de senhas e conexões seguras (HTTPS) em todas as comunicações entre o app e nossos servidores. Nenhum sistema é 100% infalível, mas trabalhamos continuamente para manter sua conta protegida.</p>
+        </div>
+
+        <div class="legal-section">
+          <h3><span class="material-symbols-rounded">update</span>8. Alterações nesta política</h3>
+          <p>Podemos atualizar esta Política de Privacidade de tempos em tempos. Mudanças relevantes serão comunicadas dentro do aplicativo. Recomendamos revisar esta página periodicamente.</p>
+        </div>
+
+        <div class="legal-divider"></div>
+
+        <div class="legal-contact">
+          <p>Dúvidas sobre seus dados ou esta política? Fale com a gente.</p>
+          <a href="mailto:contato@fendamusic.com.br">
+            <span class="material-symbols-rounded">mail</span>
+            contato@fendamusic.com.br
+          </a>
+        </div>
+
+        <a href="termos.html" class="legal-crosslink">Ver também os <strong>Termos de Uso</strong></a>
+
+        <p class="legal-updated">Última atualização: julho de 2026</p>
+      </div>
+    </div>
+  </body>
+</html>
