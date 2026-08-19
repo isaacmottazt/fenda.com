@@ -22,7 +22,9 @@ function savePlayerSession() {
             currentTime: currentTime,
             wasPlaying: AppState.playing,
             isShuffle:  AppState.isShuffle,
-            isRepeat:   AppState.isRepeat,
+            repeatMode: AppState.repeatMode,
+            // Mantido para compatibilidade com sessões antigas.
+            isRepeat:   AppState.repeatMode === 1,
             // Salva só IDs para não pesar
             trackIds: (AppState.playContext?.trackList || []).map(m => m.id),
             source:     AppState.playContext?.source     || 'library',
@@ -66,8 +68,10 @@ async function restorePlayerSession() {
     console.log('[Session] Restaurando:', music.title, '@', session.currentTime + 's');
 
     // Restaura flags
-    AppState.isShuffle = session.isShuffle || false;
-    AppState.isRepeat  = session.isRepeat  || false;
+    AppState.isShuffle = session.isShuffle === true;
+    AppState.repeatMode = Number.isInteger(session.repeatMode)
+        ? Math.max(0, Math.min(2, session.repeatMode))
+        : (session.isRepeat ? 1 : 0);
 
     // Reconstrói trackList
     const restoredList = session.trackIds?.length
@@ -79,6 +83,9 @@ async function restorePlayerSession() {
         playlistId: session.playlistId,
         trackList:  restoredList,
     };
+    // Necessário para desligar o shuffle depois de uma restauração sem
+    // perder o contexto (por exemplo, uma playlist).
+    AppState._originalTrackList = [...restoredList];
 
     AppState.currentMusicId = music.id;
 

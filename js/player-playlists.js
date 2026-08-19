@@ -117,7 +117,10 @@ async function openPlaylistDetail(playlist, skipPush = false) {
             AppState.isShuffle = true;
             if (typeof window.setPlayContext === 'function')
                 window.setPlayContext('playlist', playlistMusics, playlist.id);
-            const rand = playlistMusics[Math.floor(Math.random() * playlistMusics.length)];
+            const shuffleOrder = typeof window.buildShuffleOrder === 'function'
+                ? window.buildShuffleOrder(playlistMusics)
+                : [...playlistMusics];
+            const rand = shuffleOrder[0] || playlistMusics[0];
             playMusicTrack(rand);
         });
     }

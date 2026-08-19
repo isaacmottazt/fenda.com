@@ -407,102 +407,218 @@ async function toggleOfflineMusic(music) {
 
 // ===== FILA AUTOMÁTICA =====
 
-// Embaralhamento estilo Spotify: distribui artistas para não repetirem seguidos
-function _shuffleSpread(tracks) {
-    if (tracks.length <= 1) return [...tracks];
-    const arr = [...tracks];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    for (let i = 1; i < arr.length; i++) {
-        if (arr[i].artist === arr[i - 1].artist) {
-            for (let j = i + 1; j < Math.min(i + 4, arr.length); j++) {
-                if (arr[j].artist !== arr[i - 1].artist) {
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                    break;
-                }
-            }
+// Histórico da sessão: além de alimentar o botão "Anterior", ele ajuda o
+// shuffle a não devolver imediatamente as mesmas faixas.
+const _playbackHistory = [];
+const _HISTORY_MAX = 50;
+
+function _trackId(trackOrId) {
+    return String(trackOrId?.id ?? trackOrId);
+}
+
+function _artistKey(track) {
+    const artist = String(track?.artist || '').trim().toLowerCase();
+    return artist || `track:${_trackId(track)}`;
+}
+
+function _uniqueTracks(tracks) {
+    const seen = new Set();
+    return (Array.isArray(tracks) ? tracks : []).filter(track => {
+        if (!track) return false;
+        const id = _trackId(track);
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+    });
+}
+
+function _randomUnit() {
+    try {
+        if (window.crypto?.getRandomValues) {
+            const values = new Uint32Array(1);
+            window.crypto.getRandomValues(values);
+            return values[0] / 0x100000000;
         }
+    } catch {}
+    return Math.random();
+}
+
+function _recentTrackIds(limit = 8) {
+    const ids = [];
+    const add = (id) => {
+        if (id === null || id === undefined) return;
+        const normalized = _trackId(id);
+        if (!ids.includes(normalized)) ids.push(normalized);
+    };
+
+    for (let i = _playbackHistory.length - 1; i >= 0 && ids.length < limit; i--) {
+        add(_playbackHistory[i]);
     }
-    return arr;
+    for (const item of (AppState.history || []).slice(0, limit * 2)) {
+        if (ids.length >= limit) break;
+        add(item?.id);
+    }
+    return new Set(ids);
+}
+
+function _recentArtistKeys(trackList, limit = 5) {
+    const byId = new Map();
+    [...(AppState.musics || []), ...(trackList || [])].forEach(track => {
+        if (track) byId.set(_trackId(track), track);
+    });
+
+    const artists = [];
+    const add = (track) => {
+        if (!track) return;
+        const key = _artistKey(track);
+        if (!artists.includes(key)) artists.push(key);
+    };
+
+    for (let i = _playbackHistory.length - 1; i >= 0 && artists.length < limit; i--) {
+        add(byId.get(_trackId(_playbackHistory[i])));
+    }
+    for (const item of (AppState.history || []).slice(0, limit * 2)) {
+        if (artists.length >= limit) break;
+        add(byId.get(_trackId(item?.id)) || item);
+    }
+    return new Set(artists);
+}
+
+function _pickWeightedTrack(scoredTracks) {
+    const total = scoredTracks.reduce((sum, entry) => sum + entry.weight, 0);
+    if (!Number.isFinite(total) || total <= 0) return scoredTracks[0]?.track || null;
+
+    let cursor = _randomUnit() * total;
+    for (const entry of scoredTracks) {
+        cursor -= entry.weight;
+        if (cursor <= 0) return entry.track;
+    }
+    return scoredTracks[scoredTracks.length - 1]?.track || null;
+}
+
+// Shuffle inteligente: continua aleatório, mas evita os padrões que parecem
+// artificiais no shuffle puro — mesma faixa recém-ouvida, artista repetido e
+// músicas muito reproduzidas recebem menos probabilidade.
+function _shuffleSpread(tracks) {
+    const remaining = _uniqueTracks(tracks);
+    if (remaining.length <= 1) return remaining;
+
+    const recentIds = _recentTrackIds();
+    const recentArtists = _recentArtistKeys(remaining);
+    const currentTrack = (AppState.musics || []).find(
+        music => _trackId(music) === _trackId(AppState.currentMusicId)
+    );
+
+    const result = [];
+    let lastArtist = currentTrack ? _artistKey(currentTrack) : null;
+    let lastTrackId = _trackId(AppState.currentMusicId);
+
+    while (remaining.length > 0) {
+        // Se houver outro artista disponível, ele sempre vence a repetição
+        // imediata. A repetição só é permitida quando não há alternativa.
+        const differentArtist = remaining.filter(track => {
+            return _artistKey(track) !== lastArtist && _trackId(track) !== lastTrackId;
+        });
+        const candidates = differentArtist.length > 0
+            ? differentArtist
+            : remaining.filter(track => _trackId(track) !== lastTrackId);
+        const pool = candidates.length > 0 ? candidates : remaining;
+
+        const scored = pool.map(track => {
+            const id = _trackId(track);
+            const artist = _artistKey(track);
+            const playCount = Number(playCounts[id] || 0);
+            let weight = 1;
+
+            // A memória recente é uma preferência, não uma exclusão: se o
+            // catálogo for pequeno, nenhuma faixa fica bloqueada para sempre.
+            if (recentIds.has(id)) weight *= 0.32;
+            if (recentArtists.has(artist)) weight *= 0.68;
+            if (artist === lastArtist) weight *= 0.08;
+            if (playCount > 0) weight *= 1 / (1 + Math.min(playCount, 8) * 0.06);
+
+            return { track, weight: Math.max(weight, 0.01) };
+        });
+
+        const selected = _pickWeightedTrack(scored) || pool[0];
+        const index = remaining.indexOf(selected);
+        if (index >= 0) remaining.splice(index, 1);
+        result.push(selected);
+        lastArtist = _artistKey(selected);
+        lastTrackId = _trackId(selected);
+    }
+
+    return result;
 }
 
 // Gera a fila automática baseada no contexto atual
 function buildAutoQueue(currentMusicId, trackList, isShuffle, wrap = false) {
-    if (!trackList || trackList.length === 0) return [];
+    const cleanList = _uniqueTracks(trackList);
+    if (cleanList.length === 0) return [];
 
-    // Comparação tolerante a tipo (currentMusicId pode vir como string
-    // vindo da URL/estado salvo, enquanto m.id vem como número do Supabase).
-    // Com === estrito, currentIdx virava -1 sem a música estar "não encontrada"
-    // de verdade, e slice(0, -1) cortava o ÚLTIMO item da lista inteira.
-    const currentIdx = trackList.findIndex(m => String(m.id) === String(currentMusicId));
+    // Comparação tolerante a tipo (IDs vindos da URL/estado salvo podem ser
+    // strings, enquanto os IDs do Supabase normalmente são números).
+    const currentId = _trackId(currentMusicId);
+    const currentIdx = cleanList.findIndex(m => _trackId(m) === currentId);
 
     if (isShuffle) {
-        return _shuffleSpread(trackList.filter(m => String(m.id) !== String(currentMusicId)));
+        return _shuffleSpread(cleanList.filter(m => _trackId(m) !== currentId));
     }
 
-    // Música atual não está nesse contexto: não há "depois dela" —
-    // a fila auto vira o contexto inteiro (menos ela, se por acaso estiver lá).
+    // Música atual não está nesse contexto: a fila vira o contexto inteiro,
+    // menos ela, se por acaso estiver presente.
     if (currentIdx === -1) {
-        return trackList.filter(m => String(m.id) !== String(currentMusicId));
+        return cleanList.filter(m => _trackId(m) !== currentId);
     }
 
-    // Semântica Spotify: com repeat OFF a fila é só o que vem DEPOIS da
-    // faixa atual no contexto. O wrap (voltar ao início) só existe no
-    // repeat-all — antes ele era sempre aplicado, então todo contexto
-    // "dava a volta" para sempre e o autoplay nunca era alcançado.
-    const after  = trackList.slice(currentIdx + 1);
+    // Com repeat OFF, a fila é somente o que vem depois da faixa atual.
+    // O wrap só é usado pelo repeat-all.
+    const after = cleanList.slice(currentIdx + 1);
     if (!wrap) return after;
-    const before = trackList.slice(0, currentIdx);
+    const before = cleanList.slice(0, currentIdx);
     return [...after, ...before];
 }
 
-// Atualiza o contexto e regenera a fila automática
-// Salva a ordem original antes do shuffle para poder restaurar ao desligar
+// Atualiza o contexto e regenera a fila automática.
+// A ordem original fica preservada para desligar o shuffle sem perder o
+// contexto escolhido pelo usuário.
 function setPlayContext(source, trackList, playlistId = null) {
-    AppState._originalTrackList = [...trackList];
-    AppState.playContext = { source, playlistId, trackList: [...trackList] };
-    AppState.autoQueue = buildAutoQueue(AppState.currentMusicId, trackList, AppState.isShuffle);
+    const cleanList = _uniqueTracks(trackList);
+    AppState._originalTrackList = [...cleanList];
+    AppState.playContext = { source, playlistId, trackList: [...cleanList] };
+    AppState.autoQueue = buildAutoQueue(AppState.currentMusicId, cleanList, AppState.isShuffle);
     if (typeof window.renderQueuePanel === 'function') window.renderQueuePanel();
 }
 
-// ── Histórico de navegação (para botão ◀️ funcionar corretamente) ──
-// Guarda as músicas tocadas em ordem, independente de contexto
-const _playbackHistory = [];
-const _HISTORY_MAX = 50;
-
 function _pushPlaybackHistory(musicId) {
-    if (_playbackHistory[_playbackHistory.length - 1] === musicId) return;
+    const normalizedId = _trackId(musicId);
+    const lastId = _trackId(_playbackHistory[_playbackHistory.length - 1]);
+    if (normalizedId === lastId) return;
     _playbackHistory.push(musicId);
     if (_playbackHistory.length > _HISTORY_MAX) _playbackHistory.shift();
 }
 
 // Retorna a próxima música (fila manual tem prioridade sobre automática)
 function getNextMusic() {
-    if (AppState.queue.length > 0) {
-        return AppState.queue.shift();
-    }
-    if (AppState.autoQueue.length > 0) {
-        return AppState.autoQueue.shift();
-    }
+    if (AppState.queue.length > 0) return AppState.queue.shift();
+    if (AppState.autoQueue.length > 0) return AppState.autoQueue.shift();
     return null;
 }
 
 // Retorna a música anterior com base no histórico de reprodução real
 function getPrevMusic() {
-    // Remove a entrada atual do topo
     if (_playbackHistory.length > 0 &&
-        _playbackHistory[_playbackHistory.length - 1] === AppState.currentMusicId) {
+        _trackId(_playbackHistory[_playbackHistory.length - 1]) === _trackId(AppState.currentMusicId)) {
         _playbackHistory.pop();
     }
     if (_playbackHistory.length === 0) return null;
-    const prevId = _playbackHistory[_playbackHistory.length - 1];
-    return AppState.musics.find(m => m.id === prevId) || null;
+    const prevId = _trackId(_playbackHistory[_playbackHistory.length - 1]);
+    return AppState.musics.find(m => _trackId(m) === prevId) || null;
 }
 
 window.setPlayContext = setPlayContext;
 window.buildAutoQueue = buildAutoQueue;
+window.buildShuffleOrder = _shuffleSpread;
 window.getNextMusic = getNextMusic;
 
 // ===== FILA (sem mudanças) =====
