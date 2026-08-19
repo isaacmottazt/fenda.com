@@ -34,6 +34,8 @@
     let _compressorNode = null;
     let _crossfadeTimer = null;
     let _fading = false;
+    let _audioGraphPending = false;
+    let _audioGraphDisabled = false;
 
     function _getPrefs() {
         if (window.FendaSettings?.getPlaybackPrefs) return window.FendaSettings.getPlaybackPrefs();
@@ -47,37 +49,72 @@
     }
 
     // ── Normalização de volume via Web Audio API ──
-    // Cria o grafo de áudio uma única vez (o <audio> só pode ser
-    // conectado a um AudioContext uma vez na vida do elemento).
+    // O <audio> só é conectado ao grafo depois que o AudioContext está
+    // realmente 'running'. Alguns WebViews deixam o contexto 'suspended'
+    // mesmo após o play(), e conectar antes disso silencia a saída inteira.
+    // Enquanto o contexto não estiver pronto, o áudio permanece nativo.
+    function _disableAudioGraph(context = _audioCtx) {
+        _audioGraphPending = false;
+        _audioGraphDisabled = true;
+        if (context && typeof context.close === 'function') {
+            context.close().catch(() => {});
+        }
+        if (_audioCtx === context) _audioCtx = null;
+    }
+
     function _ensureAudioGraph() {
-        if (_sourceNode || !DOM.audio) return;
+        if (_sourceNode || _audioGraphPending || _audioGraphDisabled || !DOM.audio || !_prefs.normalize) return;
         try {
             const Ctx = window.AudioContext || window.webkitAudioContext;
-            if (!Ctx) return; // navegador sem suporte — normalização vira no-op
-            _audioCtx = new Ctx();
-            _sourceNode = _audioCtx.createMediaElementSource(DOM.audio);
-            _compressorNode = _audioCtx.createDynamicsCompressor();
-            _compressorNode.threshold.value = -24;
-            _compressorNode.knee.value = 24;
-            _compressorNode.ratio.value = 4;
-            _compressorNode.attack.value = 0.02;
-            _compressorNode.release.value = 0.25;
-            _wireGraph();
-            // Muitos WebViews mobile criam o AudioContext já 'suspended'
-            // mesmo depois de um gesto do usuário — nesse estado o
-            // grafo não produz som nenhum, o que pareceria "a música
-            // parou" assim que Normalização é ligada. resume() corrige.
-            if (_audioCtx.state === 'suspended') _audioCtx.resume().catch(() => {});
+            if (!Ctx) {
+                _audioGraphDisabled = true;
+                return; // navegador sem suporte — áudio nativo continua ativo
+            }
+
+            const context = new Ctx();
+            _audioCtx = context;
+            _audioGraphPending = true;
+
+            const activateGraph = () => {
+                if (_audioCtx !== context) return;
+                if (context.state !== 'running') {
+                    // Não criamos MediaElementSource enquanto suspenso:
+                    // assim o browser mantém a saída nativa do <audio>.
+                    _disableAudioGraph(context);
+                    return;
+                }
+                try {
+                    _sourceNode = context.createMediaElementSource(DOM.audio);
+                    _compressorNode = context.createDynamicsCompressor();
+                    _compressorNode.threshold.value = -24;
+                    _compressorNode.knee.value = 24;
+                    _compressorNode.ratio.value = 4;
+                    _compressorNode.attack.value = 0.02;
+                    _compressorNode.release.value = 0.25;
+                    _audioGraphPending = false;
+                    _wireGraph();
+                } catch {
+                    // Se outro módulo já conectou o elemento, o fallback
+                    // nativo fica preservado porque o source não foi criado.
+                    _sourceNode = null;
+                    _compressorNode = null;
+                    _disableAudioGraph(context);
+                }
+            };
+
+            const resumePromise = context.state === 'suspended'
+                ? context.resume()
+                : Promise.resolve();
+            Promise.resolve(resumePromise).then(activateGraph).catch(() => _disableAudioGraph(context));
         } catch {
-            // Se o navegador já tiver conectado esse <audio> a outro
-            // grafo (ex.: hot-reload em dev), falha silenciosamente.
-            // Nesse caso a normalização vira no-op, mas o áudio nativo
-            // continua tocando normalmente (não passou pelo grafo).
+            // Qualquer falha na Web Audio API não pode impedir o <audio>
+            // nativo de continuar carregando e reproduzindo.
+            _disableAudioGraph();
         }
     }
 
     function _wireGraph() {
-        if (!_sourceNode || !_audioCtx) return;
+        if (!_sourceNode || !_audioCtx || _audioCtx.state !== 'running') return false;
         _sourceNode.disconnect();
         if (_prefs.normalize && _compressorNode) {
             _sourceNode.connect(_compressorNode);
@@ -85,6 +122,7 @@
         } else {
             _sourceNode.connect(_audioCtx.destination);
         }
+        return true;
     }
 
     function _applyNormalize() {
@@ -160,7 +198,6 @@
 
     function _onPlay() {
         _ensureAudioGraph();
-        if (_audioCtx?.state === 'suspended') _audioCtx.resume().catch(() => {});
         _applyNormalize();
         _watchForCrossfade();
         if (DOM.audio) DOM.audio.volume = 1;
@@ -168,7 +205,9 @@
 
     function _refresh(newPrefs) {
         _prefs = newPrefs || _getPrefs();
+        if (_prefs.normalize) _audioGraphDisabled = false;
         _applyDataSaver();
+        _ensureAudioGraph();
         _applyNormalize();
         _watchForCrossfade();
     }
