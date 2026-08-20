@@ -1055,7 +1055,7 @@ async function _fetchAllFromSupabase() {
     // ── TODAS as buscas em paralelo — nenhuma espera outra ───────────
     // Histórico NÃO vai ao Supabase: o localStorage é mais atualizado
     // e já está carregado por _loadAllFromCache() antes desta função.
-    const [musicsResult, artistsResult, userResult, podcastsResult] = await Promise.allSettled([
+    const [musicsResult, artistsResult, podcastsResult, userResult] = await Promise.allSettled([
 
         // 1. Músicas do catálogo + fallback local
         _withTimeout((async () => {
