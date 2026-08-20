@@ -1,7 +1,7 @@
 // Fenda Music — Service Worker v16
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v54';
+const CACHE_NAME = 'fenda-v55';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
 const CRITICAL_RUNTIME = new Set([
@@ -12,6 +12,7 @@ const CRITICAL_RUNTIME = new Set([
   '/js/player-session.js',
   '/js/settings.js',
   '/js/podcasts.js',
+  '/js/realtime-catalog.js',
 ]);
 const LOGIN_ROUTES  = new Set(['/index.html', '/login', '/']);
 
@@ -25,7 +26,7 @@ const SHELL = [
   '/js/player-core.js', '/js/player-ui.js', '/js/player-audio-lyrics.js',
   '/js/player-menus-core.js', '/js/player-music-actions.js', '/js/player-playlists.js',
   '/js/player-session.js', '/js/notifications.js', '/css/notifications.css', '/js/inicio-extras.js', '/js/settings.js', '/js/podcasts.js',
-  '/js/playback-engine.js',
+  '/js/playback-engine.js', '/js/realtime-catalog.js',
 ];
 
 // Mensagem de skip waiting (forçar atualização imediata)

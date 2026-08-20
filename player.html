@@ -891,6 +891,7 @@
     <script src="js/player-ui.js"></script>
     <script src="js/player-playlists.js"></script>
     <script src="js/podcasts.js"></script>
+    <script src="js/realtime-catalog.js"></script>
     <script src="js/player-menus-core.js"></script>
     <script src="js/player-music-actions.js"></script>
     <script src="js/search.js"></script>
@@ -943,7 +944,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=52", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=55", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
