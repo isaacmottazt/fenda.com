@@ -821,7 +821,52 @@ body.player-active .main-content {
 .lyric-line:active {
   color: rgba(255, 255, 255, 0.45);
 }
-.lyric-line.active {
+.podcast-description {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 100%;
+  padding: 24px 2px 80px;
+  box-sizing: border-box;
+}
+.podcast-description-icon {
+  margin-bottom: 16px;
+  font-size: 36px;
+  color: #c084fc;
+}
+.podcast-description-heading {
+  margin: 0 0 14px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.podcast-description-text {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.player-lyrics-header:has([data-player-lyrics-icon="description"]) {
+  color: #c084fc;
+}
+@media (max-width: 520px) {
+  .podcast-description {
+    padding: 18px 0 64px;
+  }
+  .podcast-description-heading {
+    font-size: 21px;
+  }
+  .podcast-description-text {
+    font-size: 17px;
+    line-height: 1.6;
+  }
+}
+.player-mini-controls {
   color: #fff;
   font-size: 23px;
   font-weight: 800;

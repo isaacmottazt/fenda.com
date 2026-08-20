@@ -334,14 +334,61 @@ function parseLyrics(text) {
     return result.sort((a, b) => a.time - b.time);
 }
 
+function _getCurrentPlayerTrack() {
+    const currentId = AppState.currentMusicId;
+    return AppState.musics.find(m => m.id === currentId)
+        || AppState.playContext?.trackList?.find(m => m.id === currentId)
+        || null;
+}
+
+function _setLyricsSectionMode(isPodcast) {
+    document.querySelectorAll('[data-player-lyrics-label]').forEach((label) => {
+        label.textContent = isPodcast ? 'Descrição' : 'Letra';
+    });
+    document.querySelectorAll('[data-player-lyrics-icon]').forEach((icon) => {
+        const iconName = isPodcast ? 'description' : 'lyrics';
+        icon.textContent = iconName;
+        icon.setAttribute('data-player-lyrics-icon', iconName);
+    });
+}
+
+function _renderPodcastDescription(music) {
+    const description = String(music?.description || '').trim();
+    const wrapper = document.createElement('div');
+    wrapper.className = 'podcast-description';
+
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-rounded podcast-description-icon';
+    icon.textContent = 'description';
+
+    const heading = document.createElement('h3');
+    heading.className = 'podcast-description-heading';
+    heading.textContent = 'Descrição do podcast';
+
+    const text = document.createElement('p');
+    text.className = 'podcast-description-text';
+    text.textContent = description || 'Este episódio não possui descrição.';
+
+    wrapper.append(icon, heading, text);
+    DOM.lyricsContainer.appendChild(wrapper);
+}
+
 function buildLyricsMarkup() {
     if (!DOM.lyricsContainer) return;
     DOM.lyricsContainer.innerHTML = '';
     _lastLyricIndex = -1; // reseta ao trocar de música
     if (_lyricsScrollFrame) { cancelAnimationFrame(_lyricsScrollFrame); _lyricsScrollFrame = null; }
 
+    const music = _getCurrentPlayerTrack();
+    const isPodcast = music?.type === 'podcast' || AppState.playContext?.source === 'podcast';
+    _setLyricsSectionMode(isPodcast);
+
+    if (isPodcast) {
+        _renderPodcastDescription(music);
+        return;
+    }
+
     if (AppState.lyricsData.length === 0) {
-        const music = AppState.musics.find(m => m.id === AppState.currentMusicId);
         DOM.lyricsContainer.innerHTML = `
             <div class="lyrics-unavailable">
                 <span class="material-symbols-rounded">music_note</span>
