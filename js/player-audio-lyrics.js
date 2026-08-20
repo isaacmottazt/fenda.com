@@ -380,7 +380,9 @@ function buildLyricsMarkup() {
     if (_lyricsScrollFrame) { cancelAnimationFrame(_lyricsScrollFrame); _lyricsScrollFrame = null; }
 
     const music = _getCurrentPlayerTrack();
-    const isPodcast = music?.type === 'podcast' || AppState.playContext?.source === 'podcast';
+    const isPodcast = music?.type === 'podcast'
+        || String(AppState.currentMusicId || '').startsWith('podcast:')
+        || (!music && AppState.playContext?.source === 'podcast');
     _setLyricsSectionMode(isPodcast);
 
     if (isPodcast) {
