@@ -93,6 +93,23 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Expor globalmente para push-notifications acessar
 window.supabaseClient = supabaseClient;
 
+// ========== CATÁLOGO DE PODCASTS ==========
+async function loadPodcastsFromSupabase() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('podcasts')
+            .select('id,title,description,audio_url,cover_url,created_at')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return (data || []).filter(p => p.audio_url && p.title);
+    } catch (e) {
+        console.warn('loadPodcastsFromSupabase:', e);
+        return [];
+    }
+}
+
+window.loadPodcastsFromSupabase = loadPodcastsFromSupabase;
+
 // ========== CRUD MÚSICAS ==========
 async function loadMusicsFromSupabase() {
     try {

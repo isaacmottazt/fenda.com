@@ -526,7 +526,10 @@ function updatePlayerVisibility(music) {
     // Contexto (playlist ou biblioteca)
     const ctxEl = document.getElementById('playerContext');
     if (ctxEl) {
-        const ctx = AppState.playContext?.source === 'playlist' ? 'TOCANDO DA PLAYLIST' : 'FENDA MUSIC';
+        const source = AppState.playContext?.source;
+        const ctx = source === 'playlist'
+            ? 'TOCANDO DA PLAYLIST'
+            : source === 'podcast' ? 'PODCASTS' : 'FENDA MUSIC';
         ctxEl.textContent = ctx;
     }
 

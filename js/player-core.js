@@ -1,6 +1,7 @@
 // ===== ESTADO GLOBAL COM FILA =====
 const AppState = {
     musics: [],
+    podcasts: [],
     currentMusicId: null,
     playing: false,
     currentTab: 'inicio',
@@ -1054,7 +1055,7 @@ async function _fetchAllFromSupabase() {
     // ── TODAS as buscas em paralelo — nenhuma espera outra ───────────
     // Histórico NÃO vai ao Supabase: o localStorage é mais atualizado
     // e já está carregado por _loadAllFromCache() antes desta função.
-    const [musicsResult, artistsResult, userResult] = await Promise.allSettled([
+    const [musicsResult, artistsResult, userResult, podcastsResult] = await Promise.allSettled([
 
         // 1. Músicas do catálogo + fallback local
         _withTimeout((async () => {
@@ -1078,7 +1079,15 @@ async function _fetchAllFromSupabase() {
             8_000, []
         ),
 
-        // 3. Dados do usuário: perfil, playlists, favoritos, busca recente
+        // 3. Podcasts públicos publicados pelo admin
+        _withTimeout(
+            typeof window.loadPodcastsFromSupabase === 'function'
+                ? window.loadPodcastsFromSupabase().catch(() => [])
+                : Promise.resolve([]),
+            8_000, []
+        ),
+
+        // 4. Dados do usuário: perfil, playlists, favoritos, busca recente
         //    Timeout INDIVIDUAL por chamada — antes era um único timeout
         //    coletivo no Promise.all inteiro, então se só o perfil demorasse
         //    (RLS lenta, rede ruim), TUDO era descartado (playlists e
@@ -1113,6 +1122,12 @@ async function _fetchAllFromSupabase() {
     // ── Aplica artistas ───────────────────────────────────────────────
     if (artistsResult.status === 'fulfilled') {
         AppState.artists = artistsResult.value || [];
+    }
+
+    // ── Aplica podcasts públicos ───────────────────────────────────────
+    if (podcastsResult.status === 'fulfilled') {
+        AppState.podcasts = podcastsResult.value || [];
+        _rerender();
     }
 
     // ── Aplica dados do usuário — segundo render com tudo ─────────────

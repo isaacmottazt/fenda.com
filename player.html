@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/inicio.css" />
     <link rel="stylesheet" href="css/busca.css" />
     <link rel="stylesheet" href="css/biblioteca.css" />
+    <link rel="stylesheet" href="css/podcasts.css" />
     <link rel="stylesheet" href="css/perfil.css" />
     <link rel="stylesheet" href="css/notifications.css" />
     <link rel="stylesheet" href="css/artist-detail.css" />
@@ -257,6 +258,9 @@
                 <button class="lib-main-tab" data-filter="playlists" data-i18n="lib_playlists">
                   Playlists
                 </button>
+                <button class="lib-main-tab" data-filter="podcasts">
+                  Podcasts
+                </button>
                 <button class="lib-main-tab" data-filter="history" data-i18n="lib_history">
                   Histórico
                 </button>
@@ -296,6 +300,14 @@
                   <h2 data-i18n="lib_playlists">Playlists</h2>
                 </div>
                 <div id="playlistsGrid" class="playlists-grid-modern"></div>
+              </div>
+
+              <!-- Podcasts -->
+              <div id="podcastsSection" class="library-section podcast-library-section" style="display: none">
+                <div class="section-header">
+                  <h2><span class="material-symbols-rounded">podcasts</span>Podcasts</h2>
+                </div>
+                <div id="podcastsGrid" class="podcasts-grid"></div>
               </div>
 
               <!-- Artistas -->
@@ -878,6 +890,7 @@
     <script src="js/player-audio-lyrics.js"></script>
     <script src="js/player-ui.js"></script>
     <script src="js/player-playlists.js"></script>
+    <script src="js/podcasts.js"></script>
     <script src="js/player-menus-core.js"></script>
     <script src="js/player-music-actions.js"></script>
     <script src="js/search.js"></script>
@@ -930,7 +943,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=51", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=52", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

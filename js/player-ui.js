@@ -820,6 +820,9 @@ function renderLibrary() {
         c.addEventListener('click', () => document.querySelector('.lib-main-tab[data-filter="history"]')?.click());
     }
 
+    // Podcasts públicos
+    if (typeof window.renderPodcastSection === 'function') window.renderPodcastSection();
+
     // Playlists
     const playlistsGrid = document.getElementById('playlistsGrid');
     if (playlistsGrid) {
@@ -1230,10 +1233,11 @@ fendamusic.com.br`;
     // Controle de abas
     const summaryCards = document.getElementById('summaryCards');
     const playlistsSEl = document.getElementById('playlistsSection');
+    const podcastsSEl = document.getElementById('podcastsSection');
     const artistsSEl = document.getElementById('artistsSection');
 
     function showOnly(...show) {
-        [summaryCards, playlistsSEl, artistsSEl, histSection, dlSection, libAllSection].forEach(el => {
+        [summaryCards, playlistsSEl, podcastsSEl, artistsSEl, histSection, dlSection, libAllSection].forEach(el => {
             if (el) el.style.display = 'none';
         });
         show.forEach(el => {
@@ -1243,8 +1247,9 @@ fendamusic.com.br`;
 
     function filterLibrary(filter) {
         switch (filter) {
-            case 'all':      showOnly(summaryCards, playlistsSEl, libAllSection); break;
+            case 'all':      showOnly(summaryCards, playlistsSEl, podcastsSEl, libAllSection); break;
             case 'playlists': showOnly(playlistsSEl); break;
+            case 'podcasts': showOnly(podcastsSEl); if (typeof window.renderPodcastSection === 'function') window.renderPodcastSection(); break;
             case 'artists':  showOnly(artistsSEl); renderArtistsGrid(); break;
             case 'history':  showOnly(histSection); break;
             case 'downloads':
