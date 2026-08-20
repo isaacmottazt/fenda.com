@@ -53,6 +53,14 @@
     // realmente 'running'. Alguns WebViews deixam o contexto 'suspended'
     // mesmo após o play(), e conectar antes disso silencia a saída inteira.
     // Enquanto o contexto não estiver pronto, o áudio permanece nativo.
+    function _shouldKeepNativeAudio() {
+        const userAgent = window.navigator?.userAgent || '';
+        const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent);
+        const coarsePointer = typeof window.matchMedia === 'function'
+            && window.matchMedia('(pointer: coarse)').matches;
+        return mobileUserAgent || coarsePointer;
+    }
+
     function _disableAudioGraph(context = _audioCtx) {
         _audioGraphPending = false;
         _audioGraphDisabled = true;
@@ -63,6 +71,13 @@
     }
 
     function _ensureAudioGraph() {
+        // Em celulares/WebViews, a saída nativa é mais confiável que
+        // MediaElementSource. O progresso pode continuar mesmo quando o
+        // AudioContext está ativo, mas não entrega som ao alto-falante.
+        if (_shouldKeepNativeAudio()) {
+            _audioGraphDisabled = true;
+            return;
+        }
         if (_sourceNode || _audioGraphPending || _audioGraphDisabled || !DOM.audio || !_prefs.normalize) return;
         try {
             const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -128,6 +143,8 @@
     function _applyNormalize() {
         // O contexto de áudio só pode iniciar após gesto do usuário
         // (política dos navegadores) — por isso criamos no primeiro play.
+        // Em dispositivos touch, manter o <audio> nativo evita silêncio.
+        if (_shouldKeepNativeAudio()) return;
         if (_sourceNode) _wireGraph();
     }
 
