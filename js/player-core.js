@@ -562,7 +562,10 @@ function buildAutoQueue(currentMusicId, trackList, isShuffle, wrap = false) {
     const currentIdx = cleanList.findIndex(m => _trackId(m) === currentId);
 
     if (isShuffle) {
-        return _shuffleSpread(cleanList.filter(m => _trackId(m) !== currentId));
+        const remaining = cleanList.filter(m => _trackId(m) !== currentId);
+        // Repeat-all com apenas uma faixa precisa recriar a própria faixa.
+        if (wrap && remaining.length === 0 && currentIdx !== -1) return [cleanList[currentIdx]];
+        return _shuffleSpread(remaining);
     }
 
     // Música atual não está nesse contexto: a fila vira o contexto inteiro,
@@ -576,6 +579,7 @@ function buildAutoQueue(currentMusicId, trackList, isShuffle, wrap = false) {
     const after = cleanList.slice(currentIdx + 1);
     if (!wrap) return after;
     const before = cleanList.slice(0, currentIdx);
+    if (wrap && after.length === 0 && before.length === 0) return [cleanList[currentIdx]];
     return [...after, ...before];
 }
 
@@ -807,11 +811,7 @@ function handleNextTrack() {
 
     // 4. Autoplay universal: continua com músicas que ainda não tocaram no contexto atual
     if (allMusics.length === 0) {
-        window._showFendaError?.('[DIAG] ramo 4: AppState.musics VAZIO — catálogo não carregou');
-        // Catálogo (AppState.musics) ainda não chegou do Supabase — o boot
-        // pode levar alguns segundos. Sem esse aviso, tocar "próxima"
-        // nesse intervalo parecia simplesmente não fazer nada.
-        window.showToast?.('Carregando catálogo… tente de novo em alguns segundos', 'warning');
+        window._showFendaError?.('[DIAG] catálogo vazio durante avanço');
         return;
     }
     window._showFendaError?.('[DIAG] ramo 4: autoplay universal, montando pool de ' + allMusics.length + ' músicas');
@@ -856,6 +856,8 @@ function formatTime(secs) {
 }
 
 function showToast(message, type = 'success') {
+    // Favoritar/desfavoritar é uma ação visual silenciosa por decisão de UX.
+    if (/favorit/i.test(String(message || ''))) return;
     const container = document.getElementById('toastContainer');
     if (!container) return;
     container.innerHTML = ''; 
@@ -1121,7 +1123,7 @@ async function _fetchAllFromSupabase() {
         // local ou o nome carregado no login) em vez de apagar com {}.
         if (profile) AppState.userProfile = profile;
         AppState.userPlaylists = playlists || [];
-        AppState.favorites     = new Set(favorites || []);
+        AppState.favorites     = new Set((favorites || []).map(id => String(id)));
         window.recentSearchesGlobal = searchTerms || [];
         if (typeof window.renderRecentSearches === 'function') window.renderRecentSearches();
 

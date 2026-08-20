@@ -7,37 +7,6 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>Fenda Music</title>
-    <script>
-      // ── DIAGNÓSTICO TEMPORÁRIO: mostra qualquer erro JS na tela ──
-      // Sem isso, um erro de sintaxe ou exceção não tratada em qualquer
-      // script falha 100% silenciosamente no ambiente mobile-only (sem
-      // acesso a devtools/console). Isso intercepta TUDO, desde erros de
-      // carregamento de <script> até promises rejeitadas sem .catch().
-      window._fendaErrors = [];
-      function _showFendaError(msg) {
-        window._fendaErrors.push(msg);
-        try {
-          let box = document.getElementById('_fendaErrorBox');
-          if (!box) {
-            box = document.createElement('div');
-            box.id = '_fendaErrorBox';
-            box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#7f1d1d;color:#fff;font:12px/1.4 monospace;padding:8px 10px;max-height:45vh;overflow-y:auto;white-space:pre-wrap;word-break:break-all;border-bottom:3px solid #fca5a5';
-            document.documentElement.appendChild(box);
-          }
-          const line = document.createElement('div');
-          line.style.cssText = 'padding:4px 0;border-top:1px solid rgba(255,255,255,.2)';
-          line.textContent = '[' + window._fendaErrors.length + '] ' + msg;
-          box.appendChild(line);
-        } catch (e) {}
-      }
-      window.addEventListener('error', (e) => {
-        const src = e.filename ? e.filename.split('/').pop() : '?';
-        _showFendaError('ERRO em ' + src + ':' + e.lineno + ' — ' + (e.message || e.error));
-      });
-      window.addEventListener('unhandledrejection', (e) => {
-        _showFendaError('PROMISE REJEITADA — ' + (e.reason?.message || e.reason || '?'));
-      });
-    </script>
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="fonts/material-symbols.css" />
     <link rel="stylesheet" href="css/base.css" />

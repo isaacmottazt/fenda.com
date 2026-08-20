@@ -196,28 +196,25 @@ function initAudioAndLyricsEngine() {
             AppState.isShuffle = !AppState.isShuffle;
             DOM.shuffleBtn.classList.toggle('active', AppState.isShuffle);
 
-            // Feedback visual: pulso + flash a cada alternância (liga ou desliga)
             DOM.shuffleBtn.classList.remove('ctrl-toggled');
-            void DOM.shuffleBtn.offsetWidth; // força reflow p/ reiniciar a animação em cliques rápidos
+            void DOM.shuffleBtn.offsetWidth;
             DOM.shuffleBtn.classList.add('ctrl-toggled');
             setTimeout(() => DOM.shuffleBtn.classList.remove('ctrl-toggled'), 450);
 
-            // Ao ligar: embaralha a autoQueue mantendo a música atual
-            // Ao desligar: restaura a ordem original a partir da posição atual
             const ctx = AppState.playContext;
-            const trackList = AppState.isShuffle
-                ? (ctx?.trackList?.length > 0 ? ctx.trackList : AppState.musics)
-                : (AppState._originalTrackList?.length > 0 ? AppState._originalTrackList : AppState.musics);
-
-            if (trackList.length === 0 && typeof window.showToast === 'function') {
-                // Catálogo ainda não chegou — o toggle mudou visualmente mas
-                // não há músicas pra embaralhar ainda. Sem esse aviso parecia
-                // que o botão simplesmente não fazia nada.
-                window.showToast('Carregando catálogo… tente de novo em alguns segundos', 'warning');
+            const originalList = AppState._originalTrackList?.length > 0
+                ? AppState._originalTrackList
+                : (ctx?.trackList?.length > 0 ? ctx.trackList : AppState.musics);
+            if (!AppState._originalTrackList?.length) {
+                AppState._originalTrackList = [...originalList];
             }
+            const trackList = AppState.isShuffle
+                ? originalList
+                : (AppState._originalTrackList?.length > 0 ? AppState._originalTrackList : AppState.musics);
 
             AppState.autoQueue = buildAutoQueue(AppState.currentMusicId, trackList, AppState.isShuffle);
             if (typeof window.renderQueuePanel === 'function') window.renderQueuePanel();
+            if (typeof window.savePlayerSession === 'function') window.savePlayerSession();
         });
     }
     if (DOM.repeatBtn) {
@@ -226,22 +223,14 @@ function initAudioAndLyricsEngine() {
             AppState.repeatMode = (AppState.repeatMode + 1) % 3;
             const icon = DOM.repeatBtn.querySelector('.material-symbols-rounded');
 
-            // Feedback visual: pulso + flash a cada clique, independente do modo
             DOM.repeatBtn.classList.remove('ctrl-toggled');
             void DOM.repeatBtn.offsetWidth;
             DOM.repeatBtn.classList.add('ctrl-toggled');
             setTimeout(() => DOM.repeatBtn.classList.remove('ctrl-toggled'), 450);
 
-            if (AppState.repeatMode === 0) {
-                DOM.repeatBtn.classList.remove('active');
-                if (icon) icon.textContent = 'repeat';
-            } else if (AppState.repeatMode === 1) {
-                DOM.repeatBtn.classList.add('active');
-                if (icon) icon.textContent = 'repeat';
-            } else {
-                DOM.repeatBtn.classList.add('active');
-                if (icon) icon.textContent = 'repeat_one';
-            }
+            DOM.repeatBtn.classList.toggle('active', AppState.repeatMode !== 0);
+            if (icon) icon.textContent = AppState.repeatMode === 2 ? 'repeat_one' : 'repeat';
+            if (typeof window.savePlayerSession === 'function') window.savePlayerSession();
         });
     }
 
@@ -483,7 +472,9 @@ function updatePlayerVisibility(music) {
     // Botão favorito da mini barra
     const miniFavBtn = document.getElementById('miniFavBtn');
     if (miniFavBtn && AppState.favorites) {
-        const isFav = AppState.favorites.has(music.id);
+        const isFav = typeof window.isFavoriteTrack === 'function'
+            ? window.isFavoriteTrack(music.id)
+            : AppState.favorites.has(String(music.id));
         miniFavBtn.classList.toggle('active', isFav);
         miniFavBtn.querySelector('.material-symbols-rounded').textContent = isFav ? 'favorite' : 'favorite_border';
         const newFav = miniFavBtn.cloneNode(true);
@@ -547,13 +538,17 @@ function updatePlayerVisibility(music) {
     // Botão favorito
     const favBtn = document.getElementById('playerExpandedFavBtn');
     if (favBtn && AppState.favorites) {
-        const isFav = AppState.favorites.has(music.id);
+        const isFav = typeof window.isFavoriteTrack === 'function'
+            ? window.isFavoriteTrack(music.id)
+            : AppState.favorites.has(String(music.id));
         favBtn.classList.toggle('active', isFav);
         favBtn.querySelector('.material-symbols-rounded').textContent = isFav ? 'favorite' : 'favorite_border';
         const newFav = favBtn.cloneNode(true);
         favBtn.parentNode.replaceChild(newFav, favBtn);
         newFav.addEventListener('click', () => {
-            const wasFav = AppState.favorites.has(music.id);
+            const wasFav = typeof window.isFavoriteTrack === 'function'
+                ? window.isFavoriteTrack(music.id)
+                : AppState.favorites.has(String(music.id));
             if (typeof window.toggleFavoriteTrack === 'function') window.toggleFavoriteTrack(music.id);
             // Só anima o "curtir" (false → true), não o "descurtir"
             if (!wasFav) _playFavPopAnimation(newFav);

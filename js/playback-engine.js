@@ -180,13 +180,10 @@
                 const vol = Math.max(0, remaining / fadeSec);
                 DOM.audio.volume = vol;
 
-                // Fade chegou a (praticamente) zero antes do fim natural
-                // da faixa: dispara a troca agora, não espera o 'ended'.
-                if (vol <= 0.02 && AppState.repeatMode !== 2) {
-                    _crossfadeTriggered = true;
-                    const advance = window.handleNextTrack || handleNextTrack;
-                    if (typeof advance === 'function') advance();
-                }
+                // O fade nunca decide a próxima faixa. Deixar o evento
+                // `ended` fazer essa troca evita avançar duas vezes e mantém
+                // repeat-one, repeat-all e shuffle com uma única autoridade.
+                if (vol <= 0.02) _crossfadeTriggered = true;
             } else if (!_fading || remaining > fadeSec) {
                 DOM.audio.volume = 1;
             }
@@ -202,7 +199,7 @@
         if (!DOM.audio) return;
         DOM.audio.addEventListener('ended', (e) => {
             window._showFendaError?.('[DIAG] autoplayGuard viu "ended". prefs.autoplay=' + _prefs.autoplay + ' repeatMode=' + AppState.repeatMode);
-            if (_prefs.autoplay === false && AppState.repeatMode !== 2) {
+            if (_prefs.autoplay === false && AppState.repeatMode === 0) {
                 window._showFendaError?.('[DIAG] autoplayGuard BLOQUEOU o avanço (autoplay desligado)');
                 e.stopImmediatePropagation();
                 AppState.playing = false;

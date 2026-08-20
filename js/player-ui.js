@@ -147,7 +147,11 @@ function renderHome() {
         });
         // Fallback: se não há plays, usa favoritos
         if (artistPlays.size === 0) {
-            const favMusics = AppState.musics.filter(m => AppState.favorites.has(m.id));
+            const favMusics = AppState.musics.filter(m =>
+                typeof window.isFavoriteTrack === 'function'
+                    ? window.isFavoriteTrack(m.id)
+                    : AppState.favorites.has(String(m.id))
+            );
             favMusics.forEach(m => {
                 const artist = (m.artist || '').trim();
                 if (artist) artistPlays.set(artist, (artistPlays.get(artist) || 0) + 1);
@@ -709,7 +713,6 @@ function openArtistDetail(artistName, skipPush = false) {
             favBtn.classList.toggle('is-fav', nowFav);
             const icon = favBtn.querySelector('.material-symbols-rounded');
             icon.classList.toggle('filled', nowFav);
-            showToast(nowFav ? 'Artista favoritado' : 'Removido dos favoritos', 'success');
         });
     }
 
@@ -1495,59 +1498,61 @@ function renderQueue() {
     });
 }
 
+function _favoriteId(musicId) {
+    return String(musicId ?? '');
+}
+
+function isFavoriteTrack(musicId) {
+    const id = _favoriteId(musicId);
+    return !!id && AppState.favorites instanceof Set && AppState.favorites.has(id);
+}
+
 async function toggleFavoriteTrack(musicId) {
-    if (!AppState.userId) return;
+    const id = _favoriteId(musicId);
+    if (!id) return false;
+    if (!(AppState.favorites instanceof Set)) AppState.favorites = new Set();
 
-    // 1. Atualiza estado INSTANTANEAMENTE — zero delay
-    const wasFav = AppState.favorites.has(musicId);
-    if (wasFav) {
-        AppState.favorites.delete(musicId);
-    } else {
-        AppState.favorites.add(musicId);
-    }
-    const isFavNow = AppState.favorites.has(musicId);
+    // Atualiza localmente primeiro; o coração funciona mesmo sem rede ou
+    // enquanto a sessão ainda termina de carregar.
+    const wasFav = isFavoriteTrack(id);
+    if (wasFav) AppState.favorites.delete(id);
+    else AppState.favorites.add(id);
+    const isFavNow = isFavoriteTrack(id);
 
-    // 2. Atualiza UI instantaneamente com animação pop — sem nenhum toast
-    document.querySelectorAll(`.favorite-btn[data-id="${musicId}"]`).forEach(btn => {
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        if (_favoriteId(btn.dataset.id) !== id) return;
         btn.classList.toggle('active', isFavNow);
-        btn.querySelector('span').innerText = isFavNow ? 'favorite' : 'favorite_border';
-        // Animação de bounce instantânea
+        const icon = btn.querySelector('span');
+        if (icon) icon.innerText = isFavNow ? 'favorite' : 'favorite_border';
         btn.classList.remove('pop');
-        void btn.offsetWidth; // reflow para reiniciar animação
+        void btn.offsetWidth;
         btn.classList.add('pop');
         setTimeout(() => btn.classList.remove('pop'), 300);
     });
 
-    // Botão expandido do player
     const expandedFav = document.getElementById('playerExpandedFavBtn');
-    if (expandedFav && AppState.currentMusicId === musicId) {
+    if (expandedFav && _favoriteId(AppState.currentMusicId) === id) {
         const span = expandedFav.querySelector('span');
-        if (span) {
-            span.innerText = isFavNow ? 'favorite' : 'favorite_border';
-            expandedFav.style.color = isFavNow ? '#f472b6' : '';
-            expandedFav.classList.remove('pop');
-            void expandedFav.offsetWidth;
-            expandedFav.classList.add('pop');
-            setTimeout(() => expandedFav.classList.remove('pop'), 300);
-        }
+        if (span) span.innerText = isFavNow ? 'favorite' : 'favorite_border';
+        expandedFav.style.color = isFavNow ? '#f472b6' : '';
+        expandedFav.classList.remove('pop');
+        void expandedFav.offsetWidth;
+        expandedFav.classList.add('pop');
+        setTimeout(() => expandedFav.classList.remove('pop'), 300);
     }
 
     localStorage.setItem('supabase_player_favorites', JSON.stringify(Array.from(AppState.favorites)));
 
-    // 3. Sincroniza com Supabase em background — sem toast, silencioso
-    try {
-        const result = await window.toggleFavorite(AppState.userId, musicId);
-        if (result === null) {
-            // Reverte silenciosamente se falhou
-            if (wasFav) AppState.favorites.add(musicId);
-            else AppState.favorites.delete(musicId);
-            document.querySelectorAll(`.favorite-btn[data-id="${musicId}"]`).forEach(btn => {
-                btn.classList.toggle('active', wasFav);
-                btn.querySelector('span').innerText = wasFav ? 'favorite' : 'favorite_border';
-            });
-        }
-    } catch(e) { console.warn('Erro ao sincronizar favorito:', e); }
+    // Sincronização remota em background, sem toast e sem reverter o estado
+    // local se a rede/RLS estiver indisponível.
+    if (AppState.userId && typeof window.toggleFavorite === 'function') {
+        try { await window.toggleFavorite(AppState.userId, id); }
+        catch (e) { console.warn('Erro ao sincronizar favorito:', e); }
+    }
+    return isFavNow;
 }
+
+window.isFavoriteTrack = isFavoriteTrack;
 
 function sanitizeUrl(url) {
     if (!url || typeof url !== 'string') return '';

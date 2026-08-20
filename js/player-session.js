@@ -59,7 +59,7 @@ async function restorePlayerSession() {
     const session = loadPlayerSession();
     if (!session) return false;
 
-    const music = AppState.musics.find(m => m.id === session.musicId);
+    const music = AppState.musics.find(m => String(m.id) === String(session.musicId));
     if (!music) {
         localStorage.removeItem(SESSION_KEY);
         return false;
@@ -75,7 +75,7 @@ async function restorePlayerSession() {
 
     // Reconstrói trackList
     const restoredList = session.trackIds?.length
-        ? session.trackIds.map(id => AppState.musics.find(m => m.id === id)).filter(Boolean)
+        ? session.trackIds.map(id => AppState.musics.find(m => String(m.id) === String(id))).filter(Boolean)
         : AppState.musics;
 
     AppState.playContext = {
@@ -88,6 +88,13 @@ async function restorePlayerSession() {
     AppState._originalTrackList = [...restoredList];
 
     AppState.currentMusicId = music.id;
+
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    if (shuffleBtn) shuffleBtn.classList.toggle('active', AppState.isShuffle);
+    const repeatBtn = document.getElementById('repeatBtn');
+    const repeatIcon = repeatBtn?.querySelector('.material-symbols-rounded');
+    if (repeatBtn) repeatBtn.classList.toggle('active', AppState.repeatMode !== 0);
+    if (repeatIcon) repeatIcon.textContent = AppState.repeatMode === 2 ? 'repeat_one' : 'repeat';
 
     const audio = document.getElementById('audio');
     if (!audio) return false;

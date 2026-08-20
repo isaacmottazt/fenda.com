@@ -188,7 +188,9 @@ function openContextMenu(music) {
     if (!menu || !backdrop) return;
 
     const inPlaylist = AppState.currentPlaylistFilter && AppState.currentPlaylistFilter !== 'favorites';
-    const isFav = AppState.favorites && AppState.favorites.has(music.id);
+    const isFav = typeof window.isFavoriteTrack === 'function'
+        ? window.isFavoriteTrack(music.id)
+        : AppState.favorites && AppState.favorites.has(String(music.id));
 
     menu.innerHTML = `
         <div class="ctx-header">
@@ -466,7 +468,6 @@ document.addEventListener('click', (e) => {
         case 'menuFavoriteTrack':
             if (music && typeof window.toggleFavoriteTrack === 'function') {
                 window.toggleFavoriteTrack(music.id);
-                showToast(AppState.favorites?.has(music.id) ? 'Removido dos favoritos' : 'Adicionado aos favoritos', 'success');
             }
             closeContextMenu();
             break;

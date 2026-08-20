@@ -162,7 +162,11 @@ async function openLikedMusicsDetail(skipPush = false) {
     if (!tracksContainer) return;
     tracksContainer.innerHTML = '';
 
-    const likedMusics = AppState.musics.filter(m => AppState.favorites && AppState.favorites.has(m.id));
+    const likedMusics = AppState.musics.filter(m =>
+        typeof window.isFavoriteTrack === 'function'
+            ? window.isFavoriteTrack(m.id)
+            : AppState.favorites && AppState.favorites.has(String(m.id))
+    );
 
     const countEl = document.getElementById('playlistDetailCount');
     if (countEl) countEl.textContent = `${likedMusics.length} ${likedMusics.length === 1 ? 'música' : 'músicas'}`;
