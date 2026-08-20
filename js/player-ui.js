@@ -1534,7 +1534,7 @@ async function toggleFavoriteTrack(musicId) {
     if (expandedFav && _favoriteId(AppState.currentMusicId) === id) {
         const span = expandedFav.querySelector('span');
         if (span) span.innerText = isFavNow ? 'favorite' : 'favorite_border';
-        expandedFav.style.color = isFavNow ? '#f472b6' : '';
+        expandedFav.style.setProperty('color', isFavNow ? '#f472b6' : '', 'important');
         expandedFav.classList.remove('pop');
         void expandedFav.offsetWidth;
         expandedFav.classList.add('pop');

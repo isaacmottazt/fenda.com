@@ -219,8 +219,11 @@ function initAudioAndLyricsEngine() {
     }
     if (DOM.repeatBtn) {
         DOM.repeatBtn.addEventListener('click', () => {
-            // Cicla: 0 (off) → 1 (repeat-all) → 2 (repeat-one) → 0
-            AppState.repeatMode = (AppState.repeatMode + 1) % 3;
+            // UX do botão: 0 (off) → 2 (repeat-one) → 1 (repeat-all) → 0.
+            // O primeiro toque deve repetir a música atual, como o usuário espera.
+            const repeatCycle = [0, 2, 1];
+            const currentIndex = repeatCycle.indexOf(AppState.repeatMode);
+            AppState.repeatMode = repeatCycle[(currentIndex + 1) % repeatCycle.length];
             const icon = DOM.repeatBtn.querySelector('.material-symbols-rounded');
 
             DOM.repeatBtn.classList.remove('ctrl-toggled');

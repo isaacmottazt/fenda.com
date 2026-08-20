@@ -128,6 +128,7 @@ class FendaThemes {
       #currentTime,#totalTime{color:${inkLow}!important}
       .ctrl-extra,.ctrl-main{color:${L?inkMid:'rgba(255,255,255,0.7)'}!important}
       .player-fav-big,.player-action-btn{color:${L?inkLow:'rgba(255,255,255,0.5)'}!important}
+      .player-fav-big.active,.player-action-btn.active{color:#f472b6!important}
       .player-lyrics-header{color:${inkMid}!important}
       .lyrics-container-content p{color:${L?inkFnt:'rgba(255,255,255,0.32)'}!important}
       .lyrics-container-content p.active{color:${ink}!important}
