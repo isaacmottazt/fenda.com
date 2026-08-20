@@ -1,9 +1,17 @@
 // Fenda Music — Service Worker v16
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v46';
+const CACHE_NAME = 'fenda-v47';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
+const CRITICAL_RUNTIME = new Set([
+  '/player.html',
+  '/js/player-core.js',
+  '/js/player-audio-lyrics.js',
+  '/js/playback-engine.js',
+  '/js/player-session.js',
+  '/js/settings.js',
+]);
 const LOGIN_ROUTES  = new Set(['/index.html', '/login', '/']);
 
 // Caminhos atualizados após reorganização em pastas /css, /js, /images (v43).
@@ -100,33 +108,40 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // 3. Rotas do player (URLs limpas) → serve player.html
-  //    STALE-WHILE-REVALIDATE, igual ao resto do site (seção 5) — não
-  //    mais cache-first absoluto. O bug anterior aqui era grave: mesmo
-  //    incrementando CACHE_NAME (que força um SW novo a instalar), se
-  //    esse SW novo não tivesse ainda assumido o controle da aba no
-  //    exato momento da navegação, essa rota continuava servindo o
-  //    player.html do cache ANTIGO pra sempre, sem nunca checar a rede
-  //    — dando a impressão de que atualizações "não pegavam", mesmo
-  //    com o zip novo corretamente extraído no dispositivo.
+  // 3. Rotas do player (URLs limpas) → serve player.html.
+  //    NETWORK-FIRST: uma aba online precisa receber o HTML novo antes
+  //    de iniciar os scripts do player. O fallback para cache preserva
+  //    o funcionamento offline.
   if (url.origin === self.location.origin && PLAYER_ROUTES.has(path)) {
     e.respondWith(
-      caches.match('/player.html').then(cached => {
-        const networkFetch = fetch('/player.html')
-          .then(response => {
-            if (response.ok) {
-              caches.open(CACHE_NAME).then(c => c.put('/player.html', response.clone())).catch(() => {});
-            }
-            return response;
-          })
-          .catch(() => null);
+      fetch('/player.html', { cache: 'no-store' })
+        .then(response => {
+          if (response.ok) {
+            caches.open(CACHE_NAME).then(c => c.put('/player.html', response.clone())).catch(() => {});
+          }
+          return response;
+        })
+        .catch(() => caches.match('/player.html').then(cached =>
+          cached || new Response('Service Unavailable', { status: 503 })
+        ))
+    );
+    return;
+  }
 
-        if (cached) {
-          networkFetch.catch(() => {}); // atualiza em background, fire-and-forget
-          return cached;
-        }
-        return networkFetch.then(r => r || new Response('Service Unavailable', { status: 503 }));
-      })
+  // 3.1 Runtime crítico do player também é NETWORK-FIRST. Sem isso,
+  // um HTML novo poderia continuar carregando player-core.js antigo.
+  if (url.origin === self.location.origin && CRITICAL_RUNTIME.has(path)) {
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' })
+        .then(response => {
+          if (response.ok) {
+            caches.open(CACHE_NAME).then(c => c.put(e.request, response.clone())).catch(() => {});
+          }
+          return response;
+        })
+        .catch(() => caches.match(e.request).then(cached =>
+          cached || new Response('Service Unavailable', { status: 503 })
+        ))
     );
     return;
   }
