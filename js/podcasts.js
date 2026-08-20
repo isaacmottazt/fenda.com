@@ -45,7 +45,7 @@
 
         grid.innerHTML = podcasts.map((podcast) => {
             const cover = podcast.cover_url
-                ? `<img src="${escapePodcastHtml(podcast.cover_url)}" alt="" loading="lazy">`
+                ? `<img src="${escapePodcastHtml(podcast.cover_url)}" alt="" loading="lazy" decoding="async">`
                 : `<span class="material-symbols-rounded podcast-cover-placeholder">podcasts</span>`;
             const date = formatPodcastDate(podcast.created_at);
             return `

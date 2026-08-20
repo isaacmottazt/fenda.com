@@ -357,19 +357,11 @@ function _renderPodcastDescription(music) {
     const wrapper = document.createElement('div');
     wrapper.className = 'podcast-description';
 
-    const icon = document.createElement('span');
-    icon.className = 'material-symbols-rounded podcast-description-icon';
-    icon.textContent = 'description';
-
-    const heading = document.createElement('h3');
-    heading.className = 'podcast-description-heading';
-    heading.textContent = 'Descrição do podcast';
-
     const text = document.createElement('p');
     text.className = 'podcast-description-text';
     text.textContent = description || 'Este episódio não possui descrição.';
 
-    wrapper.append(icon, heading, text);
+    wrapper.appendChild(text);
     DOM.lyricsContainer.appendChild(wrapper);
 }
 
