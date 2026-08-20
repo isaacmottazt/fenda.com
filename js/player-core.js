@@ -683,10 +683,12 @@ window.resetListenPosition = resetListenPosition;
 
 async function playMusicTrack(music, opts = {}) {
     if (!DOM.audio || !music) return;
-    
-    // Salva o tempo AINDA NÃO LOGADO da música anterior
-    await flushListenTime(1);
-    
+
+    // Nunca bloqueia o gesto do usuário com rede, IndexedDB ou histórico.
+    // Em celulares, qualquer await antes de play() pode fazer o navegador
+    // rejeitar a reprodução por perda da user activation.
+    flushListenTime(1).catch(() => {});
+
     const isDifferentTrack = AppState.currentMusicId !== music.id;
     AppState.currentMusicId = music.id;
     AppState.playing = true;
@@ -699,15 +701,10 @@ async function playMusicTrack(music, opts = {}) {
 
     // ── Alinhamento da fila (semântica Spotify) ─────────────────────────
     // Play iniciado pelo USUÁRIO: a fila automática vira o que vem DEPOIS
-    // desta música no contexto atual — independe da ordem em que o call
-    // site chamou setPlayContext/playMusicTrack (antes, setPlayContext
-    // construía a fila com o currentMusicId ANTIGO, e tocar a faixa 5 de
-    // uma playlist gerava fila a partir da faixa 1).
+    // desta música no contexto atual.
     // Play de AVANÇO ({advance:true} = next/prev/fim de faixa): NUNCA
     // reconstrói — a fila precisa esgotar para repeat-all e o autoplay
-    // inteligente serem alcançáveis. (Antes, um rebuild automático dentro
-    // do play() fazia todo contexto repetir para sempre, mesmo com
-    // repeat desligado.)
+    // inteligente serem alcançáveis.
     if (!opts.advance) {
         const _ctx  = AppState.playContext;
         const _list = _ctx?.trackList?.length > 0 ? _ctx.trackList : AppState.musics;
@@ -717,25 +714,22 @@ async function playMusicTrack(music, opts = {}) {
     incrementPlayCount(music.id);
 
     let audioUrl = music.src;
-    const cachedBlobUrl = await getCachedAudioUrl(music);
-    if (cachedBlobUrl) audioUrl = cachedBlobUrl;
-
-    if (isDifferentTrack) {
-        DOM.audio.src = audioUrl;
-        let rawLyricsText = "";
-        if (music.lrc && (music.lrc.startsWith('http://') || music.lrc.startsWith('https://'))) {
-            try {
-                const response = await fetch(music.lrc);
-                if (response.ok) rawLyricsText = await response.text();
-                else rawLyricsText = "[00:00.00] Letra indisponível.";
-            } catch (err) {
-                rawLyricsText = "[00:00.00] Erro ao carregar letra.";
-            }
-        } else { rawLyricsText = music.lrc || ""; }
-        if (typeof window.parseLyrics === 'function') AppState.lyricsData = window.parseLyrics(rawLyricsText);
-        if (typeof window.buildLyricsMarkup === 'function') window.buildLyricsMarkup();
+    // Online: usa a URL remota imediatamente para preservar o gesto do toque.
+    // Offline: consulta o IndexedDB antes do play, pois não há rede disponível.
+    if (navigator.onLine === false || !audioUrl) {
+        const cachedBlobUrl = await getCachedAudioUrl(music);
+        if (cachedBlobUrl) audioUrl = cachedBlobUrl;
     }
 
+    if (isDifferentTrack) {
+        DOM.audio.src = audioUrl || '';
+        DOM.audio.load();
+        DOM.audio.muted = false;
+        DOM.audio.volume = 1;
+    }
+
+    // Inicia a reprodução antes de buscar letra ou atualizar histórico/UI.
+    // Esta chamada precisa ficar diretamente no caminho do clique do usuário.
     DOM.audio.play()
         .then(() => {
             if (typeof window.updatePlayerVisibility === 'function') window.updatePlayerVisibility(music);
@@ -748,6 +742,26 @@ async function playMusicTrack(music, opts = {}) {
             AppState.playing = false;
             if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
         });
+
+    // Letras são secundárias: carregam depois que o áudio já começou.
+    if (!isDifferentTrack) return;
+    const loadLyrics = async () => {
+        let rawLyricsText = "";
+        if (music.lrc && (music.lrc.startsWith('http://') || music.lrc.startsWith('https://'))) {
+            try {
+                const response = await fetch(music.lrc);
+                rawLyricsText = response.ok ? await response.text() : "[00:00.00] Letra indisponível.";
+            } catch {
+                rawLyricsText = "[00:00.00] Erro ao carregar letra.";
+            }
+        } else {
+            rawLyricsText = music.lrc || "";
+        }
+        if (AppState.currentMusicId !== music.id) return;
+        if (typeof window.parseLyrics === 'function') AppState.lyricsData = window.parseLyrics(rawLyricsText);
+        if (typeof window.buildLyricsMarkup === 'function') window.buildLyricsMarkup();
+    };
+    loadLyrics().catch(() => {});
 }
 
 function togglePlayMusic(music) {

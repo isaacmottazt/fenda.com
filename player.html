@@ -95,6 +95,18 @@
         outline: none !important;
       }
 
+      /* O áudio precisa existir no pipeline de renderização em alguns
+         WebViews; display:none pode avançar currentTime sem emitir som. */
+      .fenda-audio-output {
+        position: fixed !important;
+        left: -10000px !important;
+        top: -10000px !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0.01 !important;
+        pointer-events: none !important;
+      }
+
       /* ── FIX PLAYER EXPANDIDO (sobrescreve cache do SW) ── */
       .lyrics-full-screen {
         position: fixed !important;
@@ -130,7 +142,7 @@
     <script src="js/supabase-config.js"></script>
   </head>
   <body>
-    <audio id="audio" style="display: none"></audio>
+    <audio id="audio" class="fenda-audio-output" playsinline webkit-playsinline preload="metadata" aria-hidden="true"></audio>
 
     <div class="app-container">
       <main class="main-content">
