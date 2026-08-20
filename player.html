@@ -143,7 +143,7 @@
     <script src="js/supabase-config.js"></script>
   </head>
   <body>
-    <audio id="audio" class="fenda-audio-output" playsinline webkit-playsinline preload="metadata" aria-hidden="true"></audio>
+    <audio id="audio" class="fenda-audio-output" controls playsinline webkit-playsinline preload="metadata" aria-hidden="true"></audio>
 
     <div class="app-container">
       <main class="main-content">
@@ -961,7 +961,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=48", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=49", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
