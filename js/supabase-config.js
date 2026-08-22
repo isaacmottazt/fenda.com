@@ -93,6 +93,56 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Expor globalmente para push-notifications acessar
 window.supabaseClient = supabaseClient;
 
+// ========== TOKEN NATIVO DE NOTIFICAÇÕES ==========
+// O APK entrega o token Expo para a página assim que o WebView inicia. Em
+// algumas aberturas isso acontece antes que o Supabase restaure a sessão, de
+// modo que auth.uid() ainda é nulo e o RPC de registro é recusado. Este
+// sincronizador observa o token recebido e somente o envia quando a sessão
+// autenticada estiver disponível no próprio cliente Supabase.
+let nativePushRegistrationKey = null;
+let nativePushRegistrationInFlight = false;
+
+async function registerNativePushTokenWithAuthenticatedSession() {
+    const token = String(window.__fendaNativeExpoPushToken || '').trim();
+    if (!token || !navigator.onLine || nativePushRegistrationInFlight) return false;
+
+    try {
+        const { data, error: sessionError } = await supabaseClient.auth.getSession();
+        const session = data?.session;
+        if (sessionError || !session?.user?.id) return false;
+
+        const registrationKey = `${session.user.id}:${token}`;
+        if (nativePushRegistrationKey === registrationKey) return true;
+
+        nativePushRegistrationInFlight = true;
+        const { data: tokenId, error } = await supabaseClient.rpc('register_mobile_push_token', {
+            p_expo_push_token: token,
+            p_platform: 'android',
+        });
+        if (error || !tokenId) throw error || new Error('Registro de token não retornou identificador.');
+
+        nativePushRegistrationKey = registrationKey;
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+            source: 'fenda',
+            type: 'native-push-registration',
+            status: 'registered',
+        }));
+        return true;
+    } catch (error) {
+        console.warn('[Fenda] Registro autenticado do token nativo pendente:', error);
+        return false;
+    } finally {
+        nativePushRegistrationInFlight = false;
+    }
+}
+
+window.registerNativePushTokenWithAuthenticatedSession = registerNativePushTokenWithAuthenticatedSession;
+supabaseClient.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) void registerNativePushTokenWithAuthenticatedSession();
+});
+window.addEventListener('online', () => { void registerNativePushTokenWithAuthenticatedSession(); });
+setInterval(() => { void registerNativePushTokenWithAuthenticatedSession(); }, 4_000);
+
 // ========== CATÁLOGO DE PODCASTS ==========
 async function loadPodcastsFromSupabase() {
     try {
@@ -270,11 +320,19 @@ async function deleteUserPlaylist(playlistId, userId) {
 }
 
 // ========== HISTÓRICO DE REPRODUÇÃO ==========
-async function addToListeningHistory(userId, musicId, listenedSeconds) {
+async function addToListeningHistory(userId, musicId, listenedSeconds, completed = false) {
     try {
-        await supabaseClient
+        const payload = { user_id: userId, music_id: musicId, listened_seconds: listenedSeconds, completed: Boolean(completed) };
+        const { error } = await supabaseClient
             .from('listening_history')
-            .insert({ user_id: userId, music_id: musicId, listened_seconds: listenedSeconds });
+            .insert(payload);
+        // Compatibilidade temporária com instalações que ainda não receberam a coluna.
+        if (error && /completed/i.test(error.message || '')) {
+            const fallback = await supabaseClient
+                .from('listening_history')
+                .insert({ user_id: userId, music_id: musicId, listened_seconds: listenedSeconds });
+            if (fallback.error) throw fallback.error;
+        } else if (error) throw error;
         // Limitar histórico para 50 registros por usuário (opcional)
         return true;
     } catch (e) {
