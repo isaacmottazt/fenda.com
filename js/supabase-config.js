@@ -101,6 +101,13 @@ window.supabaseClient = supabaseClient;
 // autenticada estiver disponível no próprio cliente Supabase.
 let nativePushRegistrationKey = null;
 let nativePushRegistrationInFlight = false;
+let nativePushDiagnosticShown = false;
+
+function showNativePushDiagnostic(message) {
+    if (nativePushDiagnosticShown) return;
+    nativePushDiagnosticShown = true;
+    window.showToast?.(message, 'danger');
+}
 
 async function registerNativePushTokenWithAuthenticatedSession() {
     const token = String(window.__fendaNativeExpoPushToken || '').trim();
@@ -130,6 +137,7 @@ async function registerNativePushTokenWithAuthenticatedSession() {
         return true;
     } catch (error) {
         console.warn('[Fenda] Registro autenticado do token nativo pendente:', error);
+        showNativePushDiagnostic('O Android enviou o token, mas o registro de notificações ainda está pendente.');
         return false;
     } finally {
         nativePushRegistrationInFlight = false;
@@ -142,6 +150,11 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
 });
 window.addEventListener('online', () => { void registerNativePushTokenWithAuthenticatedSession(); });
 setInterval(() => { void registerNativePushTokenWithAuthenticatedSession(); }, 4_000);
+setTimeout(() => {
+    if (window.ReactNativeWebView && !String(window.__fendaNativeExpoPushToken || '').trim()) {
+        showNativePushDiagnostic('O Android não forneceu o token de notificações. Verifique a permissão de notificações no aplicativo.');
+    }
+}, 12_000);
 
 // ========== CATÁLOGO DE PODCASTS ==========
 async function loadPodcastsFromSupabase() {
