@@ -88,7 +88,7 @@
 .fs-color-dot{width:100%;aspect-ratio:1;border-radius:50%;border:3px solid transparent;cursor:pointer;padding:0;background-clip:padding-box}
 .fs-color-dot.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.25)}
 .fs-select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;color:#fff;font-size:14px;outline:none;box-sizing:border-box;-webkit-appearance:none;appearance:none}
-.fs-row-link{color:rgba(255,255,255,.85)}
+.fs-row-link,.fs-row-link *{color:rgba(255,255,255,.85);text-decoration:none!important}
 .fs-row .fs-row-value{font-size:13px;color:rgba(255,255,255,.4);flex-shrink:0}
 .fs-slider-row{padding:14px 16px}
 .fs-slider-row .fs-row-title{display:block;margin-bottom:10px}
@@ -139,7 +139,7 @@
     // Lidas de verdade pelo player: ver hook em player-core.js
     // (window.FendaSettings.getPlaybackPrefs() + evento fenda:playbackPrefsChanged)
     function getPlaybackPrefs() {
-        const def = { autoplay: true, crossfade: false, crossfadeSec: 4, normalize: true, dataSaver: false };
+        const def = { autoplay: true, crossfade: false, crossfadeSec: 4, normalize: true, dataSaver: false, wifiDownloadsOnly: true, sleepTimerMinutes: 0 };
         try { return { ...def, ...JSON.parse(localStorage.getItem(PLAYBACK_KEY) || '{}') }; }
         catch { return def; }
     }
@@ -230,6 +230,28 @@
                 <span class="fs-switch"><input type="checkbox" id="fsDataSaver" ${pb.dataSaver ? 'checked' : ''}><i></i></span>
               </label>
             </div>
+
+            <div class="fs-section">Downloads offline</div>
+            <div class="fs-card">
+              <label class="fs-row">
+                <span class="material-symbols-rounded">wifi</span>
+                <div class="fs-row-text"><span class="fs-row-title">Baixar somente em Wi‑Fi</span><span class="fs-row-sub">Evita usar seus dados móveis nos downloads</span></div>
+                <span class="fs-switch"><input type="checkbox" id="fsWifiDownloads" ${pb.wifiDownloadsOnly ? 'checked' : ''}><i></i></span>
+              </label>
+            </div>
+
+            <div class="fs-section">Temporizador de desligamento</div>
+            <div class="fs-card"><div class="fs-form">
+              <label for="fsSleepTimer">Parar a reprodução em</label>
+              <select class="fs-select" id="fsSleepTimer">
+                <option value="0" ${!pb.sleepTimerMinutes ? 'selected' : ''}>Desativado</option>
+                <option value="15" ${pb.sleepTimerMinutes === 15 ? 'selected' : ''}>15 minutos</option>
+                <option value="30" ${pb.sleepTimerMinutes === 30 ? 'selected' : ''}>30 minutos</option>
+                <option value="45" ${pb.sleepTimerMinutes === 45 ? 'selected' : ''}>45 minutos</option>
+                <option value="60" ${pb.sleepTimerMinutes === 60 ? 'selected' : ''}>1 hora</option>
+              </select>
+              <p class="fs-hint">A música será pausada automaticamente ao fim do período escolhido.</p>
+            </div></div>
             <p class="fs-hint" data-i18n="playback_no_quality_hint">O Fenda Music guarda só um arquivo por música — por isso ainda não existe opção de qualidade de áudio.</p>
           </div>
         `;
@@ -240,6 +262,8 @@
         _playbackScreen.querySelector('#fsAutoplay').addEventListener('change', (e) => setPlaybackPref('autoplay', e.target.checked));
         _playbackScreen.querySelector('#fsNormalize').addEventListener('change', (e) => setPlaybackPref('normalize', e.target.checked));
         _playbackScreen.querySelector('#fsDataSaver').addEventListener('change', (e) => setPlaybackPref('dataSaver', e.target.checked));
+        _playbackScreen.querySelector('#fsWifiDownloads').addEventListener('change', (e) => setPlaybackPref('wifiDownloadsOnly', e.target.checked));
+        _playbackScreen.querySelector('#fsSleepTimer').addEventListener('change', (e) => setPlaybackPref('sleepTimerMinutes', Number(e.target.value)));
         _playbackScreen.querySelector('#fsCrossfade').addEventListener('change', (e) => {
             setPlaybackPref('crossfade', e.target.checked);
             _playbackScreen.querySelector('#fsCrossfadeRow').style.display = e.target.checked ? '' : 'none';
@@ -320,6 +344,56 @@
     // TELA: SOBRE
     // ============================================================
     let _aboutScreen = null;
+    let _legalScreen = null;
+
+    const LEGAL_CONTENT = {
+        terms: {
+            title: 'Termos de uso', icon: 'description',
+            intro: 'Estes termos explicam as regras para usar o Fenda Music com segurança e respeito à comunidade.',
+            sections: [
+                ['Uso do Fenda Music', 'O Fenda Music oferece acesso pessoal e não comercial a um catálogo de música gospel e cristã. Use o app de maneira responsável e de acordo com a legislação aplicável.'],
+                ['Sua conta', 'Mantenha seu acesso protegido e informe dados corretos. Você é responsável pelas ações realizadas em sua conta.'],
+                ['Catálogo e downloads', 'As músicas e os downloads offline são destinados ao seu uso pessoal dentro do aplicativo. Não é permitido redistribuir ou explorar o conteúdo sem autorização.'],
+                ['Convivência', 'Não envie conteúdo ofensivo, ilegal ou que viole direitos de terceiros. Podemos moderar ou remover conteúdo que descumpra estas regras.'],
+                ['Atualizações', 'Podemos atualizar estes termos quando houver mudanças importantes no serviço. Se tiver dúvidas, fale conosco pelo suporte.'],
+            ],
+        },
+        privacy: {
+            title: 'Política de privacidade', icon: 'privacy_tip',
+            intro: 'Esta política descreve, em linguagem simples, como cuidamos das informações necessárias para oferecer sua experiência no Fenda Music.',
+            sections: [
+                ['Informações usadas', 'Usamos dados de conta e preferências, como perfil, favoritos, playlists e histórico, para personalizar sua experiência e manter seus recursos disponíveis.'],
+                ['Uso e controle', 'Você pode editar dados do perfil, alterar e-mail e senha, ajustar notificações, limpar downloads e excluir sua conta nas Configurações.'],
+                ['Dados no dispositivo', 'Parte das informações e dos downloads pode ficar no seu aparelho para permitir acesso mais rápido e uso offline. Você pode limpar esses dados nas Configurações.'],
+                ['Compartilhamento', 'Não vendemos suas informações pessoais. O acesso às informações é restrito ao necessário para suporte, segurança e funcionamento do Fenda Music.'],
+                ['Segurança e contato', 'Usamos medidas de proteção compatíveis com o serviço e conexões seguras. Para dúvidas ou solicitações sobre privacidade, entre em contato pelo suporte.'],
+            ],
+        },
+    };
+
+    function _openLegalScreen(kind) {
+        const content = LEGAL_CONTENT[kind];
+        if (!content) return;
+        _injectCss();
+        if (!_legalScreen) {
+            _legalScreen = document.createElement('div');
+            _legalScreen.className = 'fs-overlay fs-screen';
+            document.body.appendChild(_legalScreen);
+        }
+        _legalScreen.innerHTML = `
+          <div class="fs-header">
+            <button class="fs-back" id="fsLegalBack"><span class="material-symbols-rounded">arrow_back</span></button>
+            <h1>${_esc(content.title)}</h1>
+          </div>
+          <div class="fs-body">
+            <div class="fs-about-hero" style="margin-top:10px"><div class="fs-about-mark fallback"><span class="material-symbols-rounded fs-about-mark-icon">${content.icon}</span></div><h2>${_esc(content.title)}</h2></div>
+            <p class="fs-hint" style="margin:0 0 18px;font-size:13px;color:rgba(255,255,255,.65)">${_esc(content.intro)}</p>
+            ${content.sections.map(([heading, text]) => `<div class="fs-card" style="margin-bottom:10px"><div class="fs-form"><strong style="font-size:14px">${_esc(heading)}</strong><p class="fs-hint" style="margin:7px 0 0">${_esc(text)}</p></div></div>`).join('')}
+            <div class="fs-card"><a class="fs-row fs-row-link" href="mailto:contato@fendamusic.com.br"><span class="material-symbols-rounded">mail</span><div class="fs-row-text"><span class="fs-row-title">Fale conosco</span><span class="fs-row-sub">contato@fendamusic.com.br</span></div><span class="material-symbols-rounded fs-row-arrow">open_in_new</span></a></div>
+          </div>`;
+        _legalScreen.querySelector('#fsLegalBack').addEventListener('click', () => _legalScreen.classList.remove('open'));
+        _legalScreen.classList.add('open');
+    }
 
     function _buildAboutScreen() {
         if (_aboutScreen) return _aboutScreen;
@@ -344,16 +418,16 @@
 
             <div class="fs-section" data-i18n="about_legal">Legal</div>
             <div class="fs-card">
-              <a class="fs-row fs-row-link" href="termos.html">
+              <button class="fs-row fs-row-link" type="button" data-legal="terms">
                 <span class="material-symbols-rounded">description</span>
                 <div class="fs-row-text"><span class="fs-row-title" data-i18n="about_terms">Termos de uso</span></div>
                 <span class="material-symbols-rounded fs-row-arrow">chevron_right</span>
-              </a>
-              <a class="fs-row fs-row-link" href="privacidade.html">
+              </button>
+              <button class="fs-row fs-row-link" type="button" data-legal="privacy">
                 <span class="material-symbols-rounded">privacy_tip</span>
                 <div class="fs-row-text"><span class="fs-row-title" data-i18n="about_privacy">Política de privacidade</span></div>
                 <span class="material-symbols-rounded fs-row-arrow">chevron_right</span>
-              </a>
+              </button>
             </div>
 
             <div class="fs-section" data-i18n="about_support">Suporte</div>
@@ -363,11 +437,11 @@
                 <div class="fs-row-text"><span class="fs-row-title" data-i18n="about_contact">Fale conosco</span><span class="fs-row-sub">contato@fendamusic.com.br</span></div>
                 <span class="material-symbols-rounded fs-row-arrow open_in_new_icon">open_in_new</span>
               </a>
-              <a class="fs-row fs-row-link" href="https://fendamusic.com.br" target="_blank" rel="noopener">
+              <button class="fs-row fs-row-link" type="button" id="fsAboutOpenHome">
                 <span class="material-symbols-rounded">public</span>
-                <div class="fs-row-text"><span class="fs-row-title">fendamusic.com.br</span></div>
-                <span class="material-symbols-rounded fs-row-arrow open_in_new_icon">open_in_new</span>
-              </a>
+                <div class="fs-row-text"><span class="fs-row-title">Abrir Fenda Music</span><span class="fs-row-sub">Voltar para a tela inicial</span></div>
+                <span class="material-symbols-rounded fs-row-arrow">chevron_right</span>
+              </button>
             </div>
 
             <div class="fs-about-footer">
@@ -380,6 +454,12 @@
         `;
         document.body.appendChild(_aboutScreen);
         _aboutScreen.querySelector('#fsAboutBack').addEventListener('click', () => _aboutScreen.classList.remove('open'));
+        _aboutScreen.querySelectorAll('[data-legal]').forEach((button) => button.addEventListener('click', () => _openLegalScreen(button.dataset.legal)));
+        _aboutScreen.querySelector('#fsAboutOpenHome').addEventListener('click', () => {
+            _aboutScreen.classList.remove('open');
+            _overlay?.classList.remove('open');
+            document.querySelector('.nav-btn[data-tab="inicio"]')?.click();
+        });
         return _aboutScreen;
     }
 
@@ -394,12 +474,6 @@
 
         const p = getPrefs();
         const email = localStorage.getItem('user_email') || window.AppState?.userEmail || '';
-
-        const THEME_COLORS = [
-            '#7c3aed', '#6d28d9', '#2563eb', '#0891b2', '#059669', '#d97706',
-            '#dc2626', '#db2777', '#9333ea', '#0f172a', '#16a34a', '#ea580c',
-        ];
-        const currentColor = window.fendaThemes?.savedColor || localStorage.getItem('fenda-color') || '#7c3aed';
 
         _overlay = document.createElement('div');
         _overlay.className = 'fs-overlay';
@@ -451,6 +525,14 @@
                 </div>
               </div>
 
+              <div class="fs-form" id="fsEmailForm">
+                <label>Novo e-mail</label>
+                <input type="email" id="fsNewEmail" autocomplete="email" inputmode="email" placeholder="nome@exemplo.com">
+                <p class="fs-hint">Enviaremos uma confirmação para concluir a alteração com segurança.</p>
+                <button class="fs-btn ghost" id="fsEmailBtn" type="button">Alterar e-mail</button>
+                <div class="fs-status" id="fsEmailStatus"></div>
+              </div>
+
               <!-- Etapa 1: confirma a senha atual antes de liberar a troca -->
               <div class="fs-form" id="fsCurrentPassStep">
                 <label data-i18n="settings_current_password">Senha atual</label>
@@ -481,19 +563,6 @@
                 </div>
               </button>
             </div>
-
-            <div class="fs-section" data-i18n="settings_appearance">Aparência</div>
-            <div class="fs-card">
-              <div class="fs-colors" id="fsColors">
-                ${THEME_COLORS.map(c => `
-                  <button class="fs-color-dot ${c === currentColor ? 'active' : ''}" data-color="${c}" style="background:${c}" title="${c}"></button>
-                `).join('')}
-              </div>
-              <div style="padding:0 16px 16px">
-                <input type="color" id="fsCustomColor" value="${currentColor}" style="width:100%;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:none;cursor:pointer">
-              </div>
-            </div>
-            <p class="fs-hint" data-i18n="settings_appearance_hint">Escolha a cor principal do app. O Fenda Music usa sempre tema escuro.</p>
 
             <div class="fs-section" data-i18n="settings_general">Geral</div>
             <div class="fs-card">
@@ -755,18 +824,33 @@
             cb.addEventListener('change', () => setPref(cb.dataset.pref, cb.checked));
         });
 
-        // ── Aparência ──
-        _overlay.querySelectorAll('.fs-color-dot').forEach(dot => {
-            dot.addEventListener('click', () => {
-                const color = dot.dataset.color;
-                window.fendaThemes?.apply(color, 'dark');
-                _overlay.querySelectorAll('.fs-color-dot').forEach(d => d.classList.toggle('active', d === dot));
-                _overlay.querySelector('#fsCustomColor').value = color;
-            });
-        });
-        _overlay.querySelector('#fsCustomColor').addEventListener('input', (e) => {
-            window.fendaThemes?.apply(e.target.value, 'dark');
-            _overlay.querySelectorAll('.fs-color-dot').forEach(d => d.classList.remove('active'));
+        // ── Alteração de e-mail ──
+        _overlay.querySelector('#fsEmailBtn').addEventListener('click', async () => {
+            const btn = _overlay.querySelector('#fsEmailBtn');
+            const input = _overlay.querySelector('#fsNewEmail');
+            const status = _overlay.querySelector('#fsEmailStatus');
+            const newEmail = input.value.trim().toLowerCase();
+            status.className = 'fs-status';
+            if (!/^\S+@\S+\.\S+$/.test(newEmail)) {
+                status.classList.add('err'); status.textContent = 'Digite um e-mail válido.'; return;
+            }
+            if (newEmail === String(_overlay.querySelector('#fsEmail').textContent || '').trim().toLowerCase()) {
+                status.classList.add('err'); status.textContent = 'Este já é o e-mail atual da conta.'; return;
+            }
+            btn.disabled = true;
+            status.textContent = 'Enviando confirmação…';
+            try {
+                const { error } = await window.supabaseClient.auth.updateUser({ email: newEmail });
+                if (error) throw error;
+                status.classList.add('ok');
+                status.textContent = 'Confira seu e-mail para confirmar a alteração.';
+                input.value = '';
+            } catch (_) {
+                status.classList.add('err');
+                status.textContent = 'Não foi possível solicitar a alteração agora. Tente novamente mais tarde.';
+            } finally {
+                btn.disabled = false;
+            }
         });
 
         // ── Navegação para telas próprias ──
