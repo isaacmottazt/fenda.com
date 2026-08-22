@@ -21,6 +21,7 @@ const FendaNotifications = (() => {
         release:        { icon: 'new_releases',          bg: '#059669' },
         social:         { icon: 'favorite',              bg: '#ec4899' },
         playlist:       { icon: 'queue_music',           bg: '#6d28d9' },
+        admin:          { icon: 'campaign',              bg: '#7c3aed' },
         system:         { icon: 'notifications',         bg: '#475569' },
         fire:           { icon: 'local_fire_department', bg: '#ea580c' },
         trending:       { icon: 'trending_up',           bg: '#7c3aed' },
@@ -49,11 +50,14 @@ const FendaNotifications = (() => {
             time:   Date.now(),
             read:   false,
             musicId: notif.musicId || null,
+            adminNotificationId: notif.adminNotificationId || null,
         };
         const all = getAll();
         // Evita duplicata nas últimas 24h (mesmo título)
         const recent = all.filter(n => Date.now() - n.time < 86_400_000);
-        if (recent.some(n => n.title === entry.title)) return;
+        if (entry.adminNotificationId) {
+            if (all.some(n => n.adminNotificationId === entry.adminNotificationId)) return;
+        } else if (recent.some(n => n.title === entry.title)) return;
 
         all.unshift(entry);
         save(all);
@@ -266,6 +270,56 @@ const FendaNotifications = (() => {
         _showInAppToast(data.title, data.body);
     }
 
+    // ── Comunicados administrativos dentro do Fenda ──────────────
+    // A lista vem de uma RPC SECURITY DEFINER que expõe apenas avisos
+    // já enviados. Dessa forma a central do Fenda funciona mesmo sem
+    // permissão de notificação do navegador/Android e sem expor quem criou
+    // os comunicados ou dados administrativos.
+    let _adminSyncTimer = null;
+
+    async function syncAdminAnnouncements() {
+        const client = window.supabaseClient;
+        const userId = window.AppState?.userId;
+        if (!client?.rpc || !userId || !navigator.onLine) return [];
+
+        try {
+            const { data, error } = await client.rpc('list_fenda_in_app_announcements');
+            if (error) throw error;
+
+            const received = [];
+            (Array.isArray(data) ? data : []).slice().reverse().forEach(item => {
+                const alreadyAdded = getAll().some(n => n.adminNotificationId === item.id);
+                if (alreadyAdded) return;
+                add({
+                    type: 'admin',
+                    title: item.title || 'Comunicado do Fenda Music',
+                    body: item.body || '',
+                    image: item.image_url || null,
+                    adminNotificationId: item.id,
+                });
+                received.push(item);
+            });
+
+            if (received.length) {
+                if (document.getElementById('notificationsOverlay')?.classList.contains('active')) {
+                    renderScreen(document.querySelector('.notif-tab.active')?.dataset.tab || 'all');
+                }
+                const latest = received[received.length - 1];
+                _showInAppToast('Novo aviso do Fenda', latest.title || 'Você recebeu um comunicado');
+            }
+            return received;
+        } catch (error) {
+            console.warn('[FendaNotifications] Não foi possível sincronizar avisos administrativos:', error);
+            return [];
+        }
+    }
+
+    function startAdminAnnouncementSync() {
+        if (_adminSyncTimer) clearInterval(_adminSyncTimer);
+        void syncAdminAnnouncements();
+        _adminSyncTimer = setInterval(() => { void syncAdminAnnouncements(); }, 60_000);
+    }
+
     function _showInAppToast(title, body) {
         if (typeof window.showToast === 'function') {
             window.showToast(`🔔 ${title}: ${body}`, 'success');
@@ -383,6 +437,7 @@ const FendaNotifications = (() => {
         // Renderiza PRIMEIRO com o estado real (não lidas visíveis)
         // Marca como lidas apenas ao FECHAR — evita inconsistência visual
         renderScreen('all');
+        void syncAdminAnnouncements();
         // Verifica permissão de push para mostrar/ocultar prompt
         _checkPushPermission();
     }
@@ -486,6 +541,7 @@ const FendaNotifications = (() => {
         setTimeout(() => {
             checkAndGenerate();
             _updateDot();
+            startAdminAnnouncementSync();
         }, 3000);
     }
 
@@ -497,6 +553,7 @@ const FendaNotifications = (() => {
         openNotifications,
         closeNotifications,
         checkAndGenerate,
+        syncAdminAnnouncements,
         getAll,
         getUnreadCount,
         updateDot: _updateDot,
