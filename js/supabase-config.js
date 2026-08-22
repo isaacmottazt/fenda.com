@@ -113,6 +113,17 @@ function showNativePushDiagnostic(message) {
     window.showToast(message, 'danger');
 }
 
+function getNativePushUnavailableMessage() {
+    const reason = String(window.fendaNativePushRegistrationState?.reason || '');
+    if (reason.startsWith('fcm-device-token')) {
+        return 'O Android ainda não conseguiu iniciar as notificações. Mantenha o aplicativo aberto e tente novamente.';
+    }
+    if (reason.startsWith('expo-token')) {
+        return 'O Android iniciou as notificações, mas o token do serviço ainda não foi obtido. Tente novamente em instantes.';
+    }
+    return 'O Android não forneceu o token de notificações. Verifique a permissão de notificações no aplicativo.';
+}
+
 async function registerNativePushTokenWithAuthenticatedSession() {
     const token = String(window.__fendaNativeExpoPushToken || '').trim();
     if (!token || !navigator.onLine || nativePushRegistrationInFlight) return false;
@@ -156,7 +167,7 @@ window.addEventListener('online', () => { void registerNativePushTokenWithAuthen
 setInterval(() => { void registerNativePushTokenWithAuthenticatedSession(); }, 4_000);
 setTimeout(() => {
     if (window.ReactNativeWebView && !String(window.__fendaNativeExpoPushToken || '').trim()) {
-        showNativePushDiagnostic('O Android não forneceu o token de notificações. Verifique a permissão de notificações no aplicativo.');
+        showNativePushDiagnostic(getNativePushUnavailableMessage());
     }
 }, 12_000);
 
