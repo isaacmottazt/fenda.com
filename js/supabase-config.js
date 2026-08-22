@@ -105,8 +105,12 @@ let nativePushDiagnosticShown = false;
 
 function showNativePushDiagnostic(message) {
     if (nativePushDiagnosticShown) return;
+    if (typeof window.showToast !== 'function') {
+        window.setTimeout(() => showNativePushDiagnostic(message), 750);
+        return;
+    }
     nativePushDiagnosticShown = true;
-    window.showToast?.(message, 'danger');
+    window.showToast(message, 'danger');
 }
 
 async function registerNativePushTokenWithAuthenticatedSession() {
