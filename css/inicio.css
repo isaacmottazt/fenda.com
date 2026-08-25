@@ -22,7 +22,11 @@
     --vp-violet-line: rgba(146, 76, 255, 0.25);
 }
 
-#inicio { position: relative; }
+#inicio {
+    position: relative;
+    min-width: 0;
+    overflow-x: clip;
+}
 
 #inicio::before {
     content: '';
@@ -225,6 +229,7 @@
 .featured-content {
     position: relative;
     z-index: 3;
+    min-width: 0;
     padding: 26px 22px 22px;
     display: flex;
     flex-direction: column;
@@ -519,6 +524,7 @@
 .quick-pick {
     display: flex;
     align-items: center;
+    min-width: 0;
     gap: 10px;
     padding: 6px 12px 6px 6px;
     background: var(--vp-surface);
@@ -681,6 +687,7 @@
 }
 
 .section-header h2 {
+    min-width: 0;
     font-size: 20px;
     font-weight: 800;
     color: #fff;
@@ -698,6 +705,7 @@
 }
 
 .section-see-all {
+    flex-shrink: 0;
     background: none;
     border: none;
     color: var(--vp-ink-low);
@@ -1106,6 +1114,7 @@
 
 .weekly-item {
     display: grid;
+    min-width: 0;
     grid-template-columns: 28px 52px 1fr auto;
     align-items: center;
     gap: 12px;

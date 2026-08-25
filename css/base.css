@@ -18,6 +18,13 @@ html.fenda-reduce-motion *::after {
   box-sizing: border-box;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background: #0a0a0f;
   font-family:
@@ -28,7 +35,9 @@ body {
 }
 
 .app-container {
+  width: 100%;
   max-width: 480px;
+  min-width: 0;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
@@ -43,8 +52,10 @@ body {
 
 .main-content {
   flex: 1;
+  min-width: 0;
   padding: 20px 16px 90px;
   overflow-y: auto;
+  overflow-x: hidden;
   scroll-behavior: smooth;
   transition: padding-bottom 0.3s ease;
 }
