@@ -730,6 +730,8 @@
     display: flex;
     flex-direction: row;
     gap: 14px;
+    /* Centraliza poucos cards sem esconder o começo quando houver overflow. */
+    justify-content: safe center;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -1310,6 +1312,8 @@
 .popular-track {
     display: flex;
     gap: 14px;
+    /* Centraliza o conjunto quando ele cabe e preserva o swipe quando não cabe. */
+    justify-content: safe center;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
