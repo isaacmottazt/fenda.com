@@ -67,11 +67,14 @@ function initAudioAndLyricsEngine() {
     DOM.audio.addEventListener('ended', () => {
         window._showFendaError?.('[DIAG] evento "ended" disparou. repeatMode=' + AppState.repeatMode);
         if (AppState.repeatMode === 2) {
-            // repeat-one: reinicia a música atual
+            // repeat-one: fecha a sessão atual e inicia outra ao reiniciar.
+            window.flushListenTime?.(1, true);
+            window.resetListenPosition?.();
             DOM.audio.currentTime = 0;
             DOM.audio.play().catch(()=>{});
         } else {
             window._showFendaError?.('[DIAG] chamando handleNextTrack()');
+            window.flushListenTime?.(1, true);
             handleNextTrack();
             // repeat-all é tratado no handleNextTrack (a fila se reconstrói ao esgotar)
         }
@@ -82,13 +85,9 @@ function initAudioAndLyricsEngine() {
     // pausa e fecha o app sem trocar de música. Mínimo de 10s para não
     // poluir o histórico com pausas acidentais.
     DOM.audio.addEventListener('pause', () => {
-        const elapsed = Math.floor(DOM.audio.currentTime || 0);
-        if (elapsed >= 10 && AppState.currentMusicId) {
-            const music = AppState.musics.find(m => m.id === AppState.currentMusicId);
-            if (music && typeof window.addToHistory === 'function') {
-                window.addToHistory(music, elapsed);
-            }
-        }
+        // O core calcula somente o delta desde o último flush e atualiza a
+        // mesma sessão no Supabase, sem duplicar a contagem.
+        window.flushListenTime?.(10);
     });
 
     // ── Salva histórico ao ir para segundo plano ───────────────────────────
@@ -99,13 +98,7 @@ function initAudioAndLyricsEngine() {
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState !== 'hidden') return;
         if (DOM.audio.paused) return; // já coberto pelo listener 'pause' acima
-        const elapsed = Math.floor(DOM.audio.currentTime || 0);
-        if (elapsed >= 10 && AppState.currentMusicId) {
-            const music = AppState.musics.find(m => m.id === AppState.currentMusicId);
-            if (music && typeof window.addToHistory === 'function') {
-                window.addToHistory(music, elapsed);
-            }
-        }
+        window.flushListenTime?.(10);
     });
 
     if (DOM.playerBottomPlayBtn) DOM.playerBottomPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlayMusic(); });

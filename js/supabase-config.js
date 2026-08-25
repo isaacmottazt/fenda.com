@@ -348,24 +348,48 @@ async function deleteUserPlaylist(playlistId, userId) {
 }
 
 // ========== HISTÓRICO DE REPRODUÇÃO ==========
-async function addToListeningHistory(userId, musicId, listenedSeconds, completed = false) {
+async function addToListeningHistory(userId, musicId, listenedSeconds, completed = false, sessionId = null) {
     try {
-        const payload = { user_id: userId, music_id: musicId, listened_seconds: listenedSeconds, completed: Boolean(completed) };
+        const seconds = Math.max(0, Math.floor(Number(listenedSeconds) || 0));
+        if (!userId || !musicId || seconds < 1) return false;
+
+        // Sessões usam RPC com upsert idempotente: vários flushes da mesma
+        // reprodução atualizam uma única linha, sem inflar o ranking.
+        if (sessionId && typeof supabaseClient.rpc === 'function') {
+            const { error } = await supabaseClient.rpc('record_listening_session', {
+                p_user_id: userId,
+                p_music_id: musicId,
+                p_session_id: sessionId,
+                p_listened_seconds: seconds,
+                p_completed: Boolean(completed),
+            });
+            if (error) throw error;
+            return true;
+        }
+
+        // Compatibilidade com registros legados e instalações sem a migração.
         const { error } = await supabaseClient
             .from('listening_history')
-            .insert(payload);
-        // Compatibilidade temporária com instalações que ainda não receberam a coluna.
-        if (error && /completed/i.test(error.message || '')) {
-            const fallback = await supabaseClient
-                .from('listening_history')
-                .insert({ user_id: userId, music_id: musicId, listened_seconds: listenedSeconds });
-            if (fallback.error) throw fallback.error;
-        } else if (error) throw error;
-        // Limitar histórico para 50 registros por usuário (opcional)
+            .insert({ user_id: userId, music_id: musicId, listened_seconds: seconds });
+        if (error) throw error;
         return true;
     } catch (e) {
         console.error('addToListeningHistory:', e);
         return false;
+    }
+}
+
+async function loadGlobalMusicRanking(limit = 10, days = null) {
+    try {
+        const { data, error } = await supabaseClient.rpc('get_music_listening_ranking', {
+            p_limit: Math.min(Math.max(Number(limit) || 10, 1), 50),
+            p_days: days == null ? null : Math.max(Number(days) || 0, 0),
+        });
+        if (error) throw error;
+        return Array.isArray(data) ? data : [];
+    } catch (e) {
+        console.warn('loadGlobalMusicRanking:', e);
+        return [];
     }
 }
 
@@ -614,6 +638,7 @@ window.loadTotalListenedSeconds = loadTotalListenedSeconds;
 
 window.addToListeningHistory = addToListeningHistory;
 window.loadListeningHistory = loadListeningHistory;
+window.loadGlobalMusicRanking = loadGlobalMusicRanking;
 window.addToSearchHistory = addToSearchHistory;
 window.loadSearchHistory = loadSearchHistory;
 window.clearSearchHistory = clearSearchHistory;

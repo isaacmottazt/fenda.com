@@ -273,44 +273,10 @@
     // 04 — TOP DA SEMANA
     // ============================================================
 
-    function renderWeeklyTop() {
-        TAB.querySelectorAll('.weekly-section').forEach(el => el.remove());
+    let weeklyRankingRequest = 0;
 
-        const history    = window.AppState?.history || [];
-        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
-        const counts = {}, lastItem = {};
-        for (const item of history) {
-            const id = String(item?.id ?? item?.trackId ?? '');
-            if (!id) continue;
-            const t = item.playedAt ? new Date(item.playedAt).getTime() : Date.now();
-            if (t < oneWeekAgo) continue;
-            counts[id] = (counts[id] || 0) + 1;
-            if (!lastItem[id]) lastItem[id] = item;
-        }
-
-        if (!Object.keys(counts).length) {
-            for (const item of history) {
-                const id = String(item?.id ?? item?.trackId ?? '');
-                if (!id) continue;
-                counts[id] = (counts[id] || 0) + 1;
-                if (!lastItem[id]) lastItem[id] = item;
-            }
-        }
-
-        const top5 = Object.entries(counts)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
-            .map(([id, plays]) => {
-                const track = resolveTrack(lastItem[id]);
-                return track ? { ...track, weekPlays: plays } : null;
-            })
-            .filter(Boolean);
-
-        if (!top5.length) return;
-
+    function buildWeeklySection(top5) {
         const ranks = ['🥇', '🥈', '🥉', '4', '5'];
-
         const sec = document.createElement('section');
         sec.className = 'home-section weekly-section';
         sec.innerHTML = `
@@ -334,10 +300,59 @@
         sec.querySelectorAll('.weekly-item').forEach((btn, i) => {
             btn.addEventListener('click', () => play(top5[i]));
         });
+        return sec;
+    }
 
+    function insertWeeklySection(sec) {
         const anchor = TAB.querySelector('.quick-picks-section');
         if (anchor) anchor.parentNode.insertBefore(sec, anchor.nextSibling);
         else TAB.appendChild(sec);
+    }
+
+    function renderWeeklyTop() {
+        TAB.querySelectorAll('.weekly-section').forEach(el => el.remove());
+
+        const history = window.AppState?.history || [];
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const counts = {}, lastItem = {};
+        for (const item of history) {
+            const id = String(item?.id ?? item?.trackId ?? '');
+            const playedAt = item.playedAt ? new Date(item.playedAt).getTime() : Date.now();
+            if (!id || playedAt < oneWeekAgo) continue;
+            counts[id] = (counts[id] || 0) + 1;
+            if (!lastItem[id]) lastItem[id] = item;
+        }
+        const localTop = Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([id, plays]) => {
+                const track = resolveTrack(lastItem[id]);
+                return track ? { ...track, weekPlays: plays } : null;
+            }).filter(Boolean);
+        if (localTop.length) insertWeeklySection(buildWeeklySection(localTop));
+
+        const requestId = ++weeklyRankingRequest;
+        if (typeof window.loadGlobalMusicRanking !== 'function') return;
+        window.loadGlobalMusicRanking(5, 7).then(rows => {
+            if (requestId !== weeklyRankingRequest || !Array.isArray(rows)) return;
+            const ranked = rows.map(row => {
+                const local = resolveTrack({ id: row.music_id });
+                const cover = row.cover || local?.cover || '';
+                const title = row.title || local?.title || '';
+                if (!cover || !title) return null;
+                return {
+                    ...(local || {}),
+                    id: row.music_id,
+                    title,
+                    artist: row.artist || local?.artist || '',
+                    cover,
+                    weekPlays: Number(row.play_count) || 0,
+                };
+            }).filter(Boolean).slice(0, 5);
+            if (!ranked.length) return;
+            TAB.querySelectorAll('.weekly-section').forEach(el => el.remove());
+            insertWeeklySection(buildWeeklySection(ranked));
+        }).catch(() => {});
     }
 
     // ============================================================
@@ -399,53 +414,14 @@
 
     // ============================================================
     // 06 — POPULARES ENTRE USUÁRIOS
-    // Ordena por play_count (campo server-side) se existir,
-    // senão usa plays do localStorage como proxy
+    // O Supabase fornece o ranking global agregado; o catálogo local
+    // continua como fallback instantâneo/offline.
     // ============================================================
 
-    function renderPopular() {
-        TAB.querySelectorAll('.popular-section').forEach(el => el.remove());
+    let popularRankingRequest = 0;
 
-        const musics = getMusics();
-        if (!musics.length) return;
-
-        // Detecta qual campo tem play count server-side
-        const countField = ['play_count','plays','total_plays','playCount','totalPlays']
-            .find(f => musics.some(m => typeof m?.[f] === 'number'));
-
-        let sorted;
-
-        if (countField) {
-            // Tem campo server-side — ordena por ele
-            sorted = [...musics]
-                .filter(m => m[countField] > 0)
-                .sort((a, b) => b[countField] - a[countField])
-                .slice(0, 10);
-
-            // Se ainda não há plays registrados, usa o próprio catálogo como
-            // fallback para manter a seção visível desde o primeiro acesso.
-            if (sorted.length < 3) {
-                sorted = [...musics].slice(0, 10);
-            }
-        } else {
-            // Proxy: usa histórico local pra estimar popularidade
-            const history = window.AppState?.history || [];
-            const counts  = {};
-            for (const item of history) {
-                const id = String(item?.id ?? item?.trackId ?? '');
-                if (id) counts[id] = (counts[id] || 0) + 1;
-            }
-            sorted = [...musics]
-                .filter(m => m.cover && m.title)
-                .sort((a, b) => (counts[String(b.id)] || 0) - (counts[String(a.id)] || 0))
-                .slice(0, 10);
-        }
-
-        if (sorted.length < 3) return;
-
-        // Badge de fogo para os 3 primeiros
+    function buildPopularSection(sorted, isGlobal = false) {
         const badges = ['🔥', '🔥', '🔥'];
-
         const sec = document.createElement('section');
         sec.className = 'home-section popular-section';
         sec.innerHTML = `
@@ -461,8 +437,8 @@
                         </div>
                         <p class="popular-title">${esc(t.title)}</p>
                         <p class="popular-artist">${esc(t.artist || '')}</p>
-                        ${countField && t[countField] > 0
-                            ? `<span class="popular-count">${t[countField].toLocaleString('pt-BR')} plays</span>`
+                        ${isGlobal && t.playCount > 0
+                            ? `<span class="popular-count">${t.playCount.toLocaleString('pt-BR')} plays</span>`
                             : ''}
                     </button>
                 `).join('')}
@@ -471,12 +447,56 @@
         sec.querySelectorAll('.popular-card').forEach((btn, i) => {
             btn.addEventListener('click', () => play(sorted[i]));
         });
+        return sec;
+    }
 
-        // Insere após Descobrir
+    function insertPopularSection(sec) {
         const anchor = TAB.querySelector('.discover-section')
                     || TAB.querySelector('.weekly-section');
         if (anchor) anchor.parentNode.insertBefore(sec, anchor.nextSibling);
         else TAB.appendChild(sec);
+    }
+
+    function renderPopular() {
+        TAB.querySelectorAll('.popular-section').forEach(el => el.remove());
+
+        const musics = getMusics().filter(m => m?.cover && m?.title);
+        if (musics.length < 3) return;
+
+        const history = window.AppState?.history || [];
+        const counts = {};
+        for (const item of history) {
+            const id = String(item?.id ?? item?.trackId ?? '');
+            if (id) counts[id] = (counts[id] || 0) + 1;
+        }
+        const localSorted = [...musics]
+            .sort((a, b) => (counts[String(b.id)] || 0) - (counts[String(a.id)] || 0))
+            .slice(0, 10);
+        insertPopularSection(buildPopularSection(localSorted));
+
+        // Atualiza com dados reais de todos os usuários quando autenticado.
+        const requestId = ++popularRankingRequest;
+        if (typeof window.loadGlobalMusicRanking !== 'function') return;
+        window.loadGlobalMusicRanking(10, null).then(rows => {
+            if (requestId !== popularRankingRequest || !Array.isArray(rows)) return;
+            const ranked = rows.map(row => {
+                const local = resolveTrack({ id: row.music_id });
+                const cover = row.cover || local?.cover || '';
+                const title = row.title || local?.title || '';
+                if (!cover || !title) return null;
+                return {
+                    ...(local || {}),
+                    id: row.music_id,
+                    title,
+                    artist: row.artist || local?.artist || '',
+                    cover,
+                    playCount: Number(row.play_count) || 0,
+                };
+            }).filter(Boolean).slice(0, 10);
+            if (ranked.length < 3) return;
+            TAB.querySelectorAll('.popular-section').forEach(el => el.remove());
+            insertPopularSection(buildPopularSection(ranked, true));
+        }).catch(() => {});
     }
 
     // ============================================================

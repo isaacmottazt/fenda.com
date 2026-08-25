@@ -85,6 +85,41 @@ function saveLocalHistory(history) {
     } catch(e) { console.warn('[Cache] Erro ao salvar histórico:', e); }
 }
 
+function _pendingListenKey() {
+    return `${_historyKey()}_pending_sessions`;
+}
+
+function queuePendingListenSession(entry) {
+    try {
+        const raw = localStorage.getItem(_pendingListenKey());
+        const pending = raw ? JSON.parse(raw) : [];
+        const index = pending.findIndex(item => item.sessionId === entry.sessionId);
+        if (index >= 0) pending[index] = { ...pending[index], ...entry };
+        else pending.push(entry);
+        localStorage.setItem(_pendingListenKey(), JSON.stringify(pending.slice(-100)));
+    } catch (e) { console.warn('[Cache] Não foi possível enfileirar escuta offline:', e); }
+}
+
+async function syncPendingListenSessions() {
+    if (!navigator.onLine || !AppState.userId || typeof window.addToListeningHistory !== 'function') return;
+    try {
+        const raw = localStorage.getItem(_pendingListenKey());
+        const pending = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(pending) || !pending.length) return;
+        const remaining = [];
+        for (const entry of pending) {
+            const ok = await window.addToListeningHistory(
+                AppState.userId, entry.id, entry.listenedSeconds,
+                Boolean(entry.completed), entry.sessionId
+            );
+            if (!ok) remaining.push(entry);
+        }
+        localStorage.setItem(_pendingListenKey(), JSON.stringify(remaining));
+    } catch (e) { console.warn('[Cache] Sincronização de escutas pendentes falhou:', e); }
+}
+
+window.addEventListener('online', () => { void syncPendingListenSessions(); });
+
 // Salva tempo total ouvido (em segundos)
 function addToTotalTime(seconds) {
     try {
@@ -122,33 +157,60 @@ function loadLocalUserName() {
     } catch { return null; }
 }
 
-async function addToHistory(music, listenedSeconds = 0) {
+async function addToHistory(music, listenedSeconds = 0, options = {}) {
     if (!music) return;
 
-    // 1. Salva SEMPRE no localStorage (funciona offline)
+    const cumulativeSeconds = Math.max(0, Math.floor(Number(listenedSeconds) || 0));
+    const deltaSeconds = Math.max(0, Math.floor(Number(options.deltaSeconds ?? listenedSeconds) || 0));
+    const sessionId = options.sessionId || null;
+    const playedAt = Number(options.playedAt) || Date.now();
+    const completed = Boolean(options.completed);
+    if (cumulativeSeconds < 1) return;
+
+    // Uma entrada representa uma sessão de reprodução. Flushes sucessivos
+    // atualizam a mesma sessão em vez de criar plays duplicados.
     const history = loadLocalHistory();
-    const existingIndex = history.findIndex(h => h.id === music.id);
-    if (existingIndex !== -1) history.splice(existingIndex, 1);
-    history.unshift({
+    const existingIndex = sessionId
+        ? history.findIndex(h => h.sessionId === sessionId)
+        : -1;
+    const entry = {
         id: music.id,
         title: music.title,
         artist: music.artist,
         cover: music.cover,
-        listenedSeconds,
-        playedAt: Date.now()
-    });
+        listenedSeconds: Math.max(cumulativeSeconds, existingIndex >= 0 ? Number(history[existingIndex].listenedSeconds) || 0 : 0),
+        playedAt,
+        sessionId,
+        completed,
+    };
+    if (existingIndex >= 0) history.splice(existingIndex, 1);
+    history.unshift(entry);
     saveLocalHistory(history);
 
-    // 2. Atualiza tempo total ouvido localmente
-    if (listenedSeconds > 5) addToTotalTime(listenedSeconds);
+    // O total local recebe somente o delta novo, nunca o acumulado da sessão.
+    if (deltaSeconds > 0) addToTotalTime(deltaSeconds);
 
-    // 3. Atualiza AppState imediatamente
     AppState.history = history;
 
-    // 4. Tenta salvar no Supabase em background (não bloqueia)
-    if (AppState.userId && navigator.onLine) {
-        window.addToListeningHistory?.(AppState.userId, music.id, listenedSeconds)
-            .catch(() => console.warn('[Cache] Histórico não sincronizado (offline)'));
+    const syncEntry = {
+        id: music.id,
+        listenedSeconds: entry.listenedSeconds,
+        completed,
+        sessionId,
+    };
+    if (AppState.userId && window.addToListeningHistory) {
+        if (navigator.onLine) {
+            window.addToListeningHistory(
+                AppState.userId,
+                syncEntry.id,
+                syncEntry.listenedSeconds,
+                syncEntry.completed,
+                syncEntry.sessionId
+            ).then(ok => { if (!ok) queuePendingListenSession(syncEntry); })
+             .catch(() => queuePendingListenSession(syncEntry));
+        } else {
+            queuePendingListenSession(syncEntry);
+        }
     }
 }
 
@@ -667,22 +729,40 @@ function playNextFromQueue() {
 let currentListenStartTime = 0;
 let currentListenMusicId = null;
 let currentListenLoggedSecs = 0; // posição já contabilizada nesta sessão de escuta
+let currentListenSessionId = null;
+
+function createListenSessionId() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return `listen-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
 
 // Loga só o DELTA desde o último flush. Antes, 'pause',
 // 'visibilitychange' e a troca de faixa logavam cada um o
 // currentTime INTEIRO — pausar e depois trocar de música contava o
 // mesmo tempo 2-3x, inflando a Máquina do Tempo e as recomendações.
-async function flushListenTime(minDelta = 1) {
+const MIN_MEANINGFUL_LISTEN_SECONDS = 10;
+
+async function flushListenTime(minDelta = 1, completed = false) {
     if (!currentListenMusicId || !DOM.audio) return;
     const pos   = Math.floor(DOM.audio.currentTime || 0);
     const delta = pos - currentListenLoggedSecs;
     if (delta < minDelta) return;
+    // Ignora toques acidentais; a sessão passa a contar a partir de 10s.
+    if (pos < MIN_MEANINGFUL_LISTEN_SECONDS && !completed) return;
     currentListenLoggedSecs = pos;
     const music = AppState.musics.find(m => m.id === currentListenMusicId);
-    if (music) await addToHistory(music, delta);
+    if (music) await addToHistory(music, pos, {
+        sessionId: currentListenSessionId,
+        deltaSeconds: delta,
+        completed,
+        playedAt: currentListenStartTime || Date.now(),
+    });
 }
 // Chamar quando currentTime volta a 0 sem trocar de faixa (repeat-one)
-function resetListenPosition() { currentListenLoggedSecs = 0; }
+function resetListenPosition() {
+    currentListenLoggedSecs = 0;
+    currentListenSessionId = createListenSessionId();
+}
 window.flushListenTime     = flushListenTime;
 window.resetListenPosition = resetListenPosition;
 
@@ -700,6 +780,7 @@ async function playMusicTrack(music, opts = {}) {
     currentListenMusicId = music.id;
     currentListenStartTime = Date.now();
     currentListenLoggedSecs = 0;
+    if (isDifferentTrack || !currentListenSessionId) currentListenSessionId = createListenSessionId();
 
     // Registra no histórico de navegação para o botão ◀️
     _pushPlaybackHistory(music.id);
@@ -1154,7 +1235,9 @@ async function _fetchAllFromSupabase() {
                 artist:          AppState.musics.find(m => m.id === h.music_id)?.artist || h.artist || '',
                 cover:           AppState.musics.find(m => m.id === h.music_id)?.cover  || h.cover  || '',
                 listenedSeconds: h.listened_seconds || 0,
-                playedAt:        new Date(h.played_at).getTime()
+                playedAt:        new Date(h.played_at).getTime(),
+                sessionId:       h.session_id || null,
+                completed:       Boolean(h.completed),
             }));
 
             // Merge com histórico local (local = mais recente e preciso)
@@ -1167,9 +1250,15 @@ async function _fetchAllFromSupabase() {
                     // Plays distintos da mesma música no mesmo dia são MANTIDOS
                     // — antes eram descartados, o que subcontava minutos e
                     // plays na Máquina do Tempo. Idempotente entre boots.
-                    const seenByTrack = new Map(); // id -> [timestamps mantidos]
+                    const seenSessions = new Set();
+                    const seenByTrack = new Map(); // legado sem sessionId -> [timestamps]
                     const NEAR_MS = 2 * 60 * 1000;
                     return h => {
+                        if (h.sessionId) {
+                            if (seenSessions.has(h.sessionId)) return false;
+                            seenSessions.add(h.sessionId);
+                            return true;
+                        }
                         const id = String(h.id);
                         const ts = h.playedAt || 0;
                         const kept = seenByTrack.get(id) || [];
@@ -1301,6 +1390,7 @@ async function _refreshFromSupabaseInBackground() {
 
 async function initApp() {
     await loadInitialData();
+    void syncPendingListenSessions();
     _bootDone = true;
     if (typeof window.renderHome === 'function') window.renderHome();
     if (typeof window.renderLibrary === 'function') window.renderLibrary();
