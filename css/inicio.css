@@ -730,8 +730,8 @@
     display: flex;
     flex-direction: row;
     gap: 14px;
-    /* Centraliza poucos cards sem esconder o começo quando houver overflow. */
-    justify-content: safe center;
+    /* O JavaScript adiciona .track-centered somente quando todos os cards cabem. */
+    justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -742,6 +742,7 @@
 }
 
 .recent-grid::-webkit-scrollbar { display: none; }
+.recent-grid.track-centered { justify-content: center; }
 .recent-grid:active { cursor: grabbing; }
 
 .recent-grid .music-card-horizontal {
@@ -1312,8 +1313,8 @@
 .popular-track {
     display: flex;
     gap: 14px;
-    /* Centraliza o conjunto quando ele cabe e preserva o swipe quando não cabe. */
-    justify-content: safe center;
+    /* O JavaScript adiciona .track-centered somente quando todos os cards cabem. */
+    justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -1324,6 +1325,7 @@
 }
 
 .popular-track::-webkit-scrollbar { display: none; }
+.popular-track.track-centered { justify-content: center; }
 .popular-track:active { cursor: grabbing; }
 
 .popular-card {

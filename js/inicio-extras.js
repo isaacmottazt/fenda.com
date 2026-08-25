@@ -455,6 +455,7 @@
                     || TAB.querySelector('.weekly-section');
         if (anchor) anchor.parentNode.insertBefore(sec, anchor.nextSibling);
         else TAB.appendChild(sec);
+        window.syncHomeTrackAlignment?.(sec.querySelector('.popular-track'));
     }
 
     function renderPopular() {

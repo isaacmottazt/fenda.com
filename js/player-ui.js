@@ -1,53 +1,79 @@
 // ===== INTERFACE DAS NOVAS ABAS (player-ui.js completo) =====
 
+const FEATURED_RECOMMENDATION_TTL = 10 * 60 * 1000;
+
+function featuredRecommendationKey() {
+    return `fenda_featured_recommendation_${AppState?.userId || 'guest'}`;
+}
+
+function readFeaturedRecommendation() {
+    try {
+        const raw = localStorage.getItem(featuredRecommendationKey());
+        const cached = raw ? JSON.parse(raw) : null;
+        if (!cached?.musicId || !cached?.updatedAt) return null;
+        if (Date.now() - Number(cached.updatedAt) >= FEATURED_RECOMMENDATION_TTL) return null;
+        const music = AppState.musics.find(m => String(m.id) === String(cached.musicId));
+        return music ? { music, updatedAt: Number(cached.updatedAt) } : null;
+    } catch { return null; }
+}
+
+function saveFeaturedRecommendation(music, updatedAt = Date.now()) {
+    try {
+        localStorage.setItem(featuredRecommendationKey(), JSON.stringify({
+            musicId: music.id,
+            updatedAt,
+        }));
+    } catch {}
+}
+
+function scheduleFeaturedRecommendationRefresh(updatedAt) {
+    if (window._featuredTimer) clearTimeout(window._featuredTimer);
+    const remaining = Math.max(1000, FEATURED_RECOMMENDATION_TTL - (Date.now() - updatedAt) + 50);
+    window._featuredTimer = setTimeout(() => {
+        window._featuredTimer = null;
+        updateFeaturedMusic();
+    }, remaining);
+}
+
 function updateFeaturedMusic() {
     const titleEl = document.getElementById('featuredTitle');
     const artistEl = document.getElementById('featuredArtist');
 
-    if (!AppState.musics.length) {
-        // Sem catálogo ainda: deixa o placeholder do HTML como está —
-        // quando os dados chegarem (_fetchAllFromSupabase re-chama esta
-        // função), o texto é sobrescrito abaixo. O bug anterior era essa
-        // função sair aqui SEM jamais escrever no DOM se a primeira
-        // chamada acontecesse antes do catálogo carregar, e nenhuma
-        // chamada seguinte corrigia isso enquanto o usuário ficava parado
-        // na aba Início (só ao trocar de aba manualmente).
-        return;
+    if (!AppState.musics.length) return;
+
+    // A recomendação fica estável por 10 minutos, inclusive ao trocar de
+    // aba, atualizar a home ou receber novos dados do catálogo.
+    const cached = readFeaturedRecommendation();
+    let music = cached?.music;
+    let updatedAt = cached?.updatedAt;
+
+    if (!music) {
+        const recs = (typeof window.getRecommendations === 'function')
+            ? window.getRecommendations(5, { discovery: 0.55 })
+            : [];
+        music = recs.length > 0
+            ? recs[Math.floor(Math.random() * recs.length)]
+            : AppState.musics[Math.floor(Math.random() * AppState.musics.length)];
+        if (!music) return;
+        updatedAt = Date.now();
+        saveFeaturedRecommendation(music, updatedAt);
     }
-    // "Recomendação do dia" de verdade: perfil de escuta (getRecommendations),
-    // não Math.random no catálogo inteiro como era antes. Rotaciona entre as
-    // top 5 a cada ciclo do timer; sem histórico ainda, cai no aleatório.
-    let music;
-    const _recs = (typeof window.getRecommendations === 'function')
-        ? window.getRecommendations(5, { discovery: 0.55 })
-        : [];
-    if (_recs.length > 0) {
-        music = _recs[Math.floor(Math.random() * _recs.length)];
-    } else {
-        music = AppState.musics[Math.floor(Math.random() * AppState.musics.length)];
-    }
+    scheduleFeaturedRecommendationRefresh(updatedAt);
 
     const bg = document.getElementById('featuredBg');
     const banner = document.getElementById('featuredBanner');
 
-    // Remove data-i18n="loading" ANTES de escrever o valor real: enquanto
-    // esse atributo existir, qualquer chamada futura de applyTranslations()
-    // (disparada pelo MutationObserver do i18n.js sempre que qualquer nó
-    // com data-i18n é adicionado em QUALQUER lugar da página — abrir
-    // Configurações, um modal, etc.) sobrescreve este elemento de volta
-    // para "Carregando..." mesmo depois do nome real já ter sido exibido.
-    // Esse era o bug real por trás do "Carregando..." travado.
+    // Remove data-i18n="loading" antes de escrever o valor real, para que
+    // atualizações de tradução não devolvam o título ao placeholder.
     if (titleEl) { titleEl.removeAttribute('data-i18n'); titleEl.textContent = music.title; }
     if (artistEl) artistEl.textContent = music.artist;
 
-    // Fundo com capa da música
     if (bg && music.cover) {
         bg.style.backgroundImage = `url(${music.cover})`;
         bg.style.backgroundSize = 'cover';
         bg.style.backgroundPosition = 'center';
     }
 
-    // Botão play
     const featuredBtn = document.getElementById('featuredPlayBtn');
     if (featuredBtn) {
         const newBtn = featuredBtn.cloneNode(true);
@@ -55,7 +81,6 @@ function updateFeaturedMusic() {
         newBtn.addEventListener('click', (e) => { e.stopPropagation(); playMusicTrack(music); });
     }
 
-    // Clique no banner
     if (banner) {
         banner._featuredMusic = music;
         if (!banner._listenerAdded) {
@@ -67,11 +92,30 @@ function updateFeaturedMusic() {
     }
 }
 
+function syncHomeTrackAlignment(trackOrSelector) {
+    const track = typeof trackOrSelector === 'string'
+        ? document.querySelector(trackOrSelector)
+        : trackOrSelector;
+    if (!track) return;
+
+    const apply = () => {
+        const overflowing = track.scrollWidth > track.clientWidth + 1;
+        track.classList.toggle('track-centered', !overflowing);
+        // Uma nova renderização começa no primeiro card, nunca no meio de
+        // uma palavra ou com o primeiro título parcialmente escondido.
+        track.scrollLeft = 0;
+    };
+    if (window.requestAnimationFrame) requestAnimationFrame(apply);
+    else setTimeout(apply, 0);
+}
+
+window.syncHomeTrackAlignment = syncHomeTrackAlignment;
+window.addEventListener('resize', () => {
+    document.querySelectorAll('.recent-grid, .popular-track').forEach(syncHomeTrackAlignment);
+});
+
 function renderHome() {
-    // Recomendação do dia — atualiza a cada 10 minutos
-    if (!window._featuredTimer) {
-        window._featuredTimer = setInterval(() => updateFeaturedMusic(), 10 * 60 * 1000);
-    }
+    // updateFeaturedMusic consulta o cache e só troca a faixa após 10 minutos.
     updateFeaturedMusic();
 
     // Retry de segurança: se o catálogo (AppState.musics) ainda não tiver
@@ -118,6 +162,7 @@ function renderHome() {
                 <p>${escapeHtml(music.artist)}</p>
             </div>
         `).join('');
+        syncHomeTrackAlignment(recentContainer);
         document.querySelectorAll('#recentlyPlayedList .music-card-horizontal').forEach(card => {
             card.addEventListener('click', () => {
                 const id = parseInt(card.dataset.id);
