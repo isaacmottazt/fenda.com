@@ -347,17 +347,18 @@
     function renderDiscover() {
         TAB.querySelectorAll('.discover-section').forEach(el => el.remove());
 
-        const musics = getMusics();
-        if (musics.length < 8) return;
+        const musics = getMusics().filter(t => t?.cover && t?.title);
+        if (musics.length < 4) return;
 
         const history   = window.AppState?.history || [];
         const recentIds = new Set(
             history.slice(0, 20).map(h => String(h?.id ?? h?.trackId ?? '')).filter(Boolean)
         );
 
-        const candidates = musics.filter(t => t?.cover && t?.title && !recentIds.has(String(t.id)));
-        if (candidates.length < 4) return;
-
+        // Prioriza músicas ainda não ouvidas, mas não deixa a seção sumir
+        // quando o catálogo do usuário é pequeno ou todo o catálogo já foi ouvido.
+        const unseen = musics.filter(t => !recentIds.has(String(t.id)));
+        const candidates = unseen.length >= 4 ? unseen : musics;
         const picks = [...candidates].sort(() => Math.random() - 0.5).slice(0, 4);
 
         const sec = document.createElement('section');
@@ -409,18 +410,23 @@
         if (!musics.length) return;
 
         // Detecta qual campo tem play count server-side
-        const sample = musics[0];
         const countField = ['play_count','plays','total_plays','playCount','totalPlays']
-            .find(f => typeof sample?.[f] === 'number');
+            .find(f => musics.some(m => typeof m?.[f] === 'number'));
 
         let sorted;
 
         if (countField) {
             // Tem campo server-side — ordena por ele
             sorted = [...musics]
-                .filter(m => m[countField] > 0 && m.cover && m.title)
+                .filter(m => m[countField] > 0)
                 .sort((a, b) => b[countField] - a[countField])
                 .slice(0, 10);
+
+            // Se ainda não há plays registrados, usa o próprio catálogo como
+            // fallback para manter a seção visível desde o primeiro acesso.
+            if (sorted.length < 3) {
+                sorted = [...musics].slice(0, 10);
+            }
         } else {
             // Proxy: usa histórico local pra estimar popularidade
             const history = window.AppState?.history || [];
@@ -444,7 +450,7 @@
         sec.className = 'home-section popular-section';
         sec.innerHTML = `
             <div class="section-header">
-                <h2><span class="material-symbols-rounded">local_fire_department</span>Populares</h2>
+                <h2><span class="material-symbols-rounded">local_fire_department</span>Populares entre os usuários</h2>
             </div>
             <div class="popular-track">
                 ${sorted.map((t, i) => `
@@ -710,7 +716,9 @@
     window.__inicioExtras = {
         init,
         reorder: reorderHomeSections,
+        refresh: renderDynamic,
         refreshDiscover: renderDiscover,
+        refreshPopular: renderPopular,
         refreshRecommended: renderRecommended,
         diagnose() {
             const m = getMusics();

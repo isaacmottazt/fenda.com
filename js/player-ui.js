@@ -298,6 +298,11 @@ function renderHome() {
             }
         });
     }
+
+    // As seções extras dependem do catálogo e do histórico, que chegam de
+    // forma assíncrona. Atualiza-as junto com o restante da home para que
+    // não fiquem ausentes até o usuário trocar de aba.
+    window.__inicioExtras?.refresh?.();
 }
 
 // ========== ARTISTAS: estado de ordenação e favoritos ==========
