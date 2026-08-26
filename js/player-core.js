@@ -678,6 +678,43 @@ function _musicCategory(music) {
     return genre && text === genre ? `genre:${genre}` : null;
 }
 
+function _buildCollectionProfile(trackList) {
+    const tracks = _uniqueTracks(trackList || []);
+    if (!tracks.length) return null;
+
+    const countValues = (values) => {
+        const counts = new Map();
+        values.forEach(value => {
+            const normalized = _normalizeMusicText(value);
+            if (normalized) counts.set(normalized, (counts.get(normalized) || 0) + 1);
+        });
+        return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([value]) => value);
+    };
+
+    const genres = countValues(tracks.map(track => track.genre));
+    const styles = countValues(tracks.flatMap(track => [
+        track.style,
+        ...(Array.isArray(track.style_tags) ? track.style_tags : []),
+    ]));
+    const rhythms = countValues(tracks.map(track => track.rhythm_profile));
+    const categories = [...new Set(tracks.map(_musicCategory).filter(Boolean))];
+    const average = (field) => {
+        const values = tracks.map(track => Number(track[field])).filter(Number.isFinite);
+        return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+    };
+
+    return {
+        genre: genres[0] || '',
+        style: styles[0] || '',
+        style_tags: styles.slice(0, 8),
+        rhythm_profile: rhythms[0] || '',
+        tempo_bpm: average('tempo_bpm'),
+        energy_score: average('energy_score'),
+        danceability_score: average('danceability_score'),
+        allowedCategories: categories,
+    };
+}
+
 function _musicTextSet(music) {
     return new Set([
         music?.genre,
@@ -741,11 +778,11 @@ function _affinityScore(candidate, seed) {
         + danceScore * 0.04;
 }
 
-function buildAffinityQueue(currentMusicId, trackList, isShuffle, seedMusicId = currentMusicId) {
+function buildAffinityQueue(currentMusicId, trackList, isShuffle, seedMusicId = currentMusicId, seedProfile = null) {
     const cleanList = _uniqueTracks(trackList?.length ? trackList : AppState.musics);
     const currentId = _trackId(currentMusicId);
     const seedId = _trackId(seedMusicId || currentMusicId);
-    const seed = _uniqueTracks([...(AppState.musics || []), ...cleanList])
+    const seed = seedProfile || _uniqueTracks([...(AppState.musics || []), ...cleanList])
         .find(track => _trackId(track) === seedId);
     const allPool = cleanList.filter(track => _trackId(track) !== currentId);
     if (!allPool.length) return [];
@@ -755,9 +792,13 @@ function buildAffinityQueue(currentMusicId, trackList, isShuffle, seedMusicId = 
     // Quando a semente tem categoria conhecida, somente a mesma categoria
     // entra; faixas sem gênero ficam fora até serem catalogadas.
     const seedCategory = _musicCategory(seed);
-    const pool = seedCategory
+    const allowedCategories = Array.isArray(seed?.allowedCategories)
+        ? seed.allowedCategories.filter(Boolean)
+        : [];
+    const pool = seedCategory || allowedCategories.length
         ? allPool.filter(track => {
             const candidateCategory = _musicCategory(track);
+            if (allowedCategories.length) return allowedCategories.includes(candidateCategory);
             return candidateCategory === seedCategory;
         })
         : allPool;
@@ -850,9 +891,14 @@ function ensureAutoQueue() {
     const playedIds = new Set(_playbackHistory.map(_trackId));
     const seedId = _trackId(AppState.playContext?.seedMusicId || currentId);
     const seedTrack = allMusics.find(track => _trackId(track) === seedId);
-    const seedCategory = _musicCategory(seedTrack);
+    const seedProfile = AppState.playContext?.seedProfile || seedTrack;
+    const seedCategory = _musicCategory(seedProfile);
+    const allowedCategories = Array.isArray(seedProfile?.allowedCategories)
+        ? seedProfile.allowedCategories.filter(Boolean)
+        : [];
     const isCompatible = track => {
         const candidateCategory = _musicCategory(track);
+        if (allowedCategories.length) return allowedCategories.includes(candidateCategory);
         return !seedCategory || candidateCategory === seedCategory;
     };
 
@@ -860,6 +906,10 @@ function ensureAutoQueue() {
     // (por exemplo, uma busca com uma única música). Nesse caso, o catálogo
     // restante da mesma categoria vira a fila de continuidade.
     const source = AppState.playContext?.source || 'library';
+    // Enquanto ainda existem faixas na playlist, não antecipa recomendações
+    // externas. Elas só entram depois que a última faixa da playlist acabar.
+    if ((source === 'playlist' || AppState.playContext?.playlistId)
+        && (AppState.autoQueue || []).length > 0) return;
     if (AppState.repeatMode === 1 && (source === 'playlist' || AppState.playContext?.playlistId)) return;
     const candidates = allMusics.filter(track => {
         const id = _trackId(track);
@@ -882,7 +932,7 @@ function ensureAutoQueue() {
     const unplayed = refillCandidates.filter(track => !playedIds.has(_trackId(track)));
     const orderedPool = unplayed.length ? unplayed : refillCandidates;
     const ordered = typeof buildAffinityQueue === 'function'
-        ? buildAffinityQueue(currentId, orderedPool, AppState.isShuffle, seedId)
+        ? buildAffinityQueue(currentId, orderedPool, AppState.isShuffle, seedId, seedProfile)
         : (AppState.isShuffle ? _shuffleSpread(orderedPool) : [...orderedPool]);
     AppState.autoQueue.push(...ordered);
 }
@@ -927,6 +977,7 @@ function getPrevMusic() {
 
 window.setPlayContext = setPlayContext;
 window._queueListForContext = _queueListForContext;
+window.buildCollectionProfile = _buildCollectionProfile;
 window.buildAffinityQueue = buildAffinityQueue;
 window.ensureAutoQueue = ensureAutoQueue;
 window.buildAutoQueue = buildAutoQueue;
@@ -1047,15 +1098,20 @@ async function playMusicTrack(music, opts = {}) {
         // fora da playlist anterior também começa um contexto global novo.
         if (_isPlaylistContext) {
             _ctx.seedMusicId = music.id;
+            _ctx.seedProfile = _ctx.seedProfile || _buildCollectionProfile(_ctx.trackList);
+            // Enquanto ainda há faixas da playlist, preserva sua ordem. O
+            // perfil da coleção só será usado quando ela acabar.
+            AppState.autoQueue = buildAutoQueue(music.id, _list, AppState.isShuffle);
         } else {
             AppState.playContext = {
                 source: 'library',
                 playlistId: null,
                 trackList: [...AppState.musics],
                 seedMusicId: music.id,
+                seedProfile: null,
             };
+            AppState.autoQueue = buildAffinityQueue(music.id, _list, AppState.isShuffle, music.id, music);
         }
-        AppState.autoQueue = buildAffinityQueue(music.id, _list, AppState.isShuffle, music.id);
         ensureAutoQueue();
     }
 
@@ -1183,10 +1239,21 @@ function handleNextTrack() {
     if (pool.length === 0) pool = allMusics.filter(m => m.id !== AppState.currentMusicId && !contextIds.has(m.id));
     if (pool.length === 0) pool = allMusics.filter(m => m.id !== AppState.currentMusicId);
     window._showFendaError?.('[DIAG] pool final tem ' + pool.length + ' músicas');
+    const carriedProfile = AppState.playContext?.seedProfile || null;
     AppState.autoQueue = buildAffinityQueue(
-        AppState.currentMusicId, pool, AppState.isShuffle, AppState.currentMusicId
+        AppState.currentMusicId,
+        pool,
+        AppState.isShuffle,
+        AppState.currentMusicId,
+        carriedProfile
     );
-    AppState.playContext = { source: 'autoplay', playlistId: null, trackList: [...pool], seedMusicId: AppState.currentMusicId };
+    AppState.playContext = {
+        source: 'autoplay',
+        playlistId: null,
+        trackList: [...pool],
+        seedMusicId: AppState.currentMusicId,
+        seedProfile: carriedProfile,
+    };
     AppState._originalTrackList = [...pool];
     if (AppState.autoQueue.length > 0) {
         window._showFendaError?.('[DIAG] chamando playMusicTrack com a próxima do pool');

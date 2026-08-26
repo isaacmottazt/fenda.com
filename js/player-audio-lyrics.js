@@ -208,8 +208,9 @@ function initAudioAndLyricsEngine() {
                 ? window._queueListForContext()
                 : trackList;
             const seedId = AppState.playContext?.seedMusicId || AppState.currentMusicId;
+            const seedProfile = AppState.playContext?.seedProfile || null;
             AppState.autoQueue = typeof window.buildAffinityQueue === 'function'
-                ? window.buildAffinityQueue(AppState.currentMusicId, queueList, AppState.isShuffle, seedId)
+                ? window.buildAffinityQueue(AppState.currentMusicId, queueList, AppState.isShuffle, seedId, seedProfile)
                 : buildAutoQueue(AppState.currentMusicId, trackList, AppState.isShuffle);
             window.ensureAutoQueue?.();
             if (typeof window.renderQueuePanel === 'function') window.renderQueuePanel();
