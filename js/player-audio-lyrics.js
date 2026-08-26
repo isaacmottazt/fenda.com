@@ -1,5 +1,9 @@
 // ===== MOTOR DE ÁUDIO, SINCRONISMO E LETRAS .LRC (player-audio-lyrics.js) =====
 
+const _coverColorCache = new Map();
+const _lyricsDataCache = new Map();
+let _lyricsLoadRequest = null;
+
 // Animação de "curtir": pop elástico no ícone + pequenas partículas
 // espalhando ao redor do botão. Efeito visual só, sem afetar o estado
 // (toggleFavoriteTrack já foi chamado antes desta função rodar).
@@ -352,6 +356,87 @@ function _setLyricsSectionMode(isPodcast) {
     });
 }
 
+async function loadLyricsForTrack(music, { force = false } = {}) {
+    if (!DOM.lyricsContainer || !music) return [];
+
+    const trackId = String(music.id);
+    const source = typeof music.lrc === 'string' ? music.lrc.trim() : '';
+    const cacheKey = `${trackId}|${source}`;
+    const isPodcast = music.type === 'podcast' || trackId.startsWith('podcast:');
+    if (!force && AppState.lyricsTrackId === trackId && !AppState.lyricsLoading) {
+        if (!DOM.lyricsContainer.childElementCount) buildLyricsMarkup();
+        return Array.isArray(AppState.lyricsData) ? AppState.lyricsData : [];
+    }
+    if (!force && _lyricsDataCache.has(cacheKey)) {
+        AppState.lyricsTrackId = trackId;
+        AppState.lyricsData = _lyricsDataCache.get(cacheKey) || [];
+        AppState.lyricsLoading = false;
+        buildLyricsMarkup();
+        if (DOM.audio && AppState.lyricsData.length) updateLyricsHighlight(DOM.audio.currentTime || 0);
+        return AppState.lyricsData;
+    }
+
+    if (!force && _lyricsLoadRequest?.trackId === trackId) {
+        return _lyricsLoadRequest.promise;
+    }
+
+    if (_lyricsLoadRequest && _lyricsLoadRequest.trackId !== trackId) {
+        _lyricsLoadRequest = null;
+    }
+
+    AppState.lyricsTrackId = trackId;
+    AppState.lyricsData = [];
+    AppState.lyricsLoading = !isPodcast;
+    buildLyricsMarkup();
+
+    if (isPodcast) {
+        AppState.lyricsLoading = false;
+        buildLyricsMarkup();
+        return [];
+    }
+
+    const request = { trackId, promise: null };
+    _lyricsLoadRequest = request;
+    request.promise = (async () => {
+        let rawLyricsText = '';
+
+        if (source && /^https?:\/\//i.test(source)) {
+            try {
+                const response = await fetch(source, { cache: 'force-cache' });
+                if (response.ok) rawLyricsText = await response.text();
+            } catch (error) {
+                console.warn('[Lyrics] Não foi possível carregar o LRC:', error);
+            }
+        } else {
+            rawLyricsText = source;
+        }
+
+        // Uma resposta antiga nunca pode pintar as letras de outra faixa.
+        if (_lyricsLoadRequest !== request || String(AppState.currentMusicId) !== trackId) return [];
+
+        AppState.lyricsData = typeof window.parseLyrics === 'function'
+            ? window.parseLyrics(rawLyricsText)
+            : parseLyrics(rawLyricsText);
+        _lyricsDataCache.set(cacheKey, AppState.lyricsData);
+        AppState.lyricsLoading = false;
+        buildLyricsMarkup();
+        if (DOM.audio && AppState.lyricsData.length) updateLyricsHighlight(DOM.audio.currentTime || 0);
+        return AppState.lyricsData;
+    })().catch((error) => {
+        if (_lyricsLoadRequest === request && String(AppState.currentMusicId) === trackId) {
+            console.warn('[Lyrics] Falha inesperada:', error);
+            AppState.lyricsData = [];
+            AppState.lyricsLoading = false;
+            buildLyricsMarkup();
+        }
+        return [];
+    }).finally(() => {
+        if (_lyricsLoadRequest === request) _lyricsLoadRequest = null;
+    });
+
+    return request.promise;
+}
+
 function _renderPodcastDescription(music) {
     const description = String(music?.description || '').trim();
     const wrapper = document.createElement('div');
@@ -382,7 +467,17 @@ function buildLyricsMarkup() {
         return;
     }
 
-    if (AppState.lyricsData.length === 0) {
+    const lyrics = Array.isArray(AppState.lyricsData) ? AppState.lyricsData : [];
+    if (AppState.lyricsLoading) {
+        DOM.lyricsContainer.innerHTML = `
+            <div class="lyrics-loading" aria-live="polite">
+                <span class="material-symbols-rounded">sync</span>
+                <p>Carregando letra…</p>
+            </div>`;
+        return;
+    }
+
+    if (lyrics.length === 0) {
         DOM.lyricsContainer.innerHTML = `
             <div class="lyrics-unavailable">
                 <span class="material-symbols-rounded">music_note</span>
@@ -399,7 +494,7 @@ function buildLyricsMarkup() {
         return;
     }
 
-    AppState.lyricsData.forEach((line, index) => {
+    lyrics.forEach((line, index) => {
         const p = document.createElement('p');
         p.className = 'lyric-line';
         p.id = `lyric-line-${index}`;
@@ -417,11 +512,12 @@ let _lyricsScrollTarget = null;
 let _lyricsCurrentScroll = null;
 
 function updateLyricsHighlight(currentTime) {
-    if (AppState.lyricsData.length === 0) return;
+    const lyrics = Array.isArray(AppState.lyricsData) ? AppState.lyricsData : [];
+    if (lyrics.length === 0) return;
 
     let activeIndex = -1;
-    for (let i = 0; i < AppState.lyricsData.length; i++) {
-        if (currentTime >= AppState.lyricsData[i].time) activeIndex = i;
+    for (let i = 0; i < lyrics.length; i++) {
+        if (currentTime >= lyrics[i].time) activeIndex = i;
         else break;
     }
 
@@ -577,13 +673,21 @@ function updatePlayerVisibility(music) {
         ctxEl.textContent = ctx;
     }
 
-    // Fundo dinâmico com cor da capa
+    // A capa define a paleta somente do player expandido.
     if (music.cover) {
         _extractColorFromCover(music.cover).then(color => {
-            const bg = document.getElementById('playerBg');
-            if (bg) bg.style.background = `linear-gradient(160deg, ${color} 0%, #0c0916 65%)`;
-        });
+            if (String(AppState.currentMusicId) !== String(music.id)) return;
+            if (typeof window.applyFendaPlayerTrackTheme === 'function') {
+                window.applyFendaPlayerTrackTheme(color);
+            } else {
+                const bg = document.getElementById('playerBg');
+                if (bg) bg.style.background = `linear-gradient(160deg, ${color} 0%, #0c0916 65%)`;
+            }
+        }).catch(() => {});
     }
+
+    // Reconstroi as letras também quando a faixa já estava restaurada.
+    loadLyricsForTrack(music).catch(() => {});
 
     // Botão favorito
     const favBtn = document.getElementById('playerExpandedFavBtn');
@@ -690,26 +794,48 @@ function collapseLyricsScreen() {
 // Exportações (sem handleNextTrack/handlePrevTrack, pois já vêm do core)
 // Extrai cor dominante da capa via canvas
 async function _extractColorFromCover(src) {
-    return new Promise((resolve) => {
+    const key = String(src || '');
+    if (!key) return '#1a1040';
+    if (_coverColorCache.has(key)) return _coverColorCache.get(key);
+
+    const color = await new Promise((resolve) => {
         try {
             const img = new Image();
             img.crossOrigin = 'anonymous';
+            img.decoding = 'async';
             img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = 10; canvas.height = 10;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, 10, 10);
-                const d = ctx.getImageData(0, 0, 10, 10).data;
-                let r = 0, g = 0, b = 0;
-                for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i+1]; b += d[i+2]; }
-                const n = d.length / 4;
-                // Escurece um pouco para não ficar muito vibrante
-                resolve(`rgb(${Math.floor(r/n*0.6)}, ${Math.floor(g/n*0.6)}, ${Math.floor(b/n*0.6)})`);
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 10;
+                    canvas.height = 10;
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    if (!ctx) return resolve('#1a1040');
+                    ctx.drawImage(img, 0, 0, 10, 10);
+                    const d = ctx.getImageData(0, 0, 10, 10).data;
+                    let r = 0, g = 0, b = 0;
+                    for (let i = 0; i < d.length; i += 4) {
+                        r += d[i];
+                        g += d[i + 1];
+                        b += d[i + 2];
+                    }
+                    const n = d.length / 4;
+                    // Reduz a intensidade para manter contraste com texto branco.
+                    const toHex = value => Math.max(0, Math.min(255, Math.round(value * 0.62)))
+                        .toString(16).padStart(2, '0');
+                    resolve(`#${toHex(r / n)}${toHex(g / n)}${toHex(b / n)}`);
+                } catch {
+                    resolve('#1a1040');
+                }
             };
             img.onerror = () => resolve('#1a1040');
-            img.src = src;
-        } catch { resolve('#1a1040'); }
+            img.src = key;
+        } catch {
+            resolve('#1a1040');
+        }
     });
+
+    _coverColorCache.set(key, color);
+    return color;
 }
 
 // Configura scroll do player para mostrar mini controles ao ver letras
@@ -758,6 +884,7 @@ const _origUpdateUIState = window.updatePlayerUIState;
 window.initAudioAndLyricsEngine = initAudioAndLyricsEngine; 
 window.parseLyrics = parseLyrics; 
 window.buildLyricsMarkup = buildLyricsMarkup; 
+window.loadLyricsForTrack = loadLyricsForTrack;
 window.updatePlayerVisibility = updatePlayerVisibility; 
 window.updatePlayerUIState = updatePlayerUIState; 
 window.expandLyricsScreen = expandLyricsScreen; 

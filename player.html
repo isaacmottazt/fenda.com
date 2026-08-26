@@ -9,7 +9,7 @@
     <title>Fenda Music</title>
     <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/fonts/material-symbols.css" />
-    <link rel="stylesheet" href="/css/base.css?v=lyrics-redesign-v1" />
+    <link rel="stylesheet" href="/css/base.css?v=lyrics-redesign-v2" />
     <link rel="stylesheet" href="/css/inicio.css" />
     <link rel="stylesheet" href="/css/busca.css" />
     <link rel="stylesheet" href="/css/biblioteca.css" />
@@ -892,11 +892,10 @@
     </div>
 
     <script src="/js/i18n.js?v=consent-prompt-v1"></script>
-    <script src="/js/player-core.js?v=privacy-consent-v2"></script>
-    <script src="/js/player-session.js?v=resume-no-autoplay-v1"></script>
-    <script src="/js/player-audio-lyrics.js?v=lyrics-ui-v3"></script>
-    <script src="/js/vendor/html2canvas.min.js"></script>
-    <script src="/js/player-ui.js?v=summary-share-image-v13"></script>
+    <script src="/js/player-core.js?v=lyrics-restore-v1"></script>
+    <script src="/js/player-session.js?v=resume-lyrics-v2"></script>
+    <script src="/js/player-audio-lyrics.js?v=lyrics-ui-v4"></script>
+    <script src="/js/player-ui.js?v=summary-share-image-v14"></script>
     <script src="/js/player-playlists.js?v=offline-downloads-v1"></script>
     <script src="/js/podcasts.js"></script>
     <script src="/js/realtime-catalog.js"></script>
@@ -913,7 +912,7 @@
     <!-- Novos módulos -->
     <script src="/js/settings.js?v=privacy-controls-v1"></script>
     <script src="/js/playback-engine.js"></script>
-    <script src="/js/themes-v6.js?v=lyrics-ui-v2"></script>
+    <script src="/js/themes-v6.js?v=lyrics-ui-v3"></script>
     <script src="/js/notifications-follow.js"></script>
     <!-- Sistema de fila paralelo (queue-advanced.js, queue-initializer.js, queue-visual.js)
          removido: usava IndexedDB próprio, nunca conectado ao AppState real do player,
@@ -945,7 +944,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=92", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=93", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

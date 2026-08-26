@@ -239,6 +239,89 @@ class FendaThemes {
     this.savedMode = mode;
   }
 
+  applyPlayerTrackPalette(color) {
+    const normalized = /^#[0-9a-f]{6}$/i.test(String(color || ''))
+      ? String(color).toLowerCase()
+      : '#1a1040';
+    const { h, s } = this.hexToHSL(normalized);
+    const sat = Math.min(54, Math.max(24, Math.round(s * 0.72)));
+    const accent = `hsl(${h}, ${sat}%, 58%)`;
+    const accentHi = `hsl(${h}, ${Math.min(64, sat + 8)}%, 76%)`;
+    const deep = `hsl(${h}, ${sat}%, 11%)`;
+    const deeper = `hsl(${h}, ${sat}%, 6%)`;
+    const glow = `hsla(${h}, ${sat}%, 54%, 0.42)`;
+    const styleEl = document.getElementById('fenda-track-theme-inject') || (() => {
+      const el = document.createElement('style');
+      el.id = 'fenda-track-theme-inject';
+      document.head.appendChild(el);
+      return el;
+    })();
+
+    styleEl.textContent = `
+      /* Tema transitório da faixa: não altera a preferência global salva. */
+      .lyrics-full-screen {
+        background:
+          radial-gradient(circle at 84% 4%, hsla(${h}, ${sat}%, 42%, 0.18), transparent 44%),
+          linear-gradient(180deg, ${deep} 0%, ${deeper} 58%, #030207 100%) !important;
+      }
+      .player-bg {
+        background:
+          linear-gradient(160deg, hsla(${h}, ${sat}%, 34%, 0.9) 0%,
+          hsl(${h}, ${Math.max(18, sat - 10)}%, 14%) 48%, #05030a 100%) !important;
+      }
+      .player-bg::after {
+        background: linear-gradient(to bottom,
+          rgba(5, 3, 10, 0.02) 0%, rgba(5, 3, 10, 0.28) 38%,
+          rgba(5, 3, 10, 0.88) 76%, rgba(5, 3, 10, 1) 100%) !important;
+      }
+      .player-page-lyrics {
+        background:
+          radial-gradient(circle at 88% 0%, hsla(${h}, ${sat}%, 48%, 0.16), transparent 42%),
+          linear-gradient(180deg, hsla(${h}, ${Math.max(16, sat - 12)}%, 13%, 0.98) 0%,
+          ${deeper} 58%, #030207 100%) !important;
+      }
+      .player-lyrics-header {
+        color: rgba(255, 255, 255, 0.82) !important;
+        background: linear-gradient(180deg, hsla(${h}, ${sat}%, 8%, 0.94) 0%, hsla(${h}, ${sat}%, 8%, 0.68) 72%, transparent 100%) !important;
+      }
+      .player-lyrics-header .material-symbols-rounded {
+        color: ${accentHi} !important;
+        filter: drop-shadow(0 0 8px ${glow}) !important;
+      }
+      .ctrl-play,
+      .player-mini-play {
+        background: linear-gradient(135deg, ${accentHi}, ${accent}) !important;
+        box-shadow: 0 4px 18px ${glow} !important;
+      }
+      .player-seek-fill,
+      .player-seek-thumb {
+        background: ${accent} !important;
+      }
+      .player-mini-controls {
+        background: linear-gradient(180deg, hsla(${h}, ${sat}%, 8%, 0.98), #05030a 100%) !important;
+        border-top-color: hsla(${h}, ${sat}%, 70%, 0.20) !important;
+      }
+      .lyrics-container-content p {
+        color: rgba(255, 255, 255, 0.30) !important;
+      }
+      .lyrics-container-content p.past {
+        color: rgba(255, 255, 255, 0.48) !important;
+      }
+      .lyrics-container-content p.upcoming {
+        color: rgba(255, 255, 255, 0.28) !important;
+      }
+      .lyrics-container-content p.active {
+        color: #fff !important;
+      }
+      .lyric-line.active::before {
+        background: linear-gradient(180deg, ${accentHi}, ${accent}) !important;
+        box-shadow: 0 0 15px ${glow} !important;
+      }
+    `;
+    this.root.style.setProperty('--player-track-color', normalized);
+    this.root.style.setProperty('--player-track-accent', accent);
+  }
+
   init() {
     // Injeta o CSS de variáveis globais se ainda não estiver
     if (!document.getElementById('theme-variables-css')) {
@@ -261,3 +344,5 @@ class FendaThemes {
 }
 
 const fendaThemes = new FendaThemes();
+window.fendaThemes = fendaThemes;
+window.applyFendaPlayerTrackTheme = (color) => fendaThemes.applyPlayerTrackPalette(color);

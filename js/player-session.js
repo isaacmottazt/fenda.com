@@ -148,6 +148,11 @@ async function restorePlayerSession() {
     if (typeof window.updatePlayerVisibility === 'function') {
         window.updatePlayerVisibility(music);
     }
+    // A sessão restaura a faixa sem passar por playMusicTrack(); por isso
+    // solicita o LRC explicitamente, sem iniciar o áudio.
+    if (typeof window.loadLyricsForTrack === 'function') {
+        window.loadLyricsForTrack(music).catch(() => {});
+    }
 
     const resolveIds = (ids) => Array.isArray(ids)
         ? ids.map(id => AppState.musics.find(m => String(m.id) === String(id))).filter(Boolean)

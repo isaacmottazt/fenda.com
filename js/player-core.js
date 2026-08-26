@@ -1330,24 +1330,11 @@ async function playMusicTrack(music, opts = {}) {
         });
 
     // Letras são secundárias: carregam depois que o áudio já começou.
-    if (!isDifferentTrack) return;
-    const loadLyrics = async () => {
-        let rawLyricsText = "";
-        if (music.lrc && (music.lrc.startsWith('http://') || music.lrc.startsWith('https://'))) {
-            try {
-                const response = await fetch(music.lrc);
-                rawLyricsText = response.ok ? await response.text() : "[00:00.00] Letra indisponível.";
-            } catch {
-                rawLyricsText = "[00:00.00] Erro ao carregar letra.";
-            }
-        } else {
-            rawLyricsText = music.lrc || "";
-        }
-        if (AppState.currentMusicId !== music.id) return;
-        if (typeof window.parseLyrics === 'function') AppState.lyricsData = window.parseLyrics(rawLyricsText);
-        if (typeof window.buildLyricsMarkup === 'function') window.buildLyricsMarkup();
-    };
-    loadLyrics().catch(() => {});
+    // A rotina também é chamada pela restauração e pela UI para que uma faixa
+    // já carregada continue exibindo seu LRC após recarregar o app.
+    if (typeof window.loadLyricsForTrack === 'function') {
+        window.loadLyricsForTrack(music).catch(() => {});
+    }
 }
 
 function togglePlayMusic(music) {

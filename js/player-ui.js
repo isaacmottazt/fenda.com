@@ -958,6 +958,27 @@ async function _canvasToPngBlob(canvas) {
     });
 }
 
+let _html2CanvasLoadPromise = null;
+function _ensureHtml2Canvas() {
+    if (typeof window.html2canvas === 'function') return Promise.resolve(window.html2canvas);
+    if (_html2CanvasLoadPromise) return _html2CanvasLoadPromise;
+
+    _html2CanvasLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = '/js/vendor/html2canvas.min.js?lazy=1';
+        script.async = true;
+        script.onload = () => typeof window.html2canvas === 'function'
+            ? resolve(window.html2canvas)
+            : reject(new Error('Captura de imagem indisponível'));
+        script.onerror = () => reject(new Error('Não foi possível carregar a captura de imagem'));
+        document.head.appendChild(script);
+    }).catch(error => {
+        _html2CanvasLoadPromise = null;
+        throw error;
+    });
+    return _html2CanvasLoadPromise;
+}
+
 async function _shareSummaryImage(card, shareText, monthLabel) {
     if (_summaryShareInProgress || !card) return;
     _summaryShareInProgress = true;
@@ -968,7 +989,7 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
     }
 
     try {
-        if (typeof window.html2canvas !== 'function') throw new Error('Captura de imagem indisponível');
+        await _ensureHtml2Canvas();
         // Exporta somente o cartão mensal, exatamente como ele aparece na
         // Biblioteca. Capturar o próprio elemento evita que o fundo do app,
         // o mini-player e a navegação criem um retângulo externo na imagem.
