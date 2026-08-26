@@ -27,7 +27,7 @@
       if (Array.isArray(podcasts)) window.AppState.podcasts = podcasts;
       if (Array.isArray(artists)) window.AppState.artists = artists;
 
-      window.renderHome?.();
+      window.refreshHomeInBackground?.();
       window.renderLibrary?.();
       window.renderSearch?.();
       window.renderArtistList?.();

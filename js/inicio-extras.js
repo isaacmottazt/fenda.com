@@ -710,9 +710,8 @@
     function init() {
         renderHeader();
         renderDynamic();
-        // Retry duplo: 1s para seções dinâmicas, 2.5s especificamente para o
-        // header/avatar (autenticação pode demorar mais que o boot inicial)
-        setTimeout(() => { renderDynamic(); reorderHomeSections(); }, 1000);
+        // Apenas o cabeçalho pode precisar de uma segunda tentativa enquanto
+        // a autenticação termina; as seções só mudam via atualização de dados.
         setTimeout(() => { renderHeader(); }, 2500);
         // Inicializa sistema de notificações (delay pequeno para aguardar DOM)
         setTimeout(() => {
@@ -729,8 +728,9 @@
 
     window.addEventListener('tab-switch', e => {
         if (e.detail?.tab === 'inicio') {
-            init();
-            setTimeout(reorderHomeSections, 300);
+            // A troca de aba é apenas navegação. A atualização dos dados
+            // acontece pelos eventos de catálogo/realtime em background.
+            reorderHomeSections();
         }
     });
 

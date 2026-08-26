@@ -290,6 +290,7 @@ function setupPlaylistModal() {
                     };
                     if (!AppState.userPlaylists) AppState.userPlaylists = [];
                     AppState.userPlaylists.push(newPlaylist);
+                    window.notifyHomeDataChanged?.('playlists');
 
                     // Atualiza UI imediatamente
                     if (typeof window.renderLibrary === 'function') window.renderLibrary();
@@ -322,6 +323,7 @@ function setupPlaylistModal() {
                 else if (AppState.playlistModalMode === 'rename' && AppState.selectedPlaylistForMenu) {
                     const oldPlaylist = AppState.selectedPlaylistForMenu;
                     oldPlaylist.name = name;
+                    window.notifyHomeDataChanged?.('playlists');
 
                     // Atualiza UI imediatamente
                     if (typeof window.renderLibrary === 'function') window.renderLibrary();
@@ -409,6 +411,7 @@ function setupPlaylistDetailEvents() {
 // Salvar playlists localmente e no Supabase (usado como fallback)
 async function savePlaylists(playlists) {
     localStorage.setItem('supabase_player_playlists', JSON.stringify(playlists));
+    window.notifyHomeDataChanged?.('playlists');
     if (AppState.userId && typeof window.saveUserPlaylist === 'function') {
         // Não podemos salvar todas de uma vez sem loop, mas vamos apenas garantir que cada playlist exista
         for (const pl of playlists) {

@@ -31,6 +31,14 @@ const AppState = {
     userProfile: { full_name: '', avatar_url: null, bio: '' }
 };
 
+function notifyHomeDataChanged(reason = 'data') {
+    window._homeDataVersion = (window._homeDataVersion || 0) + 1;
+    window.dispatchEvent(new CustomEvent('fenda:homeDataChanged', {
+        detail: { reason, version: window._homeDataVersion }
+    }));
+}
+window.notifyHomeDataChanged = notifyHomeDataChanged;
+
 const DOM = {
     audio: document.getElementById('audio'),
     searchInput: document.getElementById('searchInput'),
@@ -191,6 +199,7 @@ async function addToHistory(music, listenedSeconds = 0, options = {}) {
     if (deltaSeconds > 0) addToTotalTime(deltaSeconds);
 
     AppState.history = history;
+    notifyHomeDataChanged('listening-history');
 
     const syncEntry = {
         id: music.id,
@@ -1033,7 +1042,11 @@ function _activateTab(tabId, noRender = false) {
     if (tabEl) tabEl.classList.add('active');
     AppState.currentTab = tabId;
     if (noRender) return;
-    if (tabId === 'inicio'     && typeof window.renderHome    === 'function') window.renderHome();
+    // A navegação inicial já é renderizada pelo boot. Trocar de aba não
+    // deve reconstruir a home nem mover o scroll do usuário.
+    if (tabId === 'inicio' && window._homeNeedsRefresh) {
+        window.refreshHomeInBackground?.();
+    }
     if (tabId === 'buscar'     && typeof window.initSearch    === 'function') window.initSearch();
     if (tabId === 'biblioteca' && typeof window.renderLibrary === 'function') window.renderLibrary();
     if (tabId === 'perfil'     && typeof window.renderProfile === 'function') window.renderProfile();
@@ -1048,13 +1061,18 @@ function initTabs() {
     function switchTab(tabId, btn) {
         if (!tabId) return;
         if (typeof window.closePlaylistDetail === 'function') window.closePlaylistDetail(true);
+        const wasHomeActive = document.getElementById('inicio')?.classList.contains('active');
         navButtons.forEach(b => b.classList.remove('active'));
         tabContents.forEach(t => t.classList.remove('active'));
         if (btn) btn.classList.add('active');
         const activeTab = document.getElementById(tabId);
         if (activeTab) activeTab.classList.add('active');
         AppState.currentTab = tabId;
-        if (tabId === 'inicio'     && typeof window.renderHome    === 'function') window.renderHome();
+        // Só atualiza ao retornar se uma atualização ocorreu enquanto a home
+        // estava fora da tela. Clicar novamente em Início não faz nada.
+        if (tabId === 'inicio' && !wasHomeActive && window._homeNeedsRefresh) {
+            window.refreshHomeInBackground?.();
+        }
         if (tabId === 'buscar'     && typeof window.initSearch    === 'function') window.initSearch();
         if (tabId === 'biblioteca' && typeof window.renderLibrary === 'function') window.renderLibrary();
         if (tabId === 'perfil'     && typeof window.renderProfile === 'function') window.renderProfile();
@@ -1102,7 +1120,7 @@ async function loadInitialData() {
     if (navigator.onLine) {
         console.log('[Cache]  Online — atualizando dados em background...');
         _fetchAllFromSupabase().then(() => {
-            if (typeof window.renderHome === 'function') window.renderHome();
+            if (typeof window.refreshHomeInBackground === 'function') window.refreshHomeInBackground();
             if (typeof window.renderLibrary === 'function') window.renderLibrary();
             if (typeof window.renderProfile === 'function') window.renderProfile();
         }).catch(e => console.warn('[Cache] Falha ao atualizar online:', e));
@@ -1128,7 +1146,7 @@ async function _fetchAllFromSupabase() {
 
     // ── Renderiza telas com os dados disponíveis no momento ───────────
     function _rerender() {
-        if (typeof window.renderHome     === 'function') window.renderHome();
+        if (typeof window.refreshHomeInBackground === 'function') window.refreshHomeInBackground();
         if (typeof window.renderLibrary  === 'function') window.renderLibrary();
         if (typeof window.renderProfile  === 'function') window.renderProfile();
     }
@@ -1379,7 +1397,7 @@ async function _refreshFromSupabaseInBackground() {
     try {
         await _fetchAllFromSupabase();
         // Re-renderiza as telas com dados frescos
-        if (typeof window.renderHome === 'function') window.renderHome();
+        if (typeof window.refreshHomeInBackground === 'function') window.refreshHomeInBackground();
         if (typeof window.renderLibrary === 'function') window.renderLibrary();
         if (typeof window.renderProfile === 'function') window.renderProfile();
         console.log('[Cache]  Dados atualizados em background');

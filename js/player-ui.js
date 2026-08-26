@@ -92,7 +92,48 @@ function updateFeaturedMusic() {
     }
 }
 
-function syncHomeTrackAlignment(trackOrSelector) {
+function captureHomeUiState() {
+    const main = document.querySelector('.main-content');
+    const selectors = ['.recent-grid', '.popular-track', '.carousel-track', '.recommended-track'];
+    const tracks = [];
+    selectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach((track, index) => {
+            tracks.push({ key: `${selector}:${index}`, scrollLeft: track.scrollLeft });
+        });
+    });
+    const active = document.activeElement;
+    return {
+        scrollTop: main?.scrollTop || 0,
+        scrollLeft: main?.scrollLeft || 0,
+        tracks,
+        activeId: active?.id || null,
+        capturedAt: Date.now(),
+    };
+}
+
+function restoreHomeUiState(state = window._homeUiState) {
+    if (!state) return;
+    const main = document.querySelector('.main-content');
+    if (main) {
+        main.scrollTop = state.scrollTop;
+        main.scrollLeft = state.scrollLeft;
+    }
+    const selectors = ['.recent-grid', '.popular-track', '.carousel-track', '.recommended-track'];
+    selectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach((track, index) => {
+            const saved = state.tracks.find(item => item.key === `${selector}:${index}`);
+            if (saved) track.scrollLeft = saved.scrollLeft;
+        });
+    });
+    if (state.activeId) {
+        const active = document.getElementById(state.activeId);
+        if (active && document.getElementById('inicio')?.contains(active)) {
+            try { active.focus({ preventScroll: true }); } catch { active.focus(); }
+        }
+    }
+}
+
+function syncHomeTrackAlignment(trackOrSelector, { resetScroll = false } = {}) {
     const track = typeof trackOrSelector === 'string'
         ? document.querySelector(trackOrSelector)
         : trackOrSelector;
@@ -101,20 +142,39 @@ function syncHomeTrackAlignment(trackOrSelector) {
     const apply = () => {
         const overflowing = track.scrollWidth > track.clientWidth + 1;
         track.classList.toggle('track-centered', !overflowing);
-        // Uma nova renderização começa no primeiro card, nunca no meio de
-        // uma palavra ou com o primeiro título parcialmente escondido.
-        track.scrollLeft = 0;
+        if (resetScroll) track.scrollLeft = 0;
     };
     if (window.requestAnimationFrame) requestAnimationFrame(apply);
     else setTimeout(apply, 0);
 }
 
+let _homeRefreshQueued = false;
+function queueHomeBackgroundRefresh() {
+    if (_homeRefreshQueued) return;
+    _homeRefreshQueued = true;
+    const run = () => {
+        _homeRefreshQueued = false;
+        window.refreshHomeInBackground?.();
+    };
+    if (window.requestAnimationFrame) requestAnimationFrame(run);
+    else setTimeout(run, 0);
+}
+
 window.syncHomeTrackAlignment = syncHomeTrackAlignment;
+window.captureHomeUiState = captureHomeUiState;
+window.restoreHomeUiState = restoreHomeUiState;
+window.addEventListener('fenda:homeDataChanged', queueHomeBackgroundRefresh);
 window.addEventListener('resize', () => {
-    document.querySelectorAll('.recent-grid, .popular-track').forEach(syncHomeTrackAlignment);
+    document.querySelectorAll('.recent-grid, .popular-track').forEach(track =>
+        syncHomeTrackAlignment(track, { resetScroll: false })
+    );
 });
 
-function renderHome() {
+function renderHome({ preserveUi = true } = {}) {
+    // Atualizações automáticas preservam a posição do usuário na home.
+    const homeUiState = preserveUi ? captureHomeUiState() : null;
+    window._homeUiState = homeUiState;
+
     // updateFeaturedMusic consulta o cache e só troca a faixa após 10 minutos.
     updateFeaturedMusic();
 
@@ -162,7 +222,7 @@ function renderHome() {
                 <p>${escapeHtml(music.artist)}</p>
             </div>
         `).join('');
-        syncHomeTrackAlignment(recentContainer);
+        syncHomeTrackAlignment(recentContainer, { resetScroll: false });
         document.querySelectorAll('#recentlyPlayedList .music-card-horizontal').forEach(card => {
             card.addEventListener('click', () => {
                 const id = parseInt(card.dataset.id);
@@ -345,10 +405,26 @@ function renderHome() {
     }
 
     // As seções extras dependem do catálogo e do histórico, que chegam de
-    // forma assíncrona. Atualiza-as junto com o restante da home para que
-    // não fiquem ausentes até o usuário trocar de aba.
+    // forma assíncrona. Atualiza-as em segundo plano preservando a UI.
     window.__inicioExtras?.refresh?.();
+    if (homeUiState) {
+        restoreHomeUiState(homeUiState);
+        requestAnimationFrame(() => restoreHomeUiState(homeUiState));
+    }
 }
+
+// Atualização acionada por Realtime/polling. Fora da home, marca a tela
+// como pendente e não altera a aba que o usuário está utilizando.
+window.refreshHomeInBackground = function refreshHomeInBackground() {
+    const home = document.getElementById('inicio');
+    const isHomeVisible = home?.classList.contains('active');
+    if (!isHomeVisible || document.visibilityState === 'hidden') {
+        window._homeNeedsRefresh = true;
+        return;
+    }
+    window._homeNeedsRefresh = false;
+    return renderHome({ preserveUi: true });
+};
 
 // ========== ARTISTAS: estado de ordenação e favoritos ==========
 let artistsSortMode = 'recent'; // 'recent' (mais ouvidos / padrão) | 'az'
@@ -1597,6 +1673,7 @@ async function toggleFavoriteTrack(musicId) {
     }
 
     localStorage.setItem('supabase_player_favorites', JSON.stringify(Array.from(AppState.favorites)));
+    window.notifyHomeDataChanged?.('favorites');
 
     // Sincronização remota em background, sem toast e sem reverter o estado
     // local se a rede/RLS estiver indisponível.
