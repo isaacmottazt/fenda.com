@@ -987,7 +987,7 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
             windowHeight: viewportHeight,
             scrollX: window.scrollX || 0,
             scrollY: window.scrollY || 0,
-            backgroundColor: null,
+            backgroundColor: '#0a0a0f',
             useCORS: true,
             allowTaint: false,
             scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
@@ -1000,6 +1000,15 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
                 // da referência sem alterar o visual da página real.
                 const captureStyle = clonedDocument.createElement('style');
                 captureStyle.textContent = `
+                    html, body {
+                        background: #0a0a0f !important;
+                    }
+                    .app-container {
+                        background:
+                            radial-gradient(ellipse 260px 220px at 94% 12%, rgba(124, 58, 237, 0.14), transparent 72%),
+                            radial-gradient(ellipse 300px 260px at 4% 62%, rgba(124, 58, 237, 0.07), transparent 74%),
+                            linear-gradient(180deg, #0f0f1a 0%, #07070c 100%) !important;
+                    }
                     .library-header h1 {
                         background: none !important;
                         -webkit-background-clip: initial !important;
