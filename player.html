@@ -9,7 +9,7 @@
     <title>Fenda Music</title>
     <link rel="manifest" href="/manifest.json" />
     <link rel="stylesheet" href="/fonts/material-symbols.css" />
-    <link rel="stylesheet" href="/css/base.css?v=lyrics-redesign-v2" />
+    <link rel="stylesheet" href="/css/base.css?v=lyrics-redesign-v3" />
     <link rel="stylesheet" href="/css/inicio.css" />
     <link rel="stylesheet" href="/css/busca.css" />
     <link rel="stylesheet" href="/css/biblioteca.css" />
@@ -892,9 +892,9 @@
     </div>
 
     <script src="/js/i18n.js?v=consent-prompt-v1"></script>
-    <script src="/js/player-core.js?v=lyrics-restore-v1"></script>
+    <script src="/js/player-core.js?v=lyrics-restore-v2"></script>
     <script src="/js/player-session.js?v=resume-lyrics-v2"></script>
-    <script src="/js/player-audio-lyrics.js?v=lyrics-ui-v4"></script>
+    <script src="/js/player-audio-lyrics.js?v=lyrics-ui-v5"></script>
     <script src="/js/player-ui.js?v=summary-share-image-v14"></script>
     <script src="/js/player-playlists.js?v=offline-downloads-v1"></script>
     <script src="/js/podcasts.js"></script>
@@ -944,7 +944,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=93", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=94", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

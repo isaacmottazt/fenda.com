@@ -256,6 +256,8 @@ function _compactCatalog(records) {
         artist: m.artist || '',
         cover: m.cover || '',
         src: m.src || '',
+        // Mantém a URL LRC leve no cache; o texto da letra continua fora do catálogo.
+        lrc: typeof m.lrc === 'string' && /^https?:\/\//i.test(m.lrc) ? m.lrc : '',
         album: m.album || '',
         duration: Number(m.duration) || 0,
         genre: m.genre || '',
@@ -1744,6 +1746,16 @@ async function _fetchAllFromSupabase() {
         // terminar de carregar, sem sobrescrever uma reprodução iniciada pelo usuário.
         const restored = await restorePlayerSessionWhenReady();
         if (restored) _rerender();
+
+        // Se a sessão foi restaurada a partir do catálogo compacto antigo,
+        // ela pode ter iniciado com uma música sem o campo lrc. Assim que a
+        // resposta completa chega, repõe as letras sem tocar novamente.
+        const currentTrack = AppState.currentMusicId
+            ? AppState.musics.find(m => String(m.id) === String(AppState.currentMusicId))
+            : null;
+        if (currentTrack?.lrc && typeof window.loadLyricsForTrack === 'function') {
+            window.loadLyricsForTrack(currentTrack, { force: true }).catch(() => {});
+        }
         console.log('[Cache] Músicas carregadas:', AppState.musics.length);
     }
 
