@@ -1,12 +1,13 @@
 // Fenda Music — Service Worker v16
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v82';
+const CACHE_NAME = 'fenda-v83';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
 const CRITICAL_RUNTIME = new Set([
   '/player.html',
   '/js/player-core.js',
+  '/js/player-ui.js',
   '/js/player-audio-lyrics.js',
   '/js/playback-engine.js',
   '/js/player-session.js',
@@ -126,7 +127,7 @@ self.addEventListener('fetch', e => {
             return response;
           })
           .catch(() => cached || new Response('Service Unavailable', { status: 503 }));
-        return cached || networkFetch;
+        return networkFetch;
       })
     );
     return;
