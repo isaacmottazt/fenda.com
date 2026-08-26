@@ -655,6 +655,51 @@ function buildAutoQueue(currentMusicId, trackList, isShuffle, wrap = false) {
     return [...after, ...before];
 }
 
+// Garante que a fila nunca acabe enquanto houver músicas válidas no catálogo.
+// Primeiro respeita o contexto atual (busca, playlist, histórico etc.); depois
+// acrescenta as demais faixas do catálogo para o autoplay continuar sem tela vazia.
+function ensureAutoQueue() {
+    const allMusics = _uniqueTracks(AppState.musics || []);
+    if (!allMusics.length || !AppState.currentMusicId) return;
+
+    const currentId = _trackId(AppState.currentMusicId);
+    const queuedIds = new Set([
+        ...((AppState.queue || []).map(_trackId)),
+        ...((AppState.autoQueue || []).map(_trackId)),
+        currentId,
+    ]);
+    const contextList = _uniqueTracks(AppState.playContext?.trackList || []);
+    const contextIds = new Set(contextList.map(_trackId));
+    const playedIds = new Set(_playbackHistory.map(_trackId));
+
+    // Se o contexto atual não deixou nenhuma próxima faixa, ele é curto
+    // (por exemplo, uma busca com uma única música). Nesse caso, todo o
+    // catálogo restante vira a fila de continuidade.
+    const source = AppState.playContext?.source || 'library';
+    const candidates = allMusics.filter(track => {
+        const id = _trackId(track);
+        const outsideShortContext = !contextIds.size || !contextIds.has(id);
+        const broadContext = source === 'library' || source === 'autoplay' || contextIds.size >= allMusics.length;
+        return id !== currentId && !queuedIds.has(id) && (broadContext || outsideShortContext);
+    });
+    // Quando todas as faixas já foram ouvidas, recomeça o catálogo sem deixar
+    // a fila vazia. A música atual continua excluída até ser avançada.
+    const refillCandidates = candidates.length
+        ? candidates
+        : allMusics.filter(track => {
+            const id = _trackId(track);
+            return id !== currentId && !queuedIds.has(id);
+        });
+    if (!refillCandidates.length) return;
+
+    const unplayed = refillCandidates.filter(track => !playedIds.has(_trackId(track)));
+    const orderedPool = unplayed.length ? unplayed : refillCandidates;
+    const ordered = AppState.isShuffle
+        ? _shuffleSpread(orderedPool)
+        : [...orderedPool];
+    AppState.autoQueue.push(...ordered);
+}
+
 // Atualiza o contexto e regenera a fila automática.
 // A ordem original fica preservada para desligar o shuffle sem perder o
 // contexto escolhido pelo usuário.
@@ -663,6 +708,7 @@ function setPlayContext(source, trackList, playlistId = null) {
     AppState._originalTrackList = [...cleanList];
     AppState.playContext = { source, playlistId, trackList: [...cleanList] };
     AppState.autoQueue = buildAutoQueue(AppState.currentMusicId, cleanList, AppState.isShuffle);
+    ensureAutoQueue();
     if (typeof window.renderQueuePanel === 'function') window.renderQueuePanel();
 }
 
@@ -693,6 +739,7 @@ function getPrevMusic() {
 }
 
 window.setPlayContext = setPlayContext;
+window.ensureAutoQueue = ensureAutoQueue;
 window.buildAutoQueue = buildAutoQueue;
 window.buildShuffleOrder = _shuffleSpread;
 window.getNextMusic = getNextMusic;
@@ -804,6 +851,7 @@ async function playMusicTrack(music, opts = {}) {
         const _ctx  = AppState.playContext;
         const _list = _ctx?.trackList?.length > 0 ? _ctx.trackList : AppState.musics;
         AppState.autoQueue = buildAutoQueue(music.id, _list, AppState.isShuffle);
+        ensureAutoQueue();
     }
 
     incrementPlayCount(music.id);
@@ -821,6 +869,20 @@ async function playMusicTrack(music, opts = {}) {
         DOM.audio.load();
         DOM.audio.muted = false;
         DOM.audio.volume = 1;
+    }
+
+    // O card Continue ouvindo pode pedir uma posição salva. Aplicamos antes
+    // do play para que a retomada preserve o ponto em que a faixa parou.
+    const resumeAt = Number(opts.resumeAt);
+    if (Number.isFinite(resumeAt) && resumeAt > 0) {
+        const applyResumePosition = () => {
+            const duration = Number(DOM.audio.duration);
+            if (!Number.isFinite(duration) || resumeAt < Math.max(0, duration - 3)) {
+                DOM.audio.currentTime = resumeAt;
+            }
+        };
+        if (DOM.audio.readyState >= 1) applyResumePosition();
+        else DOM.audio.addEventListener('loadedmetadata', applyResumePosition, { once: true });
     }
 
     // Inicia a reprodução antes de buscar letra ou atualizar histórico/UI.
@@ -871,6 +933,9 @@ function togglePlayMusic(music) {
 
 function handleNextTrack() {
     window._showFendaError?.('[DIAG] handleNextTrack: queue=' + AppState.queue.length + ' autoQueue=' + AppState.autoQueue.length + ' repeatMode=' + AppState.repeatMode + ' musics=' + AppState.musics.length);
+    // Reabastece antes de decidir o próximo passo, para nunca deixar o
+    // autoplay sem faixa quando o catálogo ainda possui músicas válidas.
+    ensureAutoQueue();
     // 1. Fila manual tem prioridade absoluta
     if (AppState.queue.length > 0) {
         window._showFendaError?.('[DIAG] ramo 1: fila manual');
@@ -1215,6 +1280,14 @@ async function _fetchAllFromSupabase() {
         AppState.musics = musicsResult.value;
         // Primeiro render: mostra catálogo assim que chegar
         _rerender();
+
+        // Em uma instalação sem cache, a sessão pode ser lida antes de as
+        // músicas chegarem. Tenta restaurar novamente quando o catálogo online
+        // terminar de carregar, sem sobrescrever uma reprodução iniciada pelo usuário.
+        if (!AppState.currentMusicId && typeof window.restorePlayerSession === 'function') {
+            const restored = await window.restorePlayerSession();
+            if (restored) _rerender();
+        }
         console.log('[Cache] Músicas carregadas:', AppState.musics.length);
     }
 
@@ -1518,6 +1591,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Armazena o ID do usuário logado
     AppState.userId = session.user.id;
+
+    // Ativa a persistência antes de qualquer reprodução. Assim pausas,
+    // mudanças de app e fechamento do navegador guardam o ponto atual.
+    if (typeof window.initSessionPersistence === 'function') {
+        window.initSessionPersistence();
+    }
     
     // === GARANTE QUE O PERFIL EXISTE (CRIA SE NÃO EXISTIR) ===
     const userEmail = session.user.email;
@@ -1608,6 +1687,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     await initApp();
+
+    // O catálogo já está disponível: restaura a última faixa e sua posição
+    // sem iniciar autoplay. O card Continue ouvindo fica pronto para um toque.
+    if (!AppState.currentMusicId && typeof window.restorePlayerSession === 'function') {
+        const restored = await window.restorePlayerSession();
+        if (restored) window.refreshHomeInBackground?.();
+    }
     checkDeepLink();
 });
 

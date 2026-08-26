@@ -534,6 +534,8 @@ function renderQueuePanel() {
     const list = document.getElementById('queuePanelList');
     if (!list) return;
 
+    // Se há uma música tocando, mantém uma fila contínua antes de renderizar.
+    window.ensureAutoQueue?.();
     const manualQueue = AppState.queue || [];
     const autoQueue = AppState.autoQueue || [];
     const hasAnything = manualQueue.length > 0 || autoQueue.length > 0;
@@ -600,7 +602,9 @@ function renderQueuePanel() {
         label.className = 'qp-label';
         label.textContent = 'A seguir';
         list.appendChild(label);
-        autoQueue.slice(0, 20).forEach((music, idx) => list.appendChild(makeItem(music, idx, false)));
+        // A fila completa é exibida para o usuário saber todas as músicas
+        // que serão reproduzidas nesta sequência.
+        autoQueue.forEach((music, idx) => list.appendChild(makeItem(music, idx, false)));
     }
 }
 

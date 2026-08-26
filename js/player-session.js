@@ -20,7 +20,8 @@ function savePlayerSession() {
         const session = {
             musicId:    AppState.currentMusicId,
             currentTime: currentTime,
-            wasPlaying: AppState.playing,
+            duration:   audio && Number.isFinite(audio.duration) ? Math.floor(audio.duration) : 0,
+            wasPlaying: audio ? !audio.paused : AppState.playing,
             isShuffle:  AppState.isShuffle,
             repeatMode: AppState.repeatMode,
             // Mantido para compatibilidade com sessões antigas.
@@ -127,22 +128,16 @@ async function restorePlayerSession() {
             music.id, restoredList, AppState.isShuffle
         );
     }
+    // Se o contexto restaurado for curto, continua com o restante do catálogo.
+    window.ensureAutoQueue?.();
 
-    // Dá play — o browser mobile pode bloquear sem gesto do usuário,
-    // mas como o PWA já foi instalado e tem permissão, geralmente funciona.
-    AppState.playing = true;
-    audio.play()
-        .then(() => {
-            if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
-            if (typeof window.updateMediaSession === 'function') window.updateMediaSession(music);
-            console.log('[Session] ▶ Play restaurado com sucesso');
-        })
-        .catch(() => {
-            // Bloqueado pela política de autoplay — fica pausado mas com barra visível
-            AppState.playing = false;
-            if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
-            console.log('[Session] Play bloqueado pelo browser — aguardando toque do usuário');
-        });
+    // A música fica pausada após a reabertura. Assim o usuário decide quando
+    // continuar pelo card, sem depender de autoplay do Android/Chrome.
+    AppState.playing = false;
+    audio.pause();
+    if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
+    if (typeof window.updateMediaSession === 'function') window.updateMediaSession(music);
+    console.log('[Session] Música e posição restauradas; aguardando toque do usuário');
 
     return true;
 }
@@ -154,6 +149,16 @@ function initSessionPersistence() {
 
     // Salva assim que uma música começa a tocar
     audio.addEventListener('play', savePlayerSession);
+
+    // Quando uma faixa termina, deixa de ser uma retomada pendente. O próximo
+    // avanço salvará a nova música assim que começar.
+    audio.addEventListener('ended', () => {
+        try { localStorage.removeItem(SESSION_KEY); } catch {}
+    });
+
+    // Salva também quando o usuário pausa manualmente, para o card
+    // continuar ouvindo refletir o ponto exato sem depender do próximo intervalo.
+    audio.addEventListener('pause', savePlayerSession);
 
     // Salva periodicamente enquanto toca (a cada 5s)
     setInterval(() => {

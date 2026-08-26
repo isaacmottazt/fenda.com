@@ -65,9 +65,9 @@
         return lib.find(m => String(m.id) === String(id)) || item;
     }
 
-    function play(item) {
+    function play(item, options = {}) {
         const track = resolveTrack(item);
-        if (track && window.playMusicTrack) window.playMusicTrack(track);
+        if (track && window.playMusicTrack) window.playMusicTrack(track, options);
     }
 
     // ============================================================
@@ -169,17 +169,29 @@
     function renderContinue() {
         TAB.querySelectorAll('.continue-section').forEach(el => el.remove());
 
-        const audio    = document.getElementById('audio');
+        const audio = document.getElementById('audio');
+        const savedSession = typeof window.loadPlayerSession === 'function'
+            ? window.loadPlayerSession()
+            : null;
+        const sessionTrack = savedSession?.musicId
+            ? getMusics().find(m => String(m.id) === String(savedSession.musicId))
+            : null;
         const histItem = window.AppState?.history?.[0];
-        const time     = audio?.currentTime || 0;
-        if (!histItem || time <= 5) return;
-
-        const track     = resolveTrack(histItem);
+        const track = sessionTrack || resolveTrack(histItem);
         if (!track) return;
 
-        const duration  = track.duration || audio?.duration || 0;
+        // Em primeiro lugar usamos a sessão persistida: ela continua existindo
+        // mesmo quando o áudio não está carregado após fechar o aplicativo.
+        const time = sessionTrack
+            ? Number(savedSession.currentTime) || 0
+            : Number(audio?.currentTime) || 0;
+        const duration = sessionTrack
+            ? Number(savedSession.duration) || Number(track.duration) || Number(audio?.duration) || 0
+            : Number(track.duration) || Number(audio?.duration) || 0;
+        if (time <= 5 || (duration > 0 && time >= duration - 3)) return;
+
         const remaining = duration > 0 ? duration - time : 0;
-        const pct       = duration > 0 ? Math.min(100, (time / duration) * 100) : 0;
+        const pct = duration > 0 ? Math.min(100, (time / duration) * 100) : 0;
         const remainTxt = remaining > 0 ? `Faltam ${fmtTime(remaining)}` : '';
 
         const sec = document.createElement('section');
@@ -211,7 +223,9 @@
                 </div>
             </div>
         `;
-        sec.querySelector('.continue-card').addEventListener('click', () => play(histItem));
+        sec.querySelector('.continue-card').addEventListener('click', () => {
+            play(track, { resumeAt: time });
+        });
 
         const banner = document.getElementById('featuredBanner');
         if (banner) banner.parentNode.insertBefore(sec, banner);
