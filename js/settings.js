@@ -69,7 +69,7 @@
 .fs-switch input:checked+i{background:#924cff}
 .fs-switch input:checked+i:before{transform:translateX(18px)}
 .fs-switch input:disabled+i{opacity:.4}
-.fs-form{padding:14px 16px}
+.fs-form{padding:14px 16px}.fs-subsection-title{padding:16px 16px 7px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(192,132,252,.72)}.fs-account-card>.fs-subsection-title:first-child{padding-top:15px}.fs-account-card>.fs-form{padding-top:8px}.fs-account-card>.fs-subsection-title~.fs-subsection-title{border-top:1px solid rgba(255,255,255,.05)}
 .fs-form label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5);margin:10px 0 6px}
 .fs-form input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;color:#fff;font-size:14px;outline:none;box-sizing:border-box}
 .fs-form input:focus{border-color:rgba(146,76,255,.4)}
@@ -491,7 +491,8 @@
           <div class="fs-body">
 
             <div class="fs-section" data-i18n="settings_account">Conta</div>
-            <div class="fs-card">
+            <div class="fs-card fs-account-card">
+              <div class="fs-subsection-title" data-i18n="settings_profile_section">Perfil público</div>
               <label class="fs-avatar-row" for="fsAvatarFile">
                 <div class="fs-avatar-wrap">
                   <img id="fsAvatarPreview" alt="" style="display:none">
@@ -523,6 +524,7 @@
                 <div class="fs-status" id="fsProfileStatus"></div>
               </div>
 
+              <div class="fs-subsection-title" data-i18n="settings_access_section">Acesso à conta</div>
               <div class="fs-row" style="cursor:default">
                 <span class="material-symbols-rounded">mail</span>
                 <div class="fs-row-text">
@@ -539,6 +541,7 @@
                 <div class="fs-status" id="fsEmailStatus"></div>
               </div>
 
+              <div class="fs-subsection-title" data-i18n="settings_security_section">Segurança da conta</div>
               <!-- Etapa 1: confirma a senha atual antes de liberar a troca -->
               <div class="fs-form" id="fsCurrentPassStep">
                 <label data-i18n="settings_current_password">Senha atual</label>
@@ -557,6 +560,7 @@
                 <button class="fs-btn ghost" id="fsPassBtn" data-i18n="settings_change_password">Alterar senha</button>
                 <div class="fs-status" id="fsPassStatus"></div>
               </div>
+              <div class="fs-subsection-title" data-i18n="settings_actions_section">Ações da conta</div>
               <button class="fs-row" id="fsLogoutBtn">
                 <span class="material-symbols-rounded">logout</span>
                 <div class="fs-row-text"><span class="fs-row-title" data-i18n="settings_logout">Sair da conta</span></div>
@@ -943,7 +947,12 @@
         el.textContent = 'Músicas salvas para ouvir offline';
     }
 
-    function open()  { _buildOverlay().classList.add('open'); }
+    function open() {
+        const panel = _buildOverlay();
+        panel.scrollTop = 0;
+        panel.classList.add('open');
+        requestAnimationFrame(() => { if (panel.classList.contains('open')) panel.scrollTop = 0; });
+    }
     function close() { _overlay?.classList.remove('open'); }
 
     window.FendaSettings = { open, close, getPrefs, getPlaybackPrefs, getAppPrefs };
