@@ -116,9 +116,12 @@
 .fs-about-mark.fallback .fs-about-mark-icon{display:block}
 .fs-about-hero h2{font-size:20px;font-weight:900;letter-spacing:-.2px;margin-bottom:8px}
 .fs-about-version-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-size:12px;font-weight:700;color:rgba(192,132,252,.9);background:rgba(146,76,255,.12);border:1px solid rgba(146,76,255,.25);border-radius:30px;padding:4px 12px}.fs-about-version-number{font-variant-numeric:tabular-nums}
-.fs-about-footer{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;text-align:center;font-size:12px;color:rgba(255,255,255,.35);margin-top:26px;padding-bottom:10px}
-.fs-about-footer .material-symbols-rounded{font-size:14px;color:#f472b6}
-.fs-about-footer-dot{opacity:.5}
+.fs-about-footer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;text-align:center;font-size:12px;line-height:1.35;color:rgba(255,255,255,.35);margin-top:26px;padding:0 8px 10px}
+.fs-about-footer-main{display:inline-flex;align-items:center;justify-content:center;gap:6px;max-width:100%}
+.fs-about-footer-main .material-symbols-rounded{font-size:15px;color:#f472b6;flex:0 0 auto}
+.fs-about-footer-copyright{font-size:11px;color:rgba(255,255,255,.26)}
+.fs-about-footer-dot{display:none;opacity:.5}
+@media (min-width:520px){.fs-about-footer{flex-direction:row;gap:8px}.fs-about-footer-copyright{font-size:12px}.fs-about-footer-dot{display:inline}}
 .open_in_new_icon{font-size:16px !important;opacity:.3}
 `;
         document.head.appendChild(st);
@@ -445,10 +448,12 @@
             </div>
 
             <div class="fs-about-footer">
-              <span class="material-symbols-rounded">favorite</span>
-              <span data-i18n="about_made_with">Feito com ♥ para música gospel</span>
+              <div class="fs-about-footer-main">
+                <span class="material-symbols-rounded">favorite</span>
+                <span data-i18n="about_made_with">Feito para música gospel</span>
+              </div>
               <span class="fs-about-footer-dot">·</span>
-              <span>Fenda Music © ${new Date().getFullYear()}</span>
+              <span class="fs-about-footer-copyright">Fenda Music © ${new Date().getFullYear()}</span>
             </div>
           </div>
         `;
