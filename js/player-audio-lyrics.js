@@ -194,13 +194,12 @@ function initAudioAndLyricsEngine() {
             DOM.shuffleBtn.classList.add('ctrl-toggled');
             setTimeout(() => DOM.shuffleBtn.classList.remove('ctrl-toggled'), 450);
 
-            const ctx = AppState.playContext;
-            const originalList = AppState._originalTrackList?.length > 0
-                ? AppState._originalTrackList
-                : (ctx?.trackList?.length > 0 ? ctx.trackList : AppState.musics);
-            if (!AppState._originalTrackList?.length) {
-                AppState._originalTrackList = [...originalList];
-            }
+            const ctx = AppState.playContext || {};
+            const isPlaylistContext = ctx.source === 'playlist' || ctx.playlistId;
+            const originalList = isPlaylistContext
+                ? (ctx.trackList?.length > 0 ? ctx.trackList : AppState.musics)
+                : AppState.musics;
+            AppState._originalTrackList = [...originalList];
             const trackList = AppState.isShuffle
                 ? originalList
                 : (AppState._originalTrackList?.length > 0 ? AppState._originalTrackList : AppState.musics);

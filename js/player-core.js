@@ -624,6 +624,60 @@ function _shuffleSpread(tracks) {
     return result;
 }
 
+function _normalizeMusicText(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9&]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+const MUSIC_CATEGORY_RULES = [
+    ['gospel', ['gospel', 'christian', 'cristao', 'crista', 'adoracao', 'adoracao', 'worship', 'louvor', 'hino', 'hymn', 'evangelico', 'evangelica', 'religioso']],
+    ['sertanejo', ['sertanejo', 'sertaneja', 'country brasileiro']],
+    ['mpb', ['mpb', 'musica popular brasileira']],
+    ['samba', ['samba', 'pagode']],
+    ['forro', ['forro', 'xote', 'baião', 'baiao']],
+    ['funk', ['funk brasileiro', 'funk carioca', 'funk']],
+    ['rap', ['rap', 'hip hop', 'hiphop', 'trap']],
+    ['pop', ['pop']],
+    ['rock', ['rock', 'punk', 'metal', 'indie']],
+    ['eletronica', ['eletronica', 'electronic', 'house', 'techno', 'trance', 'dance']],
+    ['rnb', ['r&b', 'r b', 'rnb', 'soul', 'rhythm and blues']],
+    ['jazz', ['jazz', 'blues']],
+    ['reggae', ['reggae', 'ska']],
+    ['classica', ['classica', 'classical', 'orquestra', 'instrumental']],
+];
+
+function _musicCategory(music) {
+    if (!music) return null;
+    const genre = _normalizeMusicText(music.genre);
+    const styleText = _normalizeMusicText([
+        music.style,
+        ...(Array.isArray(music.style_tags) ? music.style_tags : []),
+    ].filter(Boolean).join(' '));
+    const text = genre && !['unknown', 'outro', 'outros', 'nao informado'].includes(genre)
+        ? genre
+        : styleText;
+    if (!text) return null;
+
+    for (const [category, terms] of MUSIC_CATEGORY_RULES) {
+        if (terms.some(term => {
+            const normalizedTerm = _normalizeMusicText(term);
+            return text === normalizedTerm
+                || text.includes(` ${normalizedTerm} `)
+                || text.startsWith(`${normalizedTerm} `)
+                || text.endsWith(` ${normalizedTerm}`);
+        })) {
+            return category;
+        }
+    }
+
+    return genre && text === genre ? `genre:${genre}` : null;
+}
+
 function _musicTextSet(music) {
     return new Set([
         music?.genre,
@@ -693,7 +747,20 @@ function buildAffinityQueue(currentMusicId, trackList, isShuffle, seedMusicId = 
     const seedId = _trackId(seedMusicId || currentMusicId);
     const seed = _uniqueTracks([...(AppState.musics || []), ...cleanList])
         .find(track => _trackId(track) === seedId);
-    const pool = cleanList.filter(track => _trackId(track) !== currentId);
+    const allPool = cleanList.filter(track => _trackId(track) !== currentId);
+    if (!allPool.length) return [];
+
+    // Categoria da música-semente é uma barreira: uma faixa Gospel/Adoração
+    // não pode puxar Pop, Rock ou MPB, e o inverso também é verdadeiro.
+    // Quando a semente tem categoria conhecida, somente a mesma categoria
+    // entra; faixas sem gênero ficam fora até serem catalogadas.
+    const seedCategory = _musicCategory(seed);
+    const pool = seedCategory
+        ? allPool.filter(track => {
+            const candidateCategory = _musicCategory(track);
+            return candidateCategory === seedCategory;
+        })
+        : allPool;
     if (!pool.length) return [];
 
     const scored = pool.map((track, index) => ({
@@ -781,31 +848,39 @@ function ensureAutoQueue() {
     const contextList = _uniqueTracks(AppState.playContext?.trackList || []);
     const contextIds = new Set(contextList.map(_trackId));
     const playedIds = new Set(_playbackHistory.map(_trackId));
+    const seedId = _trackId(AppState.playContext?.seedMusicId || currentId);
+    const seedTrack = allMusics.find(track => _trackId(track) === seedId);
+    const seedCategory = _musicCategory(seedTrack);
+    const isCompatible = track => {
+        const candidateCategory = _musicCategory(track);
+        return !seedCategory || candidateCategory === seedCategory;
+    };
 
     // Se o contexto atual não deixou nenhuma próxima faixa, ele é curto
-    // (por exemplo, uma busca com uma única música). Nesse caso, todo o
-    // catálogo restante vira a fila de continuidade.
+    // (por exemplo, uma busca com uma única música). Nesse caso, o catálogo
+    // restante da mesma categoria vira a fila de continuidade.
     const source = AppState.playContext?.source || 'library';
     if (AppState.repeatMode === 1 && (source === 'playlist' || AppState.playContext?.playlistId)) return;
     const candidates = allMusics.filter(track => {
         const id = _trackId(track);
         const outsideShortContext = !contextIds.size || !contextIds.has(id);
         const broadContext = source === 'library' || source === 'autoplay' || contextIds.size >= allMusics.length;
-        return id !== currentId && !queuedIds.has(id) && (broadContext || outsideShortContext);
+        return id !== currentId && !queuedIds.has(id)
+            && isCompatible(track)
+            && (broadContext || outsideShortContext);
     });
-    // Quando todas as faixas já foram ouvidas, recomeça o catálogo sem deixar
-    // a fila vazia. A música atual continua excluída até ser avançada.
+    // Quando todas as faixas compatíveis já foram ouvidas, recomeça apenas a
+    // categoria da semente. Nunca usa outra categoria como fallback.
     const refillCandidates = candidates.length
         ? candidates
         : allMusics.filter(track => {
             const id = _trackId(track);
-            return id !== currentId && !queuedIds.has(id);
+            return id !== currentId && !queuedIds.has(id) && isCompatible(track);
         });
     if (!refillCandidates.length) return;
 
     const unplayed = refillCandidates.filter(track => !playedIds.has(_trackId(track)));
     const orderedPool = unplayed.length ? unplayed : refillCandidates;
-    const seedId = AppState.playContext?.seedMusicId || currentId;
     const ordered = typeof buildAffinityQueue === 'function'
         ? buildAffinityQueue(currentId, orderedPool, AppState.isShuffle, seedId)
         : (AppState.isShuffle ? _shuffleSpread(orderedPool) : [...orderedPool]);
