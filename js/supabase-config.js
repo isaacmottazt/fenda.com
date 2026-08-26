@@ -356,6 +356,7 @@ async function deleteUserPlaylist(playlistId, userId) {
 // ========== HISTÓRICO DE REPRODUÇÃO ==========
 async function addToListeningHistory(userId, musicId, listenedSeconds, completed = false, sessionId = null) {
     try {
+        if (window.FendaPrivacy && !window.FendaPrivacy.isEnabled('analytics')) return false;
         const seconds = Math.max(0, Math.floor(Number(listenedSeconds) || 0));
         if (!userId || !musicId || seconds < 1) return false;
 
@@ -401,6 +402,7 @@ async function loadGlobalMusicRanking(limit = 10, days = null) {
 
 async function loadListeningHistory(userId, limit = 50) {
     try {
+        if (window.FendaPrivacy && !window.FendaPrivacy.isEnabled('analytics')) return [];
         const { data, error } = await supabaseClient
             .from('listening_history')
             .select('*')
@@ -422,6 +424,7 @@ async function loadListeningHistory(userId, limit = 50) {
 // ========== HISTÓRICO DE BUSCA ==========
 async function addToSearchHistory(userId, term) {
     if (!term) return;
+    if (window.FendaPrivacy && !window.FendaPrivacy.isEnabled('analytics')) return false;
     try {
         // Evita duplicatas recentes (opcional)
         const { data: existing } = await supabaseClient
@@ -451,6 +454,7 @@ async function addToSearchHistory(userId, term) {
 
 async function loadSearchHistory(userId, limit = 10) {
     try {
+        if (window.FendaPrivacy && !window.FendaPrivacy.isEnabled('analytics')) return [];
         const { data, error } = await supabaseClient
             .from('search_history')
             .select('term')

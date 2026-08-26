@@ -366,8 +366,11 @@
             title: 'Política de privacidade', icon: 'privacy_tip',
             intro: 'Esta política descreve, em linguagem simples, como cuidamos das informações necessárias para oferecer sua experiência no Fenda Music.',
             sections: [
-                ['Informações usadas', 'Usamos dados de conta e preferências, como perfil, favoritos, playlists e histórico, para personalizar sua experiência e manter seus recursos disponíveis.'],
-                ['Uso e controle', 'Você pode editar dados do perfil, alterar e-mail e senha, ajustar notificações, limpar downloads e excluir sua conta nas Configurações.'],
+                ['Informações usadas', 'Usamos os dados de conta que você fornece, como e-mail, nome e foto, além de favoritos, playlists e histórico quando você autoriza análise de uso ou recomendações. Esses dados ajudam a manter os recursos disponíveis e adaptar sua experiência.'],
+                ['Consentimentos opcionais', 'Nas Configurações → Privacidade e dados, você escolhe separadamente análise de uso, recomendações personalizadas, localização precisa e dados técnicos do aparelho. O GPS só é lido depois da permissão do navegador; se você revogar a autorização, a localização armazenada é removida.'],
+                ['Localização e dados técnicos', 'Quando autorizados, guardamos as coordenadas aproximadas ao nível de precisão fornecido pelo navegador, a precisão informada, a data da captura, o idioma, o fuso horário e a plataforma. Não guardamos a senha, tokens ou o identificador bruto do navegador.'],
+                ['IP e registros de segurança', 'O Fenda não grava um IP no perfil do usuário nem o usa para criar um cadastro pessoal. Provedores de infraestrutura podem processar registros técnicos temporários para segurança, disponibilidade e prevenção de abuso, conforme as políticas aplicáveis deles.'],
+                ['Uso e controle', 'Você pode editar os dados do perfil, alterar e-mail e senha, ajustar os consentimentos, limpar downloads e excluir sua conta nas Configurações.'],
                 ['Dados no dispositivo', 'Parte das informações e dos downloads pode ficar no seu aparelho para permitir acesso mais rápido e uso offline. Você pode limpar esses dados nas Configurações.'],
                 ['Compartilhamento', 'Não vendemos suas informações pessoais. O acesso às informações é restrito ao necessário para suporte, segurança e funcionamento do Fenda Music.'],
                 ['Segurança e contato', 'Usamos medidas de proteção compatíveis com o serviço e conexões seguras. Para dúvidas ou solicitações sobre privacidade, entre em contato pelo suporte.'],
@@ -573,6 +576,37 @@
                   <span class="fs-row-sub" data-i18n="settings_delete_account_sub">Apaga sua conta e dados permanentemente</span>
                 </div>
               </button>
+            </div>
+
+            <div class="fs-section" data-i18n="privacy_section">Privacidade e dados</div>
+            <div class="fs-card" id="fsPrivacyCard">
+              <div class="fs-form">
+                <p class="fs-hint" style="margin-top:0" data-i18n="privacy_intro">Escolha quais dados o Fenda Music pode usar. Você pode alterar ou revogar essas escolhas a qualquer momento.</p>
+              </div>
+              <label class="fs-row">
+                <span class="material-symbols-rounded">analytics</span>
+                <div class="fs-row-text"><span class="fs-row-title" data-i18n="privacy_analytics">Análise de uso</span><span class="fs-row-sub" data-i18n="privacy_analytics_sub">Usa seu histórico de reprodução e buscas para medir o funcionamento e melhorar o app.</span></div>
+                <span class="fs-switch"><input type="checkbox" id="fsPrivacyAnalytics"><i></i></span>
+              </label>
+              <label class="fs-row">
+                <span class="material-symbols-rounded">auto_awesome</span>
+                <div class="fs-row-text"><span class="fs-row-title" data-i18n="privacy_recommendations">Recomendações personalizadas</span><span class="fs-row-sub" data-i18n="privacy_recommendations_sub">Usa seu histórico para adaptar sugestões, rankings pessoais e descobertas.</span></div>
+                <span class="fs-switch"><input type="checkbox" id="fsPrivacyRecommendations"><i></i></span>
+              </label>
+              <label class="fs-row">
+                <span class="material-symbols-rounded">location_on</span>
+                <div class="fs-row-text"><span class="fs-row-title" data-i18n="privacy_location">Localização precisa</span><span class="fs-row-sub" data-i18n="privacy_location_sub">Permite usar o GPS para recursos baseados na sua região. O navegador pedirá permissão.</span></div>
+                <span class="fs-switch"><input type="checkbox" id="fsPrivacyLocation"><i></i></span>
+              </label>
+              <label class="fs-row">
+                <span class="material-symbols-rounded">devices</span>
+                <div class="fs-row-text"><span class="fs-row-title" data-i18n="privacy_device">Dados técnicos do aparelho</span><span class="fs-row-sub" data-i18n="privacy_device_sub">Usa idioma, fuso horário e plataforma, sem guardar o identificador bruto do navegador.</span></div>
+                <span class="fs-switch"><input type="checkbox" id="fsPrivacyDevice"><i></i></span>
+              </label>
+              <div class="fs-form">
+                <div class="fs-status" id="fsPrivacyStatus" aria-live="polite"></div>
+                <p class="fs-hint" data-i18n="privacy_data_note">Os dados autorizados ficam vinculados à sua conta e são apagados quando a conta é excluída. O Fenda não grava um IP no seu perfil; registros técnicos de segurança podem existir nos provedores de infraestrutura conforme as políticas deles.</p>
+              </div>
             </div>
 
             <div class="fs-section" data-i18n="settings_general">Geral</div>
@@ -834,6 +868,64 @@
         _overlay.querySelectorAll('[data-pref]').forEach(cb => {
             cb.addEventListener('change', () => setPref(cb.dataset.pref, cb.checked));
         });
+
+        // ── Privacidade e dados ──
+        const privacy = window.FendaPrivacy;
+        if (privacy) {
+            const privacyStatus = _overlay.querySelector('#fsPrivacyStatus');
+            const privacyControls = [
+                ['analytics', '#fsPrivacyAnalytics'],
+                ['recommendations', '#fsPrivacyRecommendations'],
+                ['location', '#fsPrivacyLocation'],
+                ['device', '#fsPrivacyDevice'],
+            ];
+
+            const refreshPrivacyControls = async () => {
+                const current = await privacy.load(window.AppState?.userId || null);
+                privacyControls.forEach(([key, selector]) => {
+                    const control = _overlay.querySelector(selector);
+                    if (control) control.checked = privacy.isEnabled(key);
+                });
+                return current;
+            };
+
+            privacyControls.forEach(([key, selector]) => {
+                const control = _overlay.querySelector(selector);
+                if (!control) return;
+                control.addEventListener('change', async () => {
+                    const requested = control.checked;
+                    privacyControls.forEach(([, otherSelector]) => {
+                        const other = _overlay.querySelector(otherSelector);
+                        if (other) other.disabled = true;
+                    });
+                    privacyStatus.className = 'fs-status';
+                    privacyStatus.textContent = key === 'location' && requested
+                        ? 'Aguardando a permissão de localização…'
+                        : 'Salvando…';
+                    try {
+                        await privacy.setConsent(key, requested);
+                        privacyStatus.classList.add('ok');
+                        privacyStatus.textContent = window.t('privacy_saved');
+                    } catch (error) {
+                        control.checked = privacy.isEnabled(key);
+                        privacyStatus.classList.add('err');
+                        privacyStatus.textContent = key === 'location'
+                            ? window.t('privacy_location_error')
+                            : (error?.message || 'Não foi possível salvar essa preferência.');
+                    } finally {
+                        privacyControls.forEach(([, otherSelector]) => {
+                            const other = _overlay.querySelector(otherSelector);
+                            if (other) other.disabled = false;
+                        });
+                    }
+                });
+            });
+
+            void refreshPrivacyControls().catch(() => {
+                privacyStatus.className = 'fs-status err';
+                privacyStatus.textContent = window.t('privacy_load_error');
+            });
+        }
 
         // ── Alteração de e-mail ──
         _overlay.querySelector('#fsEmailBtn').addEventListener('click', async () => {

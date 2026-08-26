@@ -110,7 +110,8 @@
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/supabase-config.js?v=push-token-session-v3"></script>
+    <script src="/js/supabase-config.js?v=privacy-consent-v1"></script>
+    <script src="/js/privacy.js?v=consent-location-v2"></script>
   </head>
   <body>
     <audio id="audio" class="fenda-audio-output" controls playsinline webkit-playsinline preload="metadata" aria-hidden="true"></audio>
@@ -891,7 +892,7 @@
     </div>
 
     <script src="/js/i18n.js"></script>
-    <script src="/js/player-core.js?v=offline-catalog-v1"></script>
+    <script src="/js/player-core.js?v=privacy-consent-v1"></script>
     <script src="/js/player-session.js?v=resume-no-autoplay-v1"></script>
     <script src="/js/player-audio-lyrics.js?v=streaming-resume-v2"></script>
     <script src="/js/vendor/html2canvas.min.js"></script>
@@ -908,9 +909,9 @@
          real que ele trazia (buildAutoQueue tolerante a tipo de id) foi incorporado
          direto em player-core.js. -->
     <script src="/js/notifications.js"></script>
-    <script src="/js/inicio-extras.js?v=streaming-resume-v3"></script>
+    <script src="/js/inicio-extras.js?v=privacy-controls-v1"></script>
     <!-- Novos módulos -->
-    <script src="/js/settings.js?v=offline-downloads-v1"></script>
+    <script src="/js/settings.js?v=privacy-controls-v1"></script>
     <script src="/js/playback-engine.js"></script>
     <script src="/js/themes-v6.js"></script>
     <script src="/js/notifications-follow.js"></script>
@@ -918,7 +919,7 @@
          removido: usava IndexedDB próprio, nunca conectado ao AppState real do player,
          e causava conflito de id/classe com o painel de fila oficial (#queuePanel,
          gerenciado por player-menus-core.js). -->
-    <script src="/js/player-recommendations.js"></script>
+    <script src="/js/player-recommendations.js?v=privacy-controls-v1"></script>
 
     <script>
       // Inicializar módulos após login
@@ -944,7 +945,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=88", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=89", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

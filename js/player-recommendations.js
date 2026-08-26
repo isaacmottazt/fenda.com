@@ -19,10 +19,16 @@ class RecommendationEngine {
    * Inicializa o motor de recomendações
    */
   async init(userId) {
-    if (!userId || this.initialized) return;
+    if (!userId || (this.initialized && this.userId === userId)) return;
 
     try {
       this.userId = userId;
+      if (window.FendaPrivacy) await window.FendaPrivacy.load(userId);
+      if (window.FendaPrivacy && !window.FendaPrivacy.isEnabled('recommendations')) {
+        this.recommendations = [];
+        this.initialized = false;
+        return;
+      }
       await this.loadUserPreferences();
       await this.generateRecommendations();
       this.initialized = true;
@@ -253,5 +259,15 @@ let recommendationEngine;
 document.addEventListener('DOMContentLoaded', () => {
   if (!recommendationEngine) {
     recommendationEngine = new RecommendationEngine();
+  }
+});
+
+document.addEventListener('fenda:privacyChanged', (event) => {
+  if (!recommendationEngine?.userId) return;
+  recommendationEngine.initialized = false;
+  if (event.detail?.recommendations) {
+    void recommendationEngine.init(recommendationEngine.userId);
+  } else {
+    recommendationEngine.recommendations = [];
   }
 });

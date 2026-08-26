@@ -658,6 +658,7 @@
     // Motor local de recomendação: usa o catálogo enriquecido pelo admin e
     // o histórico do usuário, sem depender de um segundo serviço externo.
     window.getRecommendations = function getRecommendations(limit = 10, options = {}) {
+        if (window.FendaPrivacy && !window.FendaPrivacy.isEnabled('recommendations')) return [];
         const musics = getMusics();
         const history = window.AppState?.history || [];
         const playCounts = _getPlayCountsLocal();

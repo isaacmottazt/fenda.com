@@ -2069,6 +2069,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Armazena o ID do usuário logado
     AppState.userId = session.user.id;
 
+    // Carrega o consentimento antes de iniciar consultas de histórico,
+    // buscas e recomendações. Sem uma preferência salva, o módulo começa
+    // em opt-out e os dados continuam apenas no fluxo local do app.
+    if (window.FendaPrivacy) {
+        await window.FendaPrivacy.load(AppState.userId).catch((error) => {
+            console.warn('[FendaPrivacy] Boot sem sincronização de preferências:', error);
+        });
+    }
+
     // Ativa a persistência antes de qualquer reprodução. Assim pausas,
     // mudanças de app e fechamento do navegador guardam o ponto atual.
     if (typeof window.initSessionPersistence === 'function') {
