@@ -1899,6 +1899,9 @@
     scrollbar-width: none;
     margin: 0 -4px;
     padding: 2px 4px 8px;
+    scroll-padding-inline: 4px;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
 }
 .lib-all-artists-row::-webkit-scrollbar { display: none; }
 
@@ -1958,8 +1961,14 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    width: calc(100% + 32px);
+    max-width: calc(100% + 32px);
+    box-sizing: border-box;
     margin: 0 -16px;
     padding: 4px 16px 12px;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
     cursor: grab;
 }
 .lib-all-favs-carousel::-webkit-scrollbar { display: none; }

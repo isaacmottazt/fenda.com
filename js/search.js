@@ -3,6 +3,16 @@
 let searchInput = null;
 let recentSearches = [];
 
+function syncSearchStartHint() {
+    const hint = document.getElementById('searchStartHint');
+    if (!hint) return;
+    const hasRecent = recentSearches.length > 0;
+    const artistsList = document.getElementById('featuredArtistsList');
+    const artistsSection = document.getElementById('featuredArtistsSection');
+    const hasFeaturedArtists = !!(artistsList?.children.length && artistsSection?.style.display !== 'none');
+    hint.classList.toggle('is-visible', !hasRecent && !hasFeaturedArtists);
+}
+
 function initSearch() {
     searchInput = document.getElementById('globalSearchInput');
     if (!searchInput) return;
@@ -40,6 +50,7 @@ function initSearch() {
     }
 
     renderFeaturedArtists();
+    renderRecentSearches();
 }
 
 function resetSearch() {
@@ -188,6 +199,7 @@ function renderRecentSearches() {
 
     if (!recentSearches.length) {
         if (section) section.style.display = 'none';
+        syncSearchStartHint();
         return;
     }
     if (section) section.style.display = 'block';
@@ -218,6 +230,7 @@ function renderRecentSearches() {
             renderRecentSearches();
         });
     });
+    syncSearchStartHint();
 }
 
 async function clearAllRecentSearches() {
@@ -239,8 +252,10 @@ function renderFeaturedArtists() {
     const artists = [...artistMap.entries()].slice(0, 12);
     if (!artists.length) {
         if (section) section.style.display = 'none';
+        syncSearchStartHint();
         return;
     }
+    if (section) section.style.display = 'block';
 
     container.innerHTML = artists.map(([name, cover]) => `
         <div class="search-artist-card" data-artist="${escapeHtml(name)}">
@@ -263,6 +278,7 @@ function renderFeaturedArtists() {
             }
         });
     });
+    syncSearchStartHint();
 }
 
 function makeAvatar(src, fallbackIcon) {

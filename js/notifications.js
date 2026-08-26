@@ -433,6 +433,8 @@ const FendaNotifications = (() => {
         const overlay = document.getElementById('notificationsOverlay');
         if (!overlay) return;
         overlay.classList.add('active');
+        const list = overlay.querySelector('.notif-list');
+        if (list) list.scrollTop = 0;
         document.body.style.overflow = 'hidden';
         // Renderiza PRIMEIRO com o estado real (não lidas visíveis)
         // Marca como lidas apenas ao FECHAR — evita inconsistência visual

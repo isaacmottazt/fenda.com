@@ -33,7 +33,7 @@
             home_recent: 'Tocadas recentemente', home_see_all_2: 'Ver tudo',
             home_new: 'Adicionadas recentemente', loading: 'Carregando...',
             // Buscar
-            search_placeholder: 'Músicas, artistas...', search_recent: 'Buscas recentes',
+            search_placeholder: 'Músicas, artistas...', search_recent: 'Buscas recentes', search_start_title: 'Encontre sua próxima música', search_start_hint: 'Pesquise por uma música, artista ou estilo para começar.',
             search_clear: 'Limpar', search_artists: 'Artistas',
             // Biblioteca
             lib_title: 'Biblioteca', lib_all: 'Tudo', lib_playlists: 'Playlists',
@@ -127,7 +127,7 @@
             home_fav_artists: 'Your favorite artists', home_see_all: 'See all',
             home_recent: 'Recently played', home_see_all_2: 'See all',
             home_new: 'Recently added', loading: 'Loading...',
-            search_placeholder: 'Songs, artists...', search_recent: 'Recent searches',
+            search_placeholder: 'Songs, artists...', search_recent: 'Recent searches', search_start_title: 'Find your next song', search_start_hint: 'Search for a song, artist, or style to get started.',
             search_clear: 'Clear', search_artists: 'Artists',
             lib_title: 'Library', lib_all: 'All', lib_playlists: 'Playlists',
             lib_history: 'History', lib_artists: 'Artists', lib_downloads: 'Downloads',
@@ -210,7 +210,7 @@
             home_fav_artists: 'Tus artistas favoritos', home_see_all: 'Ver todos',
             home_recent: 'Reproducidas recientemente', home_see_all_2: 'Ver todo',
             home_new: 'Añadidas recientemente', loading: 'Cargando...',
-            search_placeholder: 'Canciones, artistas...', search_recent: 'Búsquedas recientes',
+            search_placeholder: 'Canciones, artistas...', search_recent: 'Búsquedas recientes', search_start_title: 'Encuentra tu próxima canción', search_start_hint: 'Busca una canción, artista o estilo para comenzar.',
             search_clear: 'Borrar', search_artists: 'Artistas',
             lib_title: 'Biblioteca', lib_all: 'Todo', lib_playlists: 'Listas',
             lib_history: 'Historial', lib_artists: 'Artistas', lib_downloads: 'Descargas',

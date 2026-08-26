@@ -16,7 +16,7 @@
         /* Garantia de que os toasts apareçam corretamente */
         .toast-container {
             position: fixed;
-            top: 20px;
+            top: max(20px, calc(env(safe-area-inset-top, 0px) + 8px));
             left: 50%;
             transform: translateX(-50%);
             z-index: 11000;
@@ -409,7 +409,7 @@
                 // próprio arquivo sw.js — sem isso, o Chrome pode servir um
                 // sw.js de até 24h atrás mesmo com CACHE_NAME já incrementado
                 // no arquivo novo, porque nunca chega a baixar a versão nova.
-                navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' })
+                navigator.serviceWorker.register('/sw.js?v=69', { scope: '/', updateViaCache: 'none' })
                     .then(reg => {
                         console.log('[SW] Registrado:', reg.scope);
                         // Força checar por atualização a cada carregamento desta tela

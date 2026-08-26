@@ -3,10 +3,12 @@ body {
     background: url('../images/fundo.png') no-repeat center center fixed;
     background-size: cover;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: max(20px, calc(env(safe-area-inset-top, 0px) + 12px)) 20px max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px));
     margin: 0;
     background-color: #0a0a0f;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -15,6 +17,7 @@ body {
 .login-screen {
     width: 100%;
     max-width: 420px;
+    margin: auto 0;
 }
 
 .login-container {
@@ -222,7 +225,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: max(20px, calc(env(safe-area-inset-top, 0px) + 12px)) 20px max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+    overflow-y: auto;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease;
@@ -359,11 +363,14 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    height: 100dvh;
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
+    padding: max(20px, calc(env(safe-area-inset-top, 0px) + 12px)) 20px max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+    overflow-y: auto;
     z-index: 10000;
 }
 
@@ -473,7 +480,7 @@ body {
 /* Toast */
 .toast-container {
     position: fixed;
-    top: 20px;
+    top: max(20px, calc(env(safe-area-inset-top, 0px) + 8px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 11000;
@@ -513,4 +520,13 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 26px 18px;
+        border-radius: 26px;
+    }
+    .login-header { margin-bottom: 24px; }
 }

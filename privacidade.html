@@ -21,6 +21,7 @@
         max-width: 720px;
         margin: 0 auto;
         min-height: 100vh;
+        min-height: 100dvh;
         background: linear-gradient(180deg, #0f0b1a 0%, #07050c 100%);
       }
 
@@ -31,7 +32,7 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 18px 20px;
+        padding: max(14px, calc(env(safe-area-inset-top, 0px) + 10px)) 20px 14px;
         background: rgba(10, 6, 18, 0.92);
         backdrop-filter: blur(12px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -60,7 +61,7 @@
       }
 
       .legal-body {
-        padding: 28px 20px 60px;
+        padding: 24px 20px max(40px, calc(40px + env(safe-area-inset-bottom, 0px)));
       }
 
       .legal-hero {
@@ -139,14 +140,21 @@
       }
 
       /* Tabela de dados coletados */
+      .legal-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 12px 0 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        scrollbar-width: thin;
+      }
       .legal-table {
         width: 100%;
+        min-width: 420px;
         border-collapse: collapse;
-        margin: 12px 0 16px;
+        margin: 0;
         font-size: 13px;
-        border-radius: 14px;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.08);
       }
       .legal-table th {
         background: rgba(146, 76, 255, 0.12);
@@ -241,6 +249,13 @@
         margin-top: 30px;
       }
 
+      @media (max-width: 380px) {
+        .legal-body { padding-left: 16px; padding-right: 16px; }
+        .legal-section p, .legal-section li { font-size: 14px; }
+        .legal-table { font-size: 12px; }
+        .legal-table th, .legal-table td { padding: 9px 10px; }
+      }
+
       @media (min-width: 560px) {
         .legal-hero h2 { font-size: 30px; }
       }
@@ -268,7 +283,8 @@
         <div class="legal-section">
           <h3><span class="material-symbols-rounded">folder_open</span>1. Quais dados coletamos</h3>
           <p>Para o Fenda Music funcionar, coletamos as seguintes informações:</p>
-          <table class="legal-table">
+          <div class="legal-table-wrap" role="region" aria-label="Dados coletados e finalidades">
+            <table class="legal-table">
             <thead>
               <tr><th>Dado</th><th>Para quê</th></tr>
             </thead>
@@ -279,7 +295,8 @@
               <tr><td>Playlists e favoritos</td><td>Guardar suas escolhas na conta</td></tr>
               <tr><td>Dados técnicos do aparelho</td><td>Notificações e funcionamento offline</td></tr>
             </tbody>
-          </table>
+            </table>
+          </div>
           <p>Não coletamos dados de pagamento — o Fenda Music é gratuito e não processa transações financeiras.</p>
         </div>
 

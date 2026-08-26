@@ -222,6 +222,11 @@
               </div>
               <div id="featuredArtistsList" class="search-artists-row"></div>
             </div>
+            <div id="searchStartHint" class="search-start-hint" aria-live="polite">
+              <span class="material-symbols-rounded">manage_search</span>
+              <strong data-i18n="search_start_title">Encontre sua próxima música</strong>
+              <span data-i18n="search_start_hint">Pesquise por uma música, artista ou estilo para começar.</span>
+            </div>
           </div>
         </div>
 
@@ -945,7 +950,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=68", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=69", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
