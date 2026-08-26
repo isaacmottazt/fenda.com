@@ -115,7 +115,7 @@
 .fs-about-mark.fallback .fs-about-mark-img{display:none}
 .fs-about-mark.fallback .fs-about-mark-icon{display:block}
 .fs-about-hero h2{font-size:20px;font-weight:900;letter-spacing:-.2px;margin-bottom:8px}
-.fs-about-version-badge{display:inline-flex;align-items:center;font-size:12px;font-weight:700;color:rgba(192,132,252,.9);background:rgba(146,76,255,.12);border:1px solid rgba(146,76,255,.25);border-radius:30px;padding:4px 12px}
+.fs-about-version-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-size:12px;font-weight:700;color:rgba(192,132,252,.9);background:rgba(146,76,255,.12);border:1px solid rgba(146,76,255,.25);border-radius:30px;padding:4px 12px}.fs-about-version-number{font-variant-numeric:tabular-nums}
 .fs-about-footer{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;text-align:center;font-size:12px;color:rgba(255,255,255,.35);margin-top:26px;padding-bottom:10px}
 .fs-about-footer .material-symbols-rounded{font-size:14px;color:#f472b6}
 .fs-about-footer-dot{opacity:.5}
@@ -413,7 +413,7 @@
                 <span class="material-symbols-rounded fs-about-mark-icon">graphic_eq</span>
               </div>
               <h2>Fenda Music</h2>
-              <span class="fs-about-version-badge"><span data-i18n="settings_version">versão</span> ${APP_VERSION}</span>
+              <span class="fs-about-version-badge"><span data-i18n="settings_version">versão</span><span class="fs-about-version-number">${APP_VERSION}</span></span>
             </div>
 
             <div class="fs-section" data-i18n="about_legal">Legal</div>
