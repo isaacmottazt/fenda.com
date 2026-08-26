@@ -872,6 +872,8 @@
         _overlay.querySelector('#fsLogoutBtn').addEventListener('click', () => {
             window.showConfirmDialog(window.t('confirm_logout_title'), window.t('confirm_logout_msg'), async () => {
                 try {
+                    AppState._sessionDisabled = true;
+                    window.clearPlayerSession?.();
                     if (window.CacheDB) await window.CacheDB.clear();
                     await window.supabaseClient.auth.signOut();
                     localStorage.clear();
@@ -887,6 +889,8 @@
                 const btn = _overlay.querySelector('#fsDeleteAccount');
                 btn.style.opacity = '.6'; btn.style.pointerEvents = 'none';
                 try {
+                    AppState._sessionDisabled = true;
+                    window.clearPlayerSession?.();
                     const { error } = await window.supabaseClient.rpc('delete_user_account');
                     if (error) throw error;
                     if (window.CacheDB) await window.CacheDB.clear();

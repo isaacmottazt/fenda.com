@@ -13,13 +13,14 @@ const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 // ── Salva o estado atual ──────────────────────────────────────
 function savePlayerSession() {
     try {
-        if (!AppState.currentMusicId) return;
+        if (!AppState.currentMusicId || !AppState.userId || AppState._sessionDisabled) return;
 
         const audio = document.getElementById('audio');
         const currentTime = audio ? Math.floor(audio.currentTime) : 0;
 
         const session = {
             musicId:    AppState.currentMusicId,
+            userId:     AppState.userId || null,
             currentTime: currentTime,
             duration:   audio && Number.isFinite(audio.duration) ? Math.floor(audio.duration) : 0,
             wasPlaying: audio ? !audio.paused : AppState.playing,
@@ -44,16 +45,28 @@ function savePlayerSession() {
     }
 }
 
+function clearPlayerSession() {
+    try { localStorage.removeItem(SESSION_KEY); } catch {}
+}
+
 // ── Lê a sessão salva ─────────────────────────────────────────
 function loadPlayerSession() {
     try {
         const raw = localStorage.getItem(SESSION_KEY);
         if (!raw) return null;
         const s = JSON.parse(raw);
+        // Sessões antigas não tinham vínculo com a conta. Descartá-las evita
+        // que a música de um usuário seja retomada após outra conta entrar.
+        if (!s.userId || (AppState.userId && String(s.userId) !== String(AppState.userId))) {
+            clearPlayerSession();
+            return null;
+        }
         // A retomada fica disponível por até 12 horas, como uma sessão recente
-        // de streaming. Depois disso, o player começa sem retomar automaticamente.
-        if (s.savedAt && Date.now() - s.savedAt > SESSION_MAX_AGE_MS) {
-            localStorage.removeItem(SESSION_KEY);
+        // de streaming. Sessões sem timestamp também são descartadas, pois não
+        // é possível provar que ainda estão dentro da janela válida.
+        const savedAt = Number(s.savedAt);
+        if (!Number.isFinite(savedAt) || savedAt <= 0 || Date.now() - savedAt > SESSION_MAX_AGE_MS) {
+            clearPlayerSession();
             return null;
         }
         return s;
@@ -68,7 +81,7 @@ async function restorePlayerSession() {
 
     const music = AppState.musics.find(m => String(m.id) === String(session.musicId));
     if (!music) {
-        localStorage.removeItem(SESSION_KEY);
+        clearPlayerSession();
         return false;
     }
 
@@ -202,11 +215,11 @@ function initSessionPersistence() {
     // Quando uma faixa termina, deixa de ser uma retomada pendente. O próximo
     // avanço salvará a nova música assim que começar.
     audio.addEventListener('ended', () => {
-        try { localStorage.removeItem(SESSION_KEY); } catch {}
+        clearPlayerSession();
     });
 
-    // Salva também quando o usuário pausa manualmente, para o card
-    // continuar ouvindo refletir o ponto exato sem depender do próximo intervalo.
+    // Salva também quando o usuário pausa manualmente, para a retomada
+    // automática refletir o ponto exato sem depender do próximo intervalo.
     audio.addEventListener('pause', savePlayerSession);
 
     // Salva periodicamente enquanto toca (a cada 5s)
@@ -229,6 +242,7 @@ function initSessionPersistence() {
 }
 
 window.savePlayerSession      = savePlayerSession;
+window.clearPlayerSession     = clearPlayerSession;
 window.loadPlayerSession      = loadPlayerSession;
 window.restorePlayerSession   = restorePlayerSession;
 window.initSessionPersistence = initSessionPersistence;

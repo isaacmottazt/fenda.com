@@ -19,9 +19,21 @@ async function deleteMusicPermanently(music) {
         showToast("Música excluída com sucesso", "success");
         if (AppState.currentMusicId === music.id) {
             DOM.audio.pause();
+            DOM.audio.removeAttribute('src');
+            DOM.audio.load();
+            window.clearPlayerSession?.();
             AppState.currentMusicId = null;
             AppState.playing = false;
+            AppState.queue = (AppState.queue || []).filter(item => item.id !== music.id);
+            AppState.autoQueue = (AppState.autoQueue || []).filter(item => item.id !== music.id);
+            if (AppState.playContext) {
+                AppState.playContext.trackList = (AppState.playContext.trackList || [])
+                    .filter(item => item.id !== music.id);
+            }
+            AppState._originalTrackList = (AppState._originalTrackList || [])
+                .filter(item => item.id !== music.id);
             DOM.playerBottomBar.style.display = 'none';
+            document.body.classList.remove('player-active');
         }
     } catch (err) {
         showToast("Erro ao excluir: " + err.message, "danger");
