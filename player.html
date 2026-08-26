@@ -894,7 +894,8 @@
     <script src="js/player-core.js?v=offline-catalog-v1"></script>
     <script src="js/player-session.js?v=resume-no-autoplay-v1"></script>
     <script src="js/player-audio-lyrics.js?v=streaming-resume-v2"></script>
-    <script src="js/player-ui.js?v=streaming-resume-v2"></script>
+    <script src="js/vendor/html2canvas.min.js"></script>
+    <script src="js/player-ui.js?v=summary-share-image-v1"></script>
     <script src="js/player-playlists.js?v=offline-downloads-v1"></script>
     <script src="js/podcasts.js"></script>
     <script src="js/realtime-catalog.js"></script>
@@ -943,7 +944,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=74", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=75", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

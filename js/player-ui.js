@@ -938,6 +938,97 @@ function openArtistDetail(artistName, skipPush = false) {
 window.openArtistDetail = openArtistDetail;
 
 
+let _summaryShareInProgress = false;
+
+function _downloadSummaryImage(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+async function _canvasToPngBlob(canvas) {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Não foi possível gerar o PNG')), 'image/png');
+    });
+}
+
+async function _shareSummaryImage(card, shareText, monthLabel) {
+    if (_summaryShareInProgress || !card) return;
+    _summaryShareInProgress = true;
+    const shareButton = card.querySelector('.sc-share');
+    if (shareButton) {
+        shareButton.disabled = true;
+        shareButton.setAttribute('aria-busy', 'true');
+    }
+
+    try {
+        if (typeof window.html2canvas !== 'function') throw new Error('Captura de imagem indisponível');
+        // Captura o elemento que o usuário vê, incluindo glow, gráfico, capas,
+        // tipografia e o botão. Nenhum card paralelo é reconstruído.
+        const canvas = await window.html2canvas(card, {
+            backgroundColor: null,
+            useCORS: true,
+            allowTaint: false,
+            scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
+            logging: false,
+            imageTimeout: 12000,
+            onclone: clonedDocument => {
+                const clonedCard = clonedDocument.querySelector('.sound-capsule--current') || clonedDocument.querySelector('.sound-capsule');
+                if (clonedCard) clonedCard.classList.add('sc-share-capture');
+            }
+        });
+        const blob = await _canvasToPngBlob(canvas);
+        const monthSlug = String(monthLabel || 'resumo').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'resumo';
+        const file = new File([blob], `fenda-resumo-${monthSlug}.png`, { type: 'image/png' });
+
+        try {
+            if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                await navigator.share({
+                    title: 'Meu resumo no Fenda Music',
+                    text: shareText,
+                    files: [file]
+                });
+                showToast('Resumo compartilhado!', 'success');
+                return;
+            }
+        } catch (error) {
+            if (error?.name === 'AbortError') return;
+            console.warn('[Share] Compartilhamento nativo indisponível:', error);
+        }
+
+        // Desktop e navegadores sem Web Share Files recebem a mesma imagem
+        // por download, sem substituir o PNG por um resumo textual diferente.
+        _downloadSummaryImage(blob, file.name);
+        showToast('Imagem do resumo salva!', 'success');
+    } catch (error) {
+        console.warn('[Share] Falha ao gerar imagem do resumo:', error);
+        let fallbackSucceeded = false;
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: 'Meu resumo no Fenda Music', text: shareText });
+                fallbackSucceeded = true;
+            } else if (navigator.clipboard) {
+                await navigator.clipboard.writeText(shareText);
+                fallbackSucceeded = true;
+                showToast('Resumo copiado!', 'success');
+            }
+        } catch {}
+        if (!fallbackSucceeded) showToast('Não foi possível gerar a imagem agora.', 'danger');
+    } finally {
+        _summaryShareInProgress = false;
+        if (shareButton) {
+            shareButton.disabled = false;
+            shareButton.removeAttribute('aria-busy');
+        }
+    }
+}
+
 function renderLibrary() {
     const favoritesCount = AppState.favorites.size;
     const recentCount = AppState.history.length;
@@ -1213,10 +1304,7 @@ function renderLibrary() {
 🔁 No repeat: ${_topMus.title}` : ''}
 
 fendamusic.com.br`;
-            try {
-                if (navigator.share) await navigator.share({ text: _txt });
-                else { await navigator.clipboard.writeText(_txt); showToast('Resumo copiado!', 'success'); }
-            } catch {}
+            await _shareSummaryImage(_cap, _txt, `${_moNames[_mIdx]}-${_y}`);
         });
         histSection.appendChild(_cap);
     });
