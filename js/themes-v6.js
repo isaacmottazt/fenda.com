@@ -177,7 +177,7 @@ class FendaThemes {
       .playlist-shuffle-btn{border-color:${p.base}!important;color:${p.hi}!important;background:${p.soft}!important}
       #playlistDetailName,#playlistDetailCount{color:${ink}!important}
 
-      .search-top{background:linear-gradient(180deg,${bg} 0%,transparent 100%)!important}
+      .search-top{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
       .search-bar-new{background:${inptBg}!important;border-color:${border}!important}
       .search-bar-new:focus-within{border-color:${p.base}!important}
       #globalSearchInput{color:${ink}!important}

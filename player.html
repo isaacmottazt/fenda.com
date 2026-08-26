@@ -945,7 +945,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=62", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=63", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
