@@ -1400,8 +1400,9 @@
 /* ── Cápsula mensal (Máquina do Tempo) ── */
 .sound-capsule {
     position: relative;
-    background: linear-gradient(145deg, #1c0d38 0%, #0e0718 100%);
-    border: 1px solid var(--primary-line, rgba(168, 85, 247, 0.28));
+    isolation: isolate;
+    background: transparent;
+    border: 1px solid var(--primary-line, rgba(168, 85, 247, 0.42));
     border-radius: 26px;
     padding: 22px 20px 18px;
     margin-bottom: 22px;
@@ -1409,6 +1410,18 @@
     box-shadow:
         0 12px 36px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.sound-capsule::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background:
+        radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
+        radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
+        linear-gradient(180deg, #24143d 0%, #180b2e 42%, #120820 100%);
+    pointer-events: none;
+    z-index: -1;
 }
 .sound-capsule--current {
     border-color: var(--primary-hi, rgba(168, 85, 247, 0.5));
