@@ -140,12 +140,20 @@ function syncHomeTrackAlignment(trackOrSelector, { resetScroll = false } = {}) {
     if (!track) return;
 
     const apply = () => {
+        // Trilhas inseridas dinamicamente podem ser medidas antes de o layout
+        // terminar. Nesse caso, aguarda o próximo frame para não centralizar
+        // uma trilha que ainda está com largura zero.
+        if (!track.isConnected || track.clientWidth === 0) return;
         const overflowing = track.scrollWidth > track.clientWidth + 1;
         track.classList.toggle('track-centered', !overflowing);
         if (resetScroll) track.scrollLeft = 0;
     };
-    if (window.requestAnimationFrame) requestAnimationFrame(apply);
-    else setTimeout(apply, 0);
+    if (window.requestAnimationFrame) {
+        requestAnimationFrame(() => {
+            apply();
+            requestAnimationFrame(apply);
+        });
+    } else setTimeout(apply, 0);
 }
 
 let _homeRefreshQueued = false;
@@ -165,7 +173,7 @@ window.captureHomeUiState = captureHomeUiState;
 window.restoreHomeUiState = restoreHomeUiState;
 window.addEventListener('fenda:homeDataChanged', queueHomeBackgroundRefresh);
 window.addEventListener('resize', () => {
-    document.querySelectorAll('.recent-grid, .popular-track').forEach(track =>
+    document.querySelectorAll('.recent-grid, .popular-track, .recommended-track').forEach(track =>
         syncHomeTrackAlignment(track, { resetScroll: false })
     );
 });

@@ -736,8 +736,14 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    width: calc(100% + 32px);
+    max-width: calc(100% + 32px);
+    box-sizing: border-box;
     margin: 0 -16px;
     padding: 4px 16px 12px;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
     cursor: grab;
 }
 
@@ -1319,8 +1325,14 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    width: calc(100% + 32px);
+    max-width: calc(100% + 32px);
+    box-sizing: border-box;
     margin: 0 -16px;
     padding: 4px 16px 12px;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
     cursor: grab;
 }
 
@@ -1437,12 +1449,19 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    width: calc(100% + 32px);
+    max-width: calc(100% + 32px);
+    box-sizing: border-box;
     margin: 0 -16px;
     padding: 4px 16px 12px;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
     cursor: grab;
 }
 
 .recommended-track::-webkit-scrollbar { display: none; }
+.recommended-track.track-centered { justify-content: center; }
 .recommended-track:active { cursor: grabbing; }
 
 /* Card individual */

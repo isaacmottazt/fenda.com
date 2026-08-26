@@ -484,15 +484,18 @@
             const id = String(item?.id ?? item?.trackId ?? '');
             if (id) counts[id] = (counts[id] || 0) + 1;
         }
+        // Exibe todo o catálogo local, mantendo as mais ouvidas no início.
         const localSorted = [...musics]
-            .sort((a, b) => (counts[String(b.id)] || 0) - (counts[String(a.id)] || 0))
-            .slice(0, 10);
+            .sort((a, b) => (counts[String(b.id)] || 0) - (counts[String(a.id)] || 0));
         insertPopularSection(buildPopularSection(localSorted));
 
         // Atualiza com dados reais de todos os usuários quando autenticado.
         const requestId = ++popularRankingRequest;
         if (typeof window.loadGlobalMusicRanking !== 'function') return;
-        window.loadGlobalMusicRanking(10, null).then(rows => {
+        // O RPC aceita até 50 itens; pedir o máximo disponível evita que o
+        // carrossel seja artificialmente reduzido a dez faixas.
+        const rankingLimit = Math.min(Math.max(musics.length, 10), 50);
+        window.loadGlobalMusicRanking(rankingLimit, null).then(rows => {
             if (requestId !== popularRankingRequest || !Array.isArray(rows)) return;
             const ranked = rows.map(row => {
                 const local = resolveTrack({ id: row.music_id });
@@ -507,7 +510,7 @@
                     cover,
                     playCount: Number(row.play_count) || 0,
                 };
-            }).filter(Boolean).slice(0, 10);
+            }).filter(Boolean);
             if (ranked.length < 3) return;
             TAB.querySelectorAll('.popular-section').forEach(el => el.remove());
             insertPopularSection(buildPopularSection(ranked, true));
@@ -718,7 +721,7 @@
         // ou seja, "recomendava" o que o usuário JÁ ouve. discovery alto inverte:
         // prioriza faixas pouco/nunca ouvidas de artistas com afinidade.
         const recommendations = (typeof window.getRecommendations === 'function')
-            ? window.getRecommendations(10, { discovery: 0.7 })
+            ? window.getRecommendations(musics.length, { discovery: 0.7 })
             : [];
 
         // Não exibe se não há recomendações suficientes
@@ -756,6 +759,7 @@
                     || TAB.querySelector('.discover-section');
         if (anchor) anchor.parentNode.insertBefore(sec, anchor.nextSibling);
         else TAB.appendChild(sec);
+        window.syncHomeTrackAlignment?.(sec.querySelector('.recommended-track'));
     }
 
     // ============================================================
