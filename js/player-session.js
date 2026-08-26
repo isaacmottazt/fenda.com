@@ -30,6 +30,7 @@ function savePlayerSession() {
             trackIds: (AppState.playContext?.trackList || []).map(m => m.id),
             source:     AppState.playContext?.source     || 'library',
             playlistId: AppState.playContext?.playlistId || null,
+            seedMusicId: AppState.playContext?.seedMusicId || AppState.currentMusicId,
             savedAt:    Date.now(),
         };
 
@@ -83,6 +84,7 @@ async function restorePlayerSession() {
         source:     session.source,
         playlistId: session.playlistId,
         trackList:  restoredList,
+        seedMusicId: session.seedMusicId || music.id,
     };
     // Necessário para desligar o shuffle depois de uma restauração sem
     // perder o contexto (por exemplo, uma playlist).
@@ -123,7 +125,12 @@ async function restorePlayerSession() {
     }
 
     // Reconstrói fila automática
-    if (typeof window.buildAutoQueue === 'function') {
+    if (typeof window.buildAffinityQueue === 'function') {
+        const queueList = window._queueListForContext?.() || restoredList;
+        AppState.autoQueue = window.buildAffinityQueue(
+            music.id, queueList, AppState.isShuffle, AppState.playContext.seedMusicId
+        );
+    } else if (typeof window.buildAutoQueue === 'function') {
         AppState.autoQueue = window.buildAutoQueue(
             music.id, restoredList, AppState.isShuffle
         );

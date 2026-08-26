@@ -205,7 +205,14 @@ function initAudioAndLyricsEngine() {
                 ? originalList
                 : (AppState._originalTrackList?.length > 0 ? AppState._originalTrackList : AppState.musics);
 
-            AppState.autoQueue = buildAutoQueue(AppState.currentMusicId, trackList, AppState.isShuffle);
+            const queueList = typeof window._queueListForContext === 'function'
+                ? window._queueListForContext()
+                : trackList;
+            const seedId = AppState.playContext?.seedMusicId || AppState.currentMusicId;
+            AppState.autoQueue = typeof window.buildAffinityQueue === 'function'
+                ? window.buildAffinityQueue(AppState.currentMusicId, queueList, AppState.isShuffle, seedId)
+                : buildAutoQueue(AppState.currentMusicId, trackList, AppState.isShuffle);
+            window.ensureAutoQueue?.();
             if (typeof window.renderQueuePanel === 'function') window.renderQueuePanel();
             if (typeof window.savePlayerSession === 'function') window.savePlayerSession();
         });

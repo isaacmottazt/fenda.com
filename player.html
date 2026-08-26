@@ -886,14 +886,14 @@
     </div>
 
     <script src="js/i18n.js"></script>
-    <script src="js/player-core.js?v=queue-resume-v1"></script>
-    <script src="js/player-session.js?v=queue-resume-v1"></script>
-    <script src="js/player-audio-lyrics.js?v=queue-resume-v1"></script>
-    <script src="js/player-ui.js?v=queue-resume-v1"></script>
+    <script src="js/player-core.js?v=queue-affinity-v1"></script>
+    <script src="js/player-session.js?v=queue-affinity-v1"></script>
+    <script src="js/player-audio-lyrics.js?v=queue-affinity-v1"></script>
+    <script src="js/player-ui.js?v=queue-affinity-v1"></script>
     <script src="js/player-playlists.js"></script>
     <script src="js/podcasts.js"></script>
     <script src="js/realtime-catalog.js"></script>
-    <script src="js/player-menus-core.js?v=queue-resume-v1"></script>
+    <script src="js/player-menus-core.js?v=queue-affinity-v1"></script>
     <script src="js/player-music-actions.js"></script>
     <script src="js/search.js"></script>
     <!-- player-smart-queue.js removido: sobrescrevia window.handleNextTrack com uma
@@ -902,7 +902,7 @@
          real que ele trazia (buildAutoQueue tolerante a tipo de id) foi incorporado
          direto em player-core.js. -->
     <script src="js/notifications.js"></script>
-    <script src="js/inicio-extras.js?v=queue-resume-v1"></script>
+    <script src="js/inicio-extras.js?v=queue-affinity-v1"></script>
     <!-- Novos módulos -->
     <script src="js/settings.js"></script>
     <script src="js/playback-engine.js"></script>
@@ -945,7 +945,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=56", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=57", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
