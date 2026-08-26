@@ -1314,9 +1314,6 @@ function renderLibrary() {
                     <span class="material-symbols-rounded sc-arrow">play_arrow</span>
                 </div>` : ''}
 
-                <button class="sc-share" type="button">
-                    <span class="material-symbols-rounded">share</span>Compartilhar resumo
-                </button>
             </div>
         `;
 
@@ -1333,17 +1330,6 @@ function renderLibrary() {
         });
         _cap.querySelector('[data-action="open-artist"]')?.addEventListener('click', () => {
             if (_topArt && typeof window.openArtistDetail === 'function') window.openArtistDetail(_topArt[0]);
-        });
-        _cap.querySelector('.sc-share')?.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const _txt = `🎧 Minha Máquina do Tempo — ${_moNames[_mIdx]}${_y !== _now.getFullYear() ? ` ${_y}` : ''}
-⏱ ${_fmtMin(_totalMins)} de música
-🎵 ${_unique} músicas em ${_activeDays} ${_activeDays === 1 ? 'dia' : 'dias'}${_topArt ? `
-🎤 Artista do mês: ${_topArt[0]}` : ''}${_topMus ? `
-🔁 No repeat: ${_topMus.title}` : ''}
-
-fendamusic.com.br`;
-            await _shareSummaryImage(_cap, _txt, `${_moNames[_mIdx]}-${_y}`);
         });
         histSection.appendChild(_cap);
     });
