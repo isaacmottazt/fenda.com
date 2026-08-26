@@ -1030,7 +1030,12 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
                     }
                     .sound-capsule {
                         isolation: isolate !important;
-                        background: transparent !important;
+                        background:
+                            radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
+                            radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
+                            linear-gradient(180deg, #24143d 0%, #180b2e 42%, #120820 100%) !important;
+                        background-clip: border-box !important;
+                        background-origin: border-box !important;
                         border-color: rgba(168, 85, 247, 0.42) !important;
                     }
                     .sound-capsule::before {
@@ -1043,7 +1048,7 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
                             radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
                             linear-gradient(180deg, #24143d 0%, #180b2e 42%, #120820 100%) !important;
                         pointer-events: none !important;
-                        z-index: -1 !important;
+                        z-index: 0 !important;
                     }
                     .sound-capsule .sc-head,
                     .sound-capsule .sc-body {
