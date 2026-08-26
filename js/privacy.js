@@ -256,7 +256,8 @@
     }
 
     function hasDecision() {
-        return Boolean(prefs.consentedAt || prefs.revokedAt);
+        // Preferências criadas antes do aviso inicial precisam ser revisadas uma vez.
+        return Boolean((prefs.consentedAt || prefs.revokedAt) && prefs.consentVersion === CONSENT_VERSION);
     }
 
     async function saveChoices(selection = {}) {
