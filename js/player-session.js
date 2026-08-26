@@ -32,6 +32,8 @@ function savePlayerSession() {
             playlistId: AppState.playContext?.playlistId || null,
             seedMusicId: AppState.playContext?.seedMusicId || AppState.currentMusicId,
             seedProfile: AppState.playContext?.seedProfile || null,
+            queueIds: (AppState.queue || []).map(m => m.id),
+            autoQueueIds: (AppState.autoQueue || []).map(m => m.id),
             savedAt:    Date.now(),
         };
 
@@ -47,8 +49,8 @@ function loadPlayerSession() {
         const raw = localStorage.getItem(SESSION_KEY);
         if (!raw) return null;
         const s = JSON.parse(raw);
-        // Descarta se tiver mais de 24 horas
-        if (Date.now() - s.savedAt > 86_400_000) {
+        // Mantém a retomada por 30 dias, como uma sessão recente de streaming.
+        if (s.savedAt && Date.now() - s.savedAt > 30 * 86_400_000) {
             localStorage.removeItem(SESSION_KEY);
             return null;
         }
@@ -126,8 +128,18 @@ async function restorePlayerSession() {
         window.updatePlayerVisibility(music);
     }
 
-    // Reconstrói fila automática
-    if (typeof window.buildAffinityQueue === 'function') {
+    const resolveIds = (ids) => Array.isArray(ids)
+        ? ids.map(id => AppState.musics.find(m => String(m.id) === String(id))).filter(Boolean)
+        : [];
+    const savedQueue = resolveIds(session.queueIds);
+    const savedAutoQueue = resolveIds(session.autoQueueIds);
+
+    // Primeiro restaura a sequência exata que estava pendente. Para sessões
+    // antigas sem IDs de fila, usa o gerador contextual como fallback.
+    AppState.queue = savedQueue;
+    if (savedAutoQueue.length || Array.isArray(session.autoQueueIds)) {
+        AppState.autoQueue = savedAutoQueue;
+    } else if (typeof window.buildAffinityQueue === 'function') {
         const queueList = window._queueListForContext?.() || restoredList;
         AppState.autoQueue = window.buildAffinityQueue(
             music.id,
