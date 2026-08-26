@@ -934,23 +934,16 @@
     </script>
     <script>
       if ("serviceWorker" in navigator) {
-        // Recarrega a página UMA VEZ quando um Service Worker novo assume o
-        // controle. Sem isso, o SKIP_WAITING troca o SW em segundo plano,
-        // mas a aba já aberta continua rodando o HTML/CSS/JS antigos até o
-        // usuário fechar e reabrir o app manualmente — o que já causou
-        // telas com CSS desatualizado (cartão de perfil com dimensões de
-        // uma versão anterior, por exemplo) mesmo depois do deploy de uma
-        // correção. A flag evita loop se o evento disparar mais de uma vez.
-        let _swReloaded = false;
+        // A troca do Service Worker acontece em segundo plano. Não forçamos
+        // um reload aqui, pois isso fazia o site aparentar uma inicialização
+        // dupla; a nova versão será usada na próxima navegação natural.
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (_swReloaded) return;
-          _swReloaded = true;
-          window.location.reload();
+          console.info('[SW] Nova versão ativa; será usada na próxima navegação.');
         });
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=69", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=70", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
