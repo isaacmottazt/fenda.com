@@ -632,6 +632,63 @@
         catch { return {}; }
     }
 
+    // Motor local de recomendação: usa o catálogo enriquecido pelo admin e
+    // o histórico do usuário, sem depender de um segundo serviço externo.
+    window.getRecommendations = function getRecommendations(limit = 10, options = {}) {
+        const musics = getMusics();
+        const history = window.AppState?.history || [];
+        const playCounts = _getPlayCountsLocal();
+        const recentIds = new Set(history.slice(0, 15).map(item => String(item.id ?? item.music_id)));
+        const styleWeights = {};
+        const rhythmWeights = {};
+        let tempoTotal = 0;
+        let tempoWeight = 0;
+        let energyTotal = 0;
+        let energyWeight = 0;
+
+        history.forEach(entry => {
+            const music = musics.find(item => String(item.id) === String(entry.id ?? entry.music_id));
+            if (!music) return;
+            const weight = Math.max(1, Number(entry.listenedSeconds || entry.listened_seconds || 1));
+            const tags = [...(Array.isArray(music.style_tags) ? music.style_tags : []), music.style, music.genre]
+                .map(value => String(value || '').trim().toLowerCase()).filter(Boolean);
+            tags.forEach(tag => { styleWeights[tag] = (styleWeights[tag] || 0) + weight; });
+            const rhythm = String(music.rhythm_profile || '').trim().toLowerCase();
+            if (rhythm) rhythmWeights[rhythm] = (rhythmWeights[rhythm] || 0) + weight;
+            const bpm = Number(music.tempo_bpm);
+            if (bpm > 0) { tempoTotal += bpm * weight; tempoWeight += weight; }
+            const energy = Number(music.energy_score);
+            if (Number.isFinite(energy)) { energyTotal += energy * weight; energyWeight += weight; }
+        });
+
+        const favoriteIds = new Set([...((window.AppState?.favorites) || [])].map(String));
+        const averageTempo = tempoWeight ? tempoTotal / tempoWeight : null;
+        const averageEnergy = energyWeight ? energyTotal / energyWeight : null;
+        const maxStyleWeight = Math.max(1, ...Object.values(styleWeights));
+        const maxRhythmWeight = Math.max(1, ...Object.values(rhythmWeights));
+        const discovery = Number(options.discovery ?? 0.35);
+
+        return musics.filter(music => !recentIds.has(String(music.id)))
+            .map((music, index) => {
+                const tags = [...(Array.isArray(music.style_tags) ? music.style_tags : []), music.style, music.genre]
+                    .map(value => String(value || '').trim().toLowerCase()).filter(Boolean);
+                const styleScore = tags.reduce((best, tag) => Math.max(best, (styleWeights[tag] || 0) / maxStyleWeight), 0);
+                const rhythm = String(music.rhythm_profile || '').trim().toLowerCase();
+                const rhythmScore = rhythm ? (rhythmWeights[rhythm] || 0) / maxRhythmWeight : 0;
+                const bpm = Number(music.tempo_bpm);
+                const tempoScore = averageTempo && bpm ? Math.max(0, 1 - Math.abs(bpm - averageTempo) / 80) : 0;
+                const energy = Number(music.energy_score);
+                const energyScore = averageEnergy != null && Number.isFinite(energy) ? Math.max(0, 1 - Math.abs(energy - averageEnergy)) : 0;
+                const artistScore = history.some(item => String(item.artist || '').toLowerCase() === String(music.artist || '').toLowerCase()) ? 1 : 0;
+                const popularity = Math.min(Number(playCounts[music.id] || music.plays || 0) / 100, 1);
+                const favoriteBonus = favoriteIds.has(String(music.id)) ? 0.08 : 0;
+                const score = styleScore * 0.36 + tempoScore * 0.22 + energyScore * 0.14 + rhythmScore * 0.12 + artistScore * 0.08 + popularity * 0.08 + favoriteBonus;
+                return { ...music, score: score * (1 - discovery * 0.04) + (index % 17) * 0.00001 };
+            })
+            .sort((a, b) => b.score - a.score)
+            .slice(0, Math.max(1, limit));
+    };
+
     function renderRecommended() {
         // Remove render anterior
         TAB.querySelectorAll('.recommended-section').forEach(el => el.remove());
