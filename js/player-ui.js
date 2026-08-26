@@ -987,7 +987,7 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
             windowHeight: viewportHeight,
             scrollX: window.scrollX || 0,
             scrollY: window.scrollY || 0,
-            backgroundColor: '#0a0a0f',
+            backgroundColor: '#120923',
             useCORS: true,
             allowTaint: false,
             scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
@@ -1001,13 +1001,20 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
                 const captureStyle = clonedDocument.createElement('style');
                 captureStyle.textContent = `
                     html, body {
-                        background: #0a0a0f !important;
+                        background: #120923 !important;
                     }
                     .app-container {
                         background:
-                            radial-gradient(ellipse 260px 220px at 94% 12%, rgba(124, 58, 237, 0.14), transparent 72%),
-                            radial-gradient(ellipse 300px 260px at 4% 62%, rgba(124, 58, 237, 0.07), transparent 74%),
-                            linear-gradient(180deg, #0f0f1a 0%, #07070c 100%) !important;
+                            radial-gradient(ellipse 300px 260px at 94% 12%, rgba(124, 58, 237, 0.18), transparent 72%),
+                            radial-gradient(ellipse 320px 300px at 4% 62%, rgba(124, 58, 237, 0.09), transparent 74%),
+                            linear-gradient(180deg, #160b2a 0%, #0d0619 100%) !important;
+                    }
+                    .sound-capsule {
+                        background: linear-gradient(180deg, #24143d 0%, #180b2e 42%, #120820 100%) !important;
+                    }
+                    .sound-capsule .sc-head,
+                    .sound-capsule .sc-body {
+                        background: transparent !important;
                     }
                     .library-header h1 {
                         background: none !important;
