@@ -1,7 +1,7 @@
 {
   "name": "fenda-music",
   "version": "1.0.0",
-  "description": "Fenda Music - Streaming de música gospel e cristã",
+  "description": "Fenda Music - Plataforma de streaming musical com diversos gêneros e estilos",
   "private": true,
   "scripts": {
     "cap:sync": "npx cap sync android",

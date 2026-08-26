@@ -354,7 +354,7 @@
             title: 'Termos de uso', icon: 'description',
             intro: 'Estes termos explicam as regras para usar o Fenda Music com segurança e respeito à comunidade.',
             sections: [
-                ['Uso do Fenda Music', 'O Fenda Music oferece acesso pessoal e não comercial a um catálogo de música gospel e cristã. Use o app de maneira responsável e de acordo com a legislação aplicável.'],
+                ['Uso do Fenda Music', 'O Fenda Music oferece acesso pessoal e não comercial a um catálogo musical com diferentes gêneros e estilos. Use o app de maneira responsável e de acordo com a legislação aplicável.'],
                 ['Sua conta', 'Mantenha seu acesso protegido e informe dados corretos. Você é responsável pelas ações realizadas em sua conta.'],
                 ['Catálogo e downloads', 'As músicas e os downloads offline são destinados ao seu uso pessoal dentro do aplicativo. Não é permitido redistribuir ou explorar o conteúdo sem autorização.'],
                 ['Convivência', 'Não envie conteúdo ofensivo, ilegal ou que viole direitos de terceiros. Podemos moderar ou remover conteúdo que descumpra estas regras.'],
@@ -450,7 +450,7 @@
             <div class="fs-about-footer">
               <div class="fs-about-footer-main">
                 <span class="material-symbols-rounded">favorite</span>
-                <span data-i18n="about_made_with">Feito para música gospel</span>
+                <span data-i18n="about_made_with">Feito para todos os estilos musicais</span>
               </div>
               <span class="fs-about-footer-dot">·</span>
               <span class="fs-about-footer-copyright">Fenda Music © ${new Date().getFullYear()}</span>

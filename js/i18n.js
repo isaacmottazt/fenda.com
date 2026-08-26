@@ -95,7 +95,7 @@
             // Configurações — Sobre
             about_title: 'Sobre', about_legal: 'Legal', about_terms: 'Termos de uso',
             about_privacy: 'Política de privacidade', about_support: 'Suporte', about_contact: 'Fale conosco',
-            about_made_with: 'Feito para música gospel',
+            about_made_with: 'Feito para todos os estilos musicais',
             // Enviar música
             submit_title: 'Enviar música',
             submit_hint: 'Sua sugestão vai para análise. Se aprovada, a música entra no catálogo do Fenda Music.',
@@ -179,7 +179,7 @@
             a11y_reduce_motion: 'Reduce motion', a11y_reduce_motion_sub: 'Reduces movement and transitions in the interface',
             about_title: 'About', about_legal: 'Legal', about_terms: 'Terms of use',
             about_privacy: 'Privacy policy', about_support: 'Support', about_contact: 'Contact us',
-            about_made_with: 'Made for gospel music',
+            about_made_with: 'Made for every music style',
             submit_title: 'Submit a song',
             submit_hint: 'Your suggestion goes to review. If approved, the song joins the Fenda Music catalog.',
             submit_song_title: 'Song title *', submit_artist: 'Artist *',
@@ -261,7 +261,7 @@
             a11y_reduce_motion: 'Reducir animaciones', a11y_reduce_motion_sub: 'Reduce el movimiento y las transiciones en la interfaz',
             about_title: 'Acerca de', about_legal: 'Legal', about_terms: 'Términos de uso',
             about_privacy: 'Política de privacidad', about_support: 'Soporte', about_contact: 'Contáctanos',
-            about_made_with: 'Hecho para música gospel',
+            about_made_with: 'Hecho para todos los estilos musicales',
             submit_title: 'Enviar canción',
             submit_hint: 'Tu sugerencia pasa a revisión. Si se aprueba, la canción se une al catálogo de Fenda Music.',
             submit_song_title: 'Título de la canción *', submit_artist: 'Artista *',
