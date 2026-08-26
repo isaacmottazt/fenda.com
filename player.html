@@ -7,18 +7,18 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>Fenda Music</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="fonts/material-symbols.css" />
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/inicio.css" />
-    <link rel="stylesheet" href="css/busca.css" />
-    <link rel="stylesheet" href="css/biblioteca.css" />
-    <link rel="stylesheet" href="css/podcasts.css" />
-    <link rel="stylesheet" href="css/perfil.css" />
-    <link rel="stylesheet" href="css/notifications.css" />
-    <link rel="stylesheet" href="css/artist-detail.css" />
-    <link rel="stylesheet" href="css/painel.css" />
-    <link rel="stylesheet" href="css/theme-overrides.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="/fonts/material-symbols.css" />
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/inicio.css" />
+    <link rel="stylesheet" href="/css/busca.css" />
+    <link rel="stylesheet" href="/css/biblioteca.css" />
+    <link rel="stylesheet" href="/css/podcasts.css" />
+    <link rel="stylesheet" href="/css/perfil.css" />
+    <link rel="stylesheet" href="/css/notifications.css" />
+    <link rel="stylesheet" href="/css/artist-detail.css" />
+    <link rel="stylesheet" href="/css/painel.css" />
+    <link rel="stylesheet" href="/css/theme-overrides.css" />
     <!-- Painel de fila (bottom sheet, id="queuePanel") estilizado em painel.css -->
     <style>
       /* Garante grid 3 colunas independente de cache do browser */
@@ -110,7 +110,7 @@
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-config.js?v=push-token-session-v3"></script>
+    <script src="/js/supabase-config.js?v=push-token-session-v3"></script>
   </head>
   <body>
     <audio id="audio" class="fenda-audio-output" controls playsinline webkit-playsinline preload="metadata" aria-hidden="true"></audio>
@@ -890,35 +890,35 @@
       </div>
     </div>
 
-    <script src="js/i18n.js"></script>
-    <script src="js/player-core.js?v=offline-catalog-v1"></script>
-    <script src="js/player-session.js?v=resume-no-autoplay-v1"></script>
-    <script src="js/player-audio-lyrics.js?v=streaming-resume-v2"></script>
-    <script src="js/vendor/html2canvas.min.js"></script>
-    <script src="js/player-ui.js?v=summary-share-image-v1"></script>
-    <script src="js/player-playlists.js?v=offline-downloads-v1"></script>
-    <script src="js/podcasts.js"></script>
-    <script src="js/realtime-catalog.js"></script>
-    <script src="js/player-menus-core.js?v=streaming-resume-v2"></script>
-    <script src="js/player-music-actions.js"></script>
-    <script src="js/search.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script src="/js/player-core.js?v=offline-catalog-v1"></script>
+    <script src="/js/player-session.js?v=resume-no-autoplay-v1"></script>
+    <script src="/js/player-audio-lyrics.js?v=streaming-resume-v2"></script>
+    <script src="/js/vendor/html2canvas.min.js"></script>
+    <script src="/js/player-ui.js?v=summary-share-image-v1"></script>
+    <script src="/js/player-playlists.js?v=offline-downloads-v1"></script>
+    <script src="/js/podcasts.js"></script>
+    <script src="/js/realtime-catalog.js"></script>
+    <script src="/js/player-menus-core.js?v=streaming-resume-v2"></script>
+    <script src="/js/player-music-actions.js"></script>
+    <script src="/js/search.js"></script>
     <!-- player-smart-queue.js removido: sobrescrevia window.handleNextTrack com uma
          versão incompatível (assinatura diferente, só calculava e retornava a próxima
          faixa sem tocar nada), quebrando o avanço automático de música. O único fix
          real que ele trazia (buildAutoQueue tolerante a tipo de id) foi incorporado
          direto em player-core.js. -->
-    <script src="js/notifications.js"></script>
-    <script src="js/inicio-extras.js?v=streaming-resume-v3"></script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/inicio-extras.js?v=streaming-resume-v3"></script>
     <!-- Novos módulos -->
-    <script src="js/settings.js?v=offline-downloads-v1"></script>
-    <script src="js/playback-engine.js"></script>
-    <script src="js/themes-v6.js"></script>
-    <script src="js/notifications-follow.js"></script>
+    <script src="/js/settings.js?v=offline-downloads-v1"></script>
+    <script src="/js/playback-engine.js"></script>
+    <script src="/js/themes-v6.js"></script>
+    <script src="/js/notifications-follow.js"></script>
     <!-- Sistema de fila paralelo (queue-advanced.js, queue-initializer.js, queue-visual.js)
          removido: usava IndexedDB próprio, nunca conectado ao AppState real do player,
          e causava conflito de id/classe com o painel de fila oficial (#queuePanel,
          gerenciado por player-menus-core.js). -->
-    <script src="js/player-recommendations.js"></script>
+    <script src="/js/player-recommendations.js"></script>
 
     <script>
       // Inicializar módulos após login
@@ -944,7 +944,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=75", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=76", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
