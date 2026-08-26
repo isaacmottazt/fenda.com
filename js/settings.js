@@ -115,7 +115,7 @@
 .fs-about-mark.fallback .fs-about-mark-img{display:none}
 .fs-about-mark.fallback .fs-about-mark-icon{display:block}
 .fs-about-hero h2{font-size:20px;font-weight:900;letter-spacing:-.2px;margin-bottom:8px}
-.fs-about-version-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-size:12px;font-weight:700;color:rgba(192,132,252,.9);background:rgba(146,76,255,.12);border:1px solid rgba(146,76,255,.25);border-radius:30px;padding:4px 12px}.fs-about-version-number{font-variant-numeric:tabular-nums}
+.fs-about-version-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-size:12px;font-weight:700;color:rgba(192,132,252,.9);background:rgba(146,76,255,.12);border:1px solid rgba(146,76,255,.25);border-radius:30px;padding:4px 12px}.fs-about-version-number{font-variant-numeric:tabular-nums}.fs-about-description{max-width:360px;margin:14px auto 0;font-size:12px;line-height:1.55;color:rgba(255,255,255,.48)}
 .fs-about-footer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;text-align:center;font-size:12px;line-height:1.35;color:rgba(255,255,255,.35);margin-top:26px;padding:0 8px 10px}
 .fs-about-footer-main{display:inline-flex;align-items:center;justify-content:center;gap:6px;max-width:100%}
 .fs-about-footer-main .material-symbols-rounded{font-size:15px;color:#f472b6;flex:0 0 auto}
@@ -354,9 +354,9 @@
             title: 'Termos de uso', icon: 'description',
             intro: 'Estes termos explicam as regras para usar o Fenda Music com segurança e respeito à comunidade.',
             sections: [
-                ['Uso do Fenda Music', 'O Fenda Music oferece acesso pessoal e não comercial a um catálogo musical com diferentes gêneros e estilos. Use o app de maneira responsável e de acordo com a legislação aplicável.'],
+                ['Uso do Fenda Music', 'O Fenda Music é uma plataforma sem fins lucrativos para compartilhamento de músicas. O catálogo é formado por envios da comunidade e passa por análise manual; por isso, nem todas as músicas conhecidas estarão disponíveis. Use o app de maneira responsável e de acordo com a legislação aplicável.'],
                 ['Sua conta', 'Mantenha seu acesso protegido e informe dados corretos. Você é responsável pelas ações realizadas em sua conta.'],
-                ['Catálogo e downloads', 'As músicas e os downloads offline são destinados ao seu uso pessoal dentro do aplicativo. Não é permitido redistribuir ou explorar o conteúdo sem autorização.'],
+                ['Catálogo e downloads', 'As músicas e os downloads offline são destinados ao seu uso pessoal dentro do aplicativo. O catálogo é colaborativo e pode não conter todas as músicas existentes. Não é permitido redistribuir ou explorar o conteúdo sem autorização.'],
                 ['Convivência', 'Não envie conteúdo ofensivo, ilegal ou que viole direitos de terceiros. Podemos moderar ou remover conteúdo que descumpra estas regras.'],
                 ['Atualizações', 'Podemos atualizar estes termos quando houver mudanças importantes no serviço. Se tiver dúvidas, fale conosco pelo suporte.'],
             ],
@@ -417,6 +417,7 @@
               </div>
               <h2>Fenda Music</h2>
               <span class="fs-about-version-badge"><span data-i18n="settings_version">versão</span><span class="fs-about-version-number">${APP_VERSION}</span></span>
+              <p class="fs-about-description" data-i18n="about_description">Plataforma sem fins lucrativos para compartilhar músicas. O catálogo é formado por envios da comunidade e passa por análise manual; por isso, nem todas as músicas estarão disponíveis.</p>
             </div>
 
             <div class="fs-section" data-i18n="about_legal">Legal</div>
@@ -965,7 +966,7 @@
           </div>
           <div class="fs-body">
             <p class="fs-hint" style="margin-top:0" data-i18n="submit_hint">
-              Sua sugestão vai para análise. Se aprovada, a música entra no catálogo do Fenda Music.
+              Sua sugestão será analisada manualmente. Se aprovada, a música entra no catálogo do Fenda Music; por isso, nem todas as músicas estarão disponíveis.
             </p>
             <div class="fs-card"><div class="fs-form">
               <label data-i18n="submit_song_title">Título da música *</label>

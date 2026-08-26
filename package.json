@@ -1,7 +1,7 @@
 {
   "name": "fenda-music",
   "version": "1.0.0",
-  "description": "Fenda Music - Plataforma de streaming musical com diversos gêneros e estilos",
+  "description": "Fenda Music - Compartilhamento musical sem fins lucrativos, com catálogo colaborativo e análise manual",
   "private": true,
   "scripts": {
     "cap:sync": "npx cap sync android",
