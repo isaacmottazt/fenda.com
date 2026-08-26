@@ -1001,13 +1001,32 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
                 const captureStyle = clonedDocument.createElement('style');
                 captureStyle.textContent = `
                     html, body {
-                        background: #120923 !important;
+                        width: 100% !important;
+                        min-width: 100% !important;
+                        min-height: 100vh !important;
+                        background:
+                            radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
+                            radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
+                            linear-gradient(180deg, #160b2a 0%, #0d0619 100%) !important;
+                        background-repeat: no-repeat !important;
+                        background-size: 100% 100% !important;
                     }
                     .app-container {
+                        width: 100% !important;
+                        max-width: none !important;
+                        min-height: 100vh !important;
+                        height: 100vh !important;
+                        margin: 0 !important;
                         background:
-                            radial-gradient(ellipse 300px 260px at 94% 12%, rgba(124, 58, 237, 0.18), transparent 72%),
-                            radial-gradient(ellipse 320px 300px at 4% 62%, rgba(124, 58, 237, 0.09), transparent 74%),
+                            radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
+                            radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
                             linear-gradient(180deg, #160b2a 0%, #0d0619 100%) !important;
+                        background-repeat: no-repeat !important;
+                        background-size: 100% 100% !important;
+                    }
+                    .main-content,
+                    .tab-content.active {
+                        background: transparent !important;
                     }
                     .sound-capsule {
                         background: linear-gradient(180deg, #24143d 0%, #180b2e 42%, #120820 100%) !important;
