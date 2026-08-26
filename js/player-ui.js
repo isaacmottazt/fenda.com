@@ -989,7 +989,24 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
             scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
             logging: false,
             imageTimeout: 12000,
-            ignoreElements: element => element.matches?.('script, style, audio, .notifications-overlay, .modal-backdrop, .context-menu-modal, .toast-container')
+            ignoreElements: element => element.matches?.('script, style, audio, .notifications-overlay, .modal-backdrop, .context-menu-modal, .toast-container'),
+            onclone: clonedDocument => {
+                // html2canvas pode rasterizar `background-clip: text` como um
+                // retângulo. No clone, mantém o título igual à leitura branca
+                // da referência sem alterar o visual da página real.
+                const captureStyle = clonedDocument.createElement('style');
+                captureStyle.textContent = `
+                    .library-header h1 {
+                        background: none !important;
+                        -webkit-background-clip: initial !important;
+                        background-clip: initial !important;
+                        color: #fff !important;
+                        -webkit-text-fill-color: #fff !important;
+                        filter: none !important;
+                    }
+                `;
+                clonedDocument.head.appendChild(captureStyle);
+            }
         });
         const blob = await _canvasToPngBlob(canvas);
         const monthSlug = String(monthLabel || 'resumo').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'resumo';
