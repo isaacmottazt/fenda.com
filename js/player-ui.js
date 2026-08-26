@@ -969,19 +969,27 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
 
     try {
         if (typeof window.html2canvas !== 'function') throw new Error('Captura de imagem indisponível');
-        // Captura o elemento que o usuário vê, incluindo glow, gráfico, capas,
-        // tipografia e o botão. Nenhum card paralelo é reconstruído.
-        const canvas = await window.html2canvas(card, {
+        // Captura a tela visível do aplicativo, como na referência: cabeçalho,
+        // abas, cartão, mini-player e navegação inferior. A barra do navegador
+        // não pertence ao DOM e, portanto, não é incluída.
+        const viewportWidth = Math.max(1, window.innerWidth);
+        const viewportHeight = Math.max(1, window.innerHeight);
+        const canvas = await window.html2canvas(document.body, {
+            x: 0,
+            y: window.scrollY || 0,
+            width: viewportWidth,
+            height: viewportHeight,
+            windowWidth: viewportWidth,
+            windowHeight: viewportHeight,
+            scrollX: window.scrollX || 0,
+            scrollY: window.scrollY || 0,
             backgroundColor: null,
             useCORS: true,
             allowTaint: false,
             scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
             logging: false,
             imageTimeout: 12000,
-            onclone: clonedDocument => {
-                const clonedCard = clonedDocument.querySelector('.sound-capsule--current') || clonedDocument.querySelector('.sound-capsule');
-                if (clonedCard) clonedCard.classList.add('sc-share-capture');
-            }
+            ignoreElements: element => element.matches?.('script, style, audio, .notifications-overlay, .modal-backdrop, .context-menu-modal, .toast-container')
         });
         const blob = await _canvasToPngBlob(canvas);
         const monthSlug = String(monthLabel || 'resumo').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'resumo';
