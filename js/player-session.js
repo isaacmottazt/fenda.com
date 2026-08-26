@@ -8,6 +8,7 @@
 // ============================================================
 
 const SESSION_KEY = 'fenda_player_session';
+const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
 // ── Salva o estado atual ──────────────────────────────────────
 function savePlayerSession() {
@@ -49,8 +50,9 @@ function loadPlayerSession() {
         const raw = localStorage.getItem(SESSION_KEY);
         if (!raw) return null;
         const s = JSON.parse(raw);
-        // Mantém a retomada por 30 dias, como uma sessão recente de streaming.
-        if (s.savedAt && Date.now() - s.savedAt > 30 * 86_400_000) {
+        // A retomada fica disponível por até 12 horas, como uma sessão recente
+        // de streaming. Depois disso, o player começa sem retomar automaticamente.
+        if (s.savedAt && Date.now() - s.savedAt > SESSION_MAX_AGE_MS) {
             localStorage.removeItem(SESSION_KEY);
             return null;
         }
@@ -115,13 +117,36 @@ async function restorePlayerSession() {
 
     audio.src = audioUrl;
 
-    // Aplica o tempo depois de carregar o metadado
-    const targetTime = session.currentTime || 0;
-    audio.addEventListener('loadedmetadata', () => {
-        if (targetTime > 0 && targetTime < (audio.duration - 3)) {
-            audio.currentTime = targetTime;
+    // Aplica o tempo exato antes de retomar. O play é tentado depois que o
+    // navegador conhece a duração; assim a retomada não começa do zero.
+    const targetTime = Math.max(0, Number(session.currentTime) || 0);
+    let resumeHandled = false;
+    const resumeAutomatically = async () => {
+        if (resumeHandled) return;
+        resumeHandled = true;
+
+        if (targetTime > 0 && (!Number.isFinite(audio.duration) || targetTime < (audio.duration - 3))) {
+            try { audio.currentTime = targetTime; } catch {}
         }
-    }, { once: true });
+
+        try {
+            await audio.play();
+            AppState.playing = true;
+            if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
+            if (typeof window.updateMediaSession === 'function') window.updateMediaSession(music);
+            console.log('[Session] Retomada automática iniciada em', targetTime + 's');
+        } catch (error) {
+            // Alguns navegadores bloqueiam autoplay sem gesto do usuário. Nesse
+            // caso, mantemos a música e a posição prontas no mini-player, sem
+            // recriar o card grande da Home.
+            AppState.playing = false;
+            audio.pause();
+            if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
+            console.warn('[Session] Autoplay bloqueado; aguardando interação:', error?.name || error);
+        }
+    };
+    audio.addEventListener('loadedmetadata', resumeAutomatically, { once: true });
+    if (audio.readyState >= 1) void resumeAutomatically();
 
     // Atualiza UI (mini barra aparece imediatamente)
     if (typeof window.updatePlayerVisibility === 'function') {
@@ -156,13 +181,12 @@ async function restorePlayerSession() {
     // Se o contexto restaurado for curto, continua com o restante do catálogo.
     window.ensureAutoQueue?.();
 
-    // A música fica pausada após a reabertura. Assim o usuário decide quando
-    // continuar pelo card, sem depender de autoplay do Android/Chrome.
+    // A retomada automática já foi agendada acima. Enquanto o metadado não
+    // chega, a interface mostra a faixa carregada e preserva a fila restaurada.
     AppState.playing = false;
-    audio.pause();
     if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
     if (typeof window.updateMediaSession === 'function') window.updateMediaSession(music);
-    console.log('[Session] Música e posição restauradas; aguardando toque do usuário');
+    console.log('[Session] Música e posição restauradas; retomada automática agendada');
 
     return true;
 }

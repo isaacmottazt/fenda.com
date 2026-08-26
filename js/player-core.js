@@ -2006,7 +2006,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initApp();
 
     // O catálogo já está disponível: restaura a última faixa e sua posição
-    // sem iniciar autoplay. O card Continue ouvindo fica pronto para um toque.
+    // e tenta retomar automaticamente dentro da janela de 12 horas.
     if (!AppState.currentMusicId && typeof window.restorePlayerSession === 'function') {
         const restored = await window.restorePlayerSession();
         if (restored) window.refreshHomeInBackground?.();

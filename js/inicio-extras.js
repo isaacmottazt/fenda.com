@@ -167,8 +167,13 @@
     // ============================================================
 
     function renderContinue() {
+        // A retomada agora acontece automaticamente no boot do player. O
+        // mini-player continua sendo a indicação compacta da faixa atual;
+        // não exibimos mais um card grande no topo da Home.
         TAB.querySelectorAll('.continue-section').forEach(el => el.remove());
+        return;
 
+        /* legado: mantido abaixo apenas para preservar o histórico do módulo.
         const audio = document.getElementById('audio');
         const savedSession = typeof window.loadPlayerSession === 'function'
             ? window.loadPlayerSession()
@@ -230,6 +235,7 @@
         const banner = document.getElementById('featuredBanner');
         if (banner) banner.parentNode.insertBefore(sec, banner);
         else TAB.appendChild(sec);
+        */
     }
 
     // ============================================================
