@@ -969,25 +969,11 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
 
     try {
         if (typeof window.html2canvas !== 'function') throw new Error('Captura de imagem indisponível');
-        // Captura a tela visível do aplicativo, como na referência: cabeçalho,
-        // abas, cartão, mini-player e navegação inferior. A barra do navegador
-        // não pertence ao DOM e, portanto, não é incluída.
-        const viewportWidth = Math.max(1, window.innerWidth);
-        const viewportHeight = Math.max(1, window.innerHeight);
-        const appContainer = document.querySelector('.app-container');
-        const appRect = appContainer?.getBoundingClientRect();
-        const captureX = appRect ? Math.max(0, Math.round(appRect.left)) : 0;
-        const captureWidth = appRect ? Math.max(1, Math.round(appRect.width)) : viewportWidth;
-        const canvas = await window.html2canvas(document.body, {
-            x: captureX,
-            y: window.scrollY || 0,
-            width: captureWidth,
-            height: viewportHeight,
-            windowWidth: viewportWidth,
-            windowHeight: viewportHeight,
-            scrollX: window.scrollX || 0,
-            scrollY: window.scrollY || 0,
-            backgroundColor: '#120923',
+        // Exporta somente o cartão mensal, exatamente como ele aparece na
+        // Biblioteca. Capturar o próprio elemento evita que o fundo do app,
+        // o mini-player e a navegação criem um retângulo externo na imagem.
+        const canvas = await window.html2canvas(card, {
+            backgroundColor: null,
             useCORS: true,
             allowTaint: false,
             scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
@@ -995,41 +981,18 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
             imageTimeout: 12000,
             ignoreElements: element => element.matches?.('script, style, audio, .notifications-overlay, .modal-backdrop, .context-menu-modal, .toast-container'),
             onclone: clonedDocument => {
-                // html2canvas pode rasterizar `background-clip: text` como um
-                // retângulo. No clone, mantém o título igual à leitura branca
-                // da referência sem alterar o visual da página real.
+                // Mantém todos os textos, dados e elementos do cartão, mas
+                // remove qualquer pintura herdada do documento ao redor dele.
                 const captureStyle = clonedDocument.createElement('style');
                 captureStyle.textContent = `
                     html, body {
-                        width: 100% !important;
-                        min-width: 100% !important;
-                        min-height: 100vh !important;
-                        background:
-                            radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
-                            radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
-                            linear-gradient(180deg, #160b2a 0%, #0d0619 100%) !important;
-                        background-repeat: no-repeat !important;
-                        background-size: 100% 100% !important;
-                    }
-                    .app-container {
-                        width: 100% !important;
-                        max-width: none !important;
-                        min-height: 100vh !important;
-                        height: 100vh !important;
                         margin: 0 !important;
-                        background:
-                            radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
-                            radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
-                            linear-gradient(180deg, #160b2a 0%, #0d0619 100%) !important;
-                        background-repeat: no-repeat !important;
-                        background-size: 100% 100% !important;
-                    }
-                    .main-content,
-                    .tab-content.active {
+                        padding: 0 !important;
                         background: transparent !important;
                     }
                     .sound-capsule {
                         isolation: isolate !important;
+                        margin: 0 !important;
                         background:
                             radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
                             radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
@@ -1037,18 +1000,11 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
                         background-clip: border-box !important;
                         background-origin: border-box !important;
                         border-color: rgba(168, 85, 247, 0.42) !important;
+                        border-radius: 26px !important;
+                        overflow: hidden !important;
                     }
                     .sound-capsule::before {
-                        content: "" !important;
-                        position: absolute !important;
-                        inset: -1px !important;
-                        border-radius: inherit !important;
-                        background:
-                            radial-gradient(ellipse 150% 70% at 96% 8%, rgba(124, 58, 237, 0.20), transparent 68%),
-                            radial-gradient(ellipse 140% 80% at 4% 58%, rgba(124, 58, 237, 0.10), transparent 72%),
-                            linear-gradient(180deg, #24143d 0%, #180b2e 42%, #120820 100%) !important;
-                        pointer-events: none !important;
-                        z-index: 0 !important;
+                        display: none !important;
                     }
                     .sound-capsule .sc-head,
                     .sound-capsule .sc-body {
