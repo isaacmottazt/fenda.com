@@ -974,10 +974,14 @@ async function _shareSummaryImage(card, shareText, monthLabel) {
         // não pertence ao DOM e, portanto, não é incluída.
         const viewportWidth = Math.max(1, window.innerWidth);
         const viewportHeight = Math.max(1, window.innerHeight);
+        const appContainer = document.querySelector('.app-container');
+        const appRect = appContainer?.getBoundingClientRect();
+        const captureX = appRect ? Math.max(0, Math.round(appRect.left)) : 0;
+        const captureWidth = appRect ? Math.max(1, Math.round(appRect.width)) : viewportWidth;
         const canvas = await window.html2canvas(document.body, {
-            x: 0,
+            x: captureX,
             y: window.scrollY || 0,
-            width: viewportWidth,
+            width: captureWidth,
             height: viewportHeight,
             windowWidth: viewportWidth,
             windowHeight: viewportHeight,
