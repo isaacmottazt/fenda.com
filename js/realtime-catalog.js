@@ -13,7 +13,7 @@
   }
 
   async function refreshCatalog() {
-    if (document.visibilityState !== 'visible' || !window.supabaseClient || !window.AppState) return;
+    if (!navigator.onLine || document.visibilityState !== 'visible' || !window.supabaseClient || !window.AppState) return;
     try {
       const [musics, podcasts, artists] = await Promise.all([
         window.loadMusicsFromSupabase?.(),
@@ -39,7 +39,7 @@
 
   function connect() {
     const client = window.supabaseClient;
-    if (!client || channel) return;
+    if (!navigator.onLine || !client || channel) return;
 
     channel = client.channel('fenda-web-catalog');
     TABLES.forEach((table) => {
@@ -63,7 +63,12 @@
       if (document.visibilityState === 'visible') scheduleRefresh(0);
     }, 60000);
 
-    window.addEventListener('online', () => scheduleRefresh(0));
+    window.addEventListener('online', () => { connect(); scheduleRefresh(0); });
+    window.addEventListener('offline', () => {
+      if (channel && window.supabaseClient) window.supabaseClient.removeChannel(channel).catch?.(() => {});
+      channel = null;
+      clearTimeout(refreshTimer);
+    });
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         connect();

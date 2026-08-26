@@ -245,6 +245,30 @@ function _cacheKey(name) {
     return `fenda_cache_${name}`;
 }
 
+// O catálogo é global e pode ser grande. Guardamos apenas os campos usados
+// pela interface, recomendações e reprodução; letras e payloads pesados ficam
+// fora do localStorage para não travar o boot nem estourar sua cota.
+function _compactCatalog(records) {
+    if (!Array.isArray(records)) return [];
+    return records.map(m => ({
+        id: m.id,
+        title: m.title || '',
+        artist: m.artist || '',
+        cover: m.cover || '',
+        src: m.src || '',
+        album: m.album || '',
+        duration: Number(m.duration) || 0,
+        genre: m.genre || '',
+        style: m.style || '',
+        style_tags: Array.isArray(m.style_tags) ? m.style_tags.slice(0, 12) : [],
+        rhythm_profile: m.rhythm_profile || '',
+        tempo_bpm: Number(m.tempo_bpm) || 0,
+        energy_score: Number(m.energy_score) || 0,
+        plays: Number(m.plays) || 0,
+        created_at: m.created_at || null
+    })).filter(m => m.id !== undefined && m.id !== null);
+}
+
 const CacheDB = {
     save(name, data) {
         try {
@@ -265,14 +289,17 @@ const CacheDB = {
         } catch { return null; }
     },
 
-    async saveAll({ playlists, favorites, history, profile, searchHistory, userId }) {
-        // Músicas NÃO são salvas — só as baixadas ficam no IndexedDB de áudio
+    async saveAll({ musics, artists, podcasts, playlists, favorites, history, profile, searchHistory, userId }) {
         const results = {
+            musics:    this.save('catalog_musics', _compactCatalog(musics)),
+            artists:   this.save('catalog_artists', Array.isArray(artists) ? artists.slice(0, 500) : []),
+            podcasts:  this.save('catalog_podcasts', Array.isArray(podcasts) ? podcasts.slice(0, 200) : []),
             playlists: this.save('playlists_' + userId, playlists || []),
             favorites: this.save('favorites_' + userId, favorites || []),
             history:   this.save('history_'   + userId, (history || []).slice(0, 30)),
             profile:   this.save('profile_'   + userId, profile || {}),
-            userId:    this.save('meta_userId', userId),
+            searchHistory: this.save('search_'    + userId, (searchHistory || []).slice(0, 30)),
+            userId:        this.save('meta_userId', userId),
         };
         const allOk = Object.values(results).every(Boolean);
         console.log('[Cache] ' + (allOk ? 'Dados do usuário salvos' : 'Alguns itens falharam'));
@@ -282,8 +309,9 @@ const CacheDB = {
     async loadAll(userId) {
         try {
             return {
-                musics:        [],   // músicas sempre vêm do Supabase ou do áudio offline
-                artists:       [],
+                musics:        this.load('catalog_musics') || [],
+                artists:       this.load('catalog_artists') || [],
+                podcasts:      this.load('catalog_podcasts') || [],
                 playlists:     this.load('playlists_' + userId)  || [],
                 favorites:     this.load('favorites_' + userId)  || [],
                 history:       this.load('history_'   + userId)  || [],
@@ -336,17 +364,24 @@ async function isMusicCached(musicId) {
     try {
         const database = await openCacheDB();
         return new Promise((resolve) => {
-            const tx = database.transaction('metadata', 'readonly');
-            const req = tx.objectStore('metadata').get(musicId);
-            req.onsuccess = () => resolve(!!req.result);
-            req.onerror = () => resolve(false);
+            const tx = database.transaction(['audio', 'metadata'], 'readonly');
+            const audioReq = tx.objectStore('audio').get(musicId);
+            const metaReq = tx.objectStore('metadata').get(musicId);
+            let audioRecord = null;
+            let metadata = null;
+            audioReq.onsuccess = () => { audioRecord = audioReq.result; };
+            metaReq.onsuccess = () => { metadata = metaReq.result; };
+            tx.oncomplete = () => resolve(Boolean(audioRecord && metadata));
+            tx.onerror = () => resolve(false);
         });
     } catch { return false; }
 }
 
 // Baixa e salva a música no IndexedDB com progresso
 // silent=true suprime toasts internos — usado no download em lote de playlists
-async function cacheAudio(music, silent = false) {
+const _audioDownloadPromises = new Map();
+
+async function _cacheAudioImpl(music, silent = false) {
     const url = music.src;
     const musicId = music.id;
     try {
@@ -397,13 +432,29 @@ async function cacheAudio(music, silent = false) {
         });
 
         if (!silent) showToast(`"${music.title}" salva para ouvir offline!`, 'success');
-        // Atualiza ícone do botão de download na UI
+        // Atualiza ícone do botão de download na UI e invalida o snapshot da UI.
         _updateDownloadBtn(musicId, true);
+        window.dispatchEvent(new CustomEvent('fenda:offlineCacheChanged', { detail: { musicId, cached: true } }));
         return true;
     } catch (err) {
         if (!silent) showToast('Erro ao salvar: ' + err.message, 'danger');
         return false;
     }
+}
+
+// Evita duas requisições simultâneas para a mesma faixa (toque manual,
+// download manual e download automático podem coincidir).
+function cacheAudio(music, silent = false) {
+    if (!music?.id || !music?.src) return Promise.resolve(false);
+    const existing = _audioDownloadPromises.get(String(music.id));
+    if (existing) return existing;
+    const promise = _cacheAudioImpl(music, silent).finally(() => {
+        if (_audioDownloadPromises.get(String(music.id)) === promise) {
+            _audioDownloadPromises.delete(String(music.id));
+        }
+    });
+    _audioDownloadPromises.set(String(music.id), promise);
+    return promise;
 }
 
 // Remove música do cache offline
@@ -419,6 +470,7 @@ async function removeCachedAudio(musicId) {
         });
         showToast('Música removida do armazenamento offline', 'success');
         _updateDownloadBtn(musicId, false);
+        window.dispatchEvent(new CustomEvent('fenda:offlineCacheChanged', { detail: { musicId, cached: false } }));
         return true;
     } catch (err) {
         showToast('Erro ao remover: ' + err.message, 'danger');
@@ -477,6 +529,79 @@ async function toggleOfflineMusic(music) {
     }
 }
 
+// ===== DOWNLOAD AUTOMÁTICO DE PLAYLISTS =====
+let _autoPlaylistDownloadTimer = null;
+let _autoPlaylistDownloadPromise = null;
+
+function _getOfflineDownloadPrefs() {
+    const defaults = { autoDownloadPlaylists: true, wifiDownloadsOnly: true };
+    try {
+        return { ...defaults, ...JSON.parse(localStorage.getItem('fenda_playback_prefs') || '{}') };
+    } catch { return defaults; }
+}
+
+function _canAutoDownloadPlaylists() {
+    if (!navigator.onLine || _getOfflineDownloadPrefs().autoDownloadPlaylists === false) return false;
+    const prefs = _getOfflineDownloadPrefs();
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (prefs.wifiDownloadsOnly !== false && connection &&
+        (connection.type === 'cellular' || connection.saveData === true)) return false;
+    return true;
+}
+
+function _yieldToBrowser() {
+    return new Promise(resolve => {
+        if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(() => resolve(), { timeout: 1200 });
+        } else {
+            setTimeout(resolve, 80);
+        }
+    });
+}
+
+async function _downloadPlaylistsInBackground() {
+    if (_autoPlaylistDownloadPromise) return _autoPlaylistDownloadPromise;
+    _autoPlaylistDownloadPromise = (async () => {
+        if (!_canAutoDownloadPlaylists()) return;
+        const playlists = Array.isArray(AppState.userPlaylists) ? AppState.userPlaylists : [];
+        const tracks = [];
+        const seen = new Set();
+        playlists.forEach(pl => (pl?.musics || []).forEach(id => {
+            const music = AppState.musics.find(m => String(m.id) === String(id));
+            if (music && !seen.has(String(music.id))) {
+                seen.add(String(music.id));
+                tracks.push(music);
+            }
+        }));
+        if (!tracks.length) return;
+
+        let saved = 0;
+        for (const music of tracks) {
+            if (!_canAutoDownloadPlaylists()) break;
+            await _yieldToBrowser();
+            if (await isMusicCached(music.id)) continue;
+            if (await cacheAudio(music, true)) saved++;
+        }
+        if (saved) console.info('[Offline] Downloads automáticos concluídos:', saved);
+    })().catch(error => {
+        console.warn('[Offline] Download automático interrompido:', error);
+    }).finally(() => { _autoPlaylistDownloadPromise = null; });
+    return _autoPlaylistDownloadPromise;
+}
+
+function schedulePlaylistAutoDownloads(delay = 1600) {
+    clearTimeout(_autoPlaylistDownloadTimer);
+    _autoPlaylistDownloadTimer = setTimeout(() => {
+        _autoPlaylistDownloadTimer = null;
+        void _downloadPlaylistsInBackground();
+    }, Math.max(0, delay));
+}
+
+window.schedulePlaylistAutoDownloads = schedulePlaylistAutoDownloads;
+window.addEventListener('online', () => schedulePlaylistAutoDownloads(500));
+window.addEventListener('fenda:playbackPrefsChanged', event => {
+    if (event.detail?.autoDownloadPlaylists !== false) schedulePlaylistAutoDownloads(300);
+});
 
 // ===== FILA AUTOMÁTICA =====
 
@@ -1108,10 +1233,6 @@ window.resetListenPosition = resetListenPosition;
 async function playMusicTrack(music, opts = {}) {
     if (!DOM.audio || !music) return;
 
-    // Se havia uma retomada pendente por bloqueio de autoplay, a escolha
-    // explícita do usuário passa a ser a única autoridade da reprodução.
-    window.cancelPendingPlayerResume?.();
-
     // Nunca bloqueia o gesto do usuário com rede, IndexedDB ou histórico.
     // Em celulares, qualquer await antes de play() pode fazer o navegador
     // rejeitar a reprodução por perda da user activation.
@@ -1552,11 +1673,17 @@ async function _fetchAllFromSupabase() {
         ]);
     }
 
-    // ── Renderiza telas com os dados disponíveis no momento ───────────
+    // Agrupa renders disparados por respostas independentes para não reconstruir
+    // Home, Biblioteca e Perfil várias vezes no mesmo ciclo de carregamento.
+    let _rerenderTimer = null;
     function _rerender() {
-        if (typeof window.refreshHomeInBackground === 'function') window.refreshHomeInBackground();
-        if (typeof window.renderLibrary  === 'function') window.renderLibrary();
-        if (typeof window.renderProfile  === 'function') window.renderProfile();
+        if (_rerenderTimer) return;
+        _rerenderTimer = setTimeout(() => {
+            _rerenderTimer = null;
+            if (typeof window.refreshHomeInBackground === 'function') window.refreshHomeInBackground();
+            if (typeof window.renderLibrary  === 'function') window.renderLibrary();
+            if (typeof window.renderProfile  === 'function') window.renderProfile();
+        }, 0);
     }
 
     // ── TODAS as buscas em paralelo — nenhuma espera outra ───────────
@@ -1621,6 +1748,7 @@ async function _fetchAllFromSupabase() {
     // ── Aplica músicas — re-renderiza imediatamente ───────────────────
     if (musicsResult.status === 'fulfilled' && musicsResult.value?.length) {
         AppState.musics = musicsResult.value;
+        CacheDB.save('catalog_musics', _compactCatalog(AppState.musics));
         // Primeiro render: mostra catálogo assim que chegar
         _rerender();
 
@@ -1729,9 +1857,13 @@ async function _fetchAllFromSupabase() {
             favorites:     [...AppState.favorites],
             history:       AppState.history,
             profile:       AppState.userProfile,
+            musics:        AppState.musics,
+            artists:       AppState.artists,
+            podcasts:      AppState.podcasts,
             searchHistory: searchTerms || [],
             userId:        AppState.userId,
         });
+        schedulePlaylistAutoDownloads();
 
         // Segundo render: agora com dados completos do usuário
         _rerender();
@@ -1756,8 +1888,12 @@ async function _loadAllFromCache() {
 
     const cached = await CacheDB.loadAll(userId);
     if (cached) {
-        // Músicas não vêm do cache — só playlists, favoritos, perfil e histórico
-        if (cached.playlists.length)     AppState.userPlaylists = cached.playlists;
+        // Catálogo e dados do usuário entram primeiro para o app continuar
+        // navegável mesmo quando nenhuma chamada de rede é possível.
+        if (cached.musics?.length)      AppState.musics = cached.musics;
+        if (cached.artists?.length)     AppState.artists = cached.artists;
+        if (cached.podcasts?.length)    AppState.podcasts = cached.podcasts;
+        if (cached.playlists.length)    AppState.userPlaylists = cached.playlists;
         if (cached.favorites.length)     AppState.favorites     = new Set(cached.favorites);
         if (cached.profile?.full_name)   AppState.userProfile   = cached.profile;
         if (cached.searchHistory.length) {
@@ -2092,6 +2228,7 @@ window.isMusicCached = isMusicCached;
 window.removeCachedAudio = removeCachedAudio;
 window.getAllCachedMusics = getAllCachedMusics;
 window.toggleOfflineMusic = toggleOfflineMusic;
+window.schedulePlaylistAutoDownloads = schedulePlaylistAutoDownloads;
 window.addToQueue = addToQueue;
 window.removeFromQueue = removeFromQueue;
 window.clearQueue = clearQueue;

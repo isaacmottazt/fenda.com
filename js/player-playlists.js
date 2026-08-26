@@ -412,6 +412,8 @@ function setupPlaylistDetailEvents() {
 async function savePlaylists(playlists) {
     localStorage.setItem('supabase_player_playlists', JSON.stringify(playlists));
     window.notifyHomeDataChanged?.('playlists');
+    // O download é iniciado depois do salvamento local, sem bloquear a UI.
+    window.schedulePlaylistAutoDownloads?.(250);
     if (AppState.userId && typeof window.saveUserPlaylist === 'function') {
         // Não podemos salvar todas de uma vez sem loop, mas vamos apenas garantir que cada playlist exista
         for (const pl of playlists) {

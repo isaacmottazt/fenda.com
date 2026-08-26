@@ -11,7 +11,8 @@
 //
 //   Conta          → e-mail, trocar senha, sair, excluir conta
 //   Aparência      → cor do app (sempre modo escuro, sem toggle claro/escuro)
-//   Reprodução*    → autoplay, crossfade, normalização, economia de dados
+    //   Reprodução*    → downloads automáticos, crossfade, normalização, economia de dados
+
 //   Notificações   → liga/desliga cada tipo local (lido pelo notifications.js)
 //   Idioma e acessibilidade* → idioma da interface, tamanho de fonte, reduzir movimento
 //   Armazenamento  → limpar downloads offline, forçar atualização do app
@@ -142,7 +143,7 @@
     // Lidas de verdade pelo player: ver hook em player-core.js
     // (window.FendaSettings.getPlaybackPrefs() + evento fenda:playbackPrefsChanged)
     function getPlaybackPrefs() {
-        const def = { autoplay: true, crossfade: false, crossfadeSec: 4, normalize: true, dataSaver: false, wifiDownloadsOnly: true, sleepTimerMinutes: 0 };
+        const def = { autoplay: true, autoDownloadPlaylists: true, crossfade: false, crossfadeSec: 4, normalize: true, dataSaver: false, wifiDownloadsOnly: true, sleepTimerMinutes: 0 };
         try { return { ...def, ...JSON.parse(localStorage.getItem(PLAYBACK_KEY) || '{}') }; }
         catch { return def; }
     }
@@ -200,11 +201,6 @@
             <div class="fs-section" data-i18n="playback_section">Reprodução</div>
             <div class="fs-card">
               <label class="fs-row">
-                <span class="material-symbols-rounded">play_circle</span>
-                <div class="fs-row-text"><span class="fs-row-title" data-i18n="playback_autoplay">Reprodução automática</span><span class="fs-row-sub" data-i18n="playback_autoplay_sub">Continua tocando ao fim da fila</span></div>
-                <span class="fs-switch"><input type="checkbox" id="fsAutoplay" ${pb.autoplay ? 'checked' : ''}><i></i></span>
-              </label>
-              <label class="fs-row">
                 <span class="material-symbols-rounded">equalizer</span>
                 <div class="fs-row-text"><span class="fs-row-title" data-i18n="playback_normalize">Normalização de volume</span><span class="fs-row-sub" data-i18n="playback_normalize_sub">Mantém o volume equilibrado entre faixas</span></div>
                 <span class="fs-switch"><input type="checkbox" id="fsNormalize" ${pb.normalize ? 'checked' : ''}><i></i></span>
@@ -237,6 +233,11 @@
             <div class="fs-section">Downloads offline</div>
             <div class="fs-card">
               <label class="fs-row">
+                <span class="material-symbols-rounded">playlist_play</span>
+                <div class="fs-row-text"><span class="fs-row-title" data-i18n="playback_auto_download">Baixar playlists automaticamente</span><span class="fs-row-sub" data-i18n="playback_auto_download_sub">Salva as músicas das suas playlists para ouvir sem internet</span></div>
+                <span class="fs-switch"><input type="checkbox" id="fsAutoDownloadPlaylists" ${pb.autoDownloadPlaylists !== false ? 'checked' : ''}><i></i></span>
+              </label>
+              <label class="fs-row">
                 <span class="material-symbols-rounded">wifi</span>
                 <div class="fs-row-text"><span class="fs-row-title">Baixar somente em Wi‑Fi</span><span class="fs-row-sub">Evita usar seus dados móveis nos downloads</span></div>
                 <span class="fs-switch"><input type="checkbox" id="fsWifiDownloads" ${pb.wifiDownloadsOnly ? 'checked' : ''}><i></i></span>
@@ -262,8 +263,8 @@
 
         _playbackScreen.querySelector('#fsPlaybackBack').addEventListener('click', () => _playbackScreen.classList.remove('open'));
 
-        _playbackScreen.querySelector('#fsAutoplay').addEventListener('change', (e) => setPlaybackPref('autoplay', e.target.checked));
         _playbackScreen.querySelector('#fsNormalize').addEventListener('change', (e) => setPlaybackPref('normalize', e.target.checked));
+        _playbackScreen.querySelector('#fsAutoDownloadPlaylists').addEventListener('change', (e) => setPlaybackPref('autoDownloadPlaylists', e.target.checked));
         _playbackScreen.querySelector('#fsDataSaver').addEventListener('change', (e) => setPlaybackPref('dataSaver', e.target.checked));
         _playbackScreen.querySelector('#fsWifiDownloads').addEventListener('change', (e) => setPlaybackPref('wifiDownloadsOnly', e.target.checked));
         _playbackScreen.querySelector('#fsSleepTimer').addEventListener('change', (e) => setPlaybackPref('sleepTimerMinutes', Number(e.target.value)));
@@ -412,7 +413,7 @@
           <div class="fs-body">
             <div class="fs-about-hero">
               <div class="fs-about-mark">
-                <img src="images/logo.png" alt="" class="fs-about-mark-img" onerror="this.style.display='none'; this.parentElement.classList.add('fallback')">
+                <img src="/imagens/logo.png" alt="" class="fs-about-mark-img" onerror="this.style.display='none'; this.parentElement.classList.add('fallback')">
                 <span class="material-symbols-rounded fs-about-mark-icon">graphic_eq</span>
               </div>
               <h2>Fenda Music</h2>
@@ -578,7 +579,7 @@
             <div class="fs-card">
               <button class="fs-row" id="fsOpenPlayback">
                 <span class="material-symbols-rounded">play_circle</span>
-                <div class="fs-row-text"><span class="fs-row-title" data-i18n="settings_playback">Reprodução</span><span class="fs-row-sub" data-i18n="settings_playback_sub">Autoplay, crossfade, dados móveis</span></div>
+                <div class="fs-row-text"><span class="fs-row-title" data-i18n="settings_playback">Reprodução</span><span class="fs-row-sub" data-i18n="settings_playback_sub">Downloads offline, crossfade e dados móveis</span></div>
                 <span class="material-symbols-rounded fs-row-arrow">chevron_right</span>
               </button>
               <button class="fs-row" id="fsOpenA11y">

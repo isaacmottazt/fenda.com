@@ -2,6 +2,30 @@
 
 const FEATURED_RECOMMENDATION_TTL = 10 * 60 * 1000;
 
+let _cachedMusicsSnapshot = null;
+let _cachedMusicsSnapshotAt = 0;
+let _cachedMusicsRequest = null;
+async function _getCachedMusicsSnapshot(force = false) {
+    const now = Date.now();
+    if (!force && _cachedMusicsSnapshot && now - _cachedMusicsSnapshotAt < 5000) {
+        return _cachedMusicsSnapshot;
+    }
+    if (_cachedMusicsRequest) return _cachedMusicsRequest;
+    _cachedMusicsRequest = Promise.resolve(window.getAllCachedMusics?.() || [])
+        .then(list => {
+            _cachedMusicsSnapshot = Array.isArray(list) ? list : [];
+            _cachedMusicsSnapshotAt = Date.now();
+            return _cachedMusicsSnapshot;
+        })
+        .catch(() => _cachedMusicsSnapshot || [])
+        .finally(() => { _cachedMusicsRequest = null; });
+    return _cachedMusicsRequest;
+}
+window.addEventListener('fenda:offlineCacheChanged', () => {
+    _cachedMusicsSnapshot = null;
+    _cachedMusicsSnapshotAt = 0;
+});
+
 function featuredRecommendationKey() {
     return `fenda_featured_recommendation_${AppState?.userId || 'guest'}`;
 }
@@ -192,7 +216,7 @@ function renderHome({ preserveUi = true } = {}) {
     // card "Recomendação do dia" ficava preso no placeholder "Carregando..."
     // até o usuário trocar de aba manualmente. Replicando o mesmo padrão
     // de retry de inicio-extras.js (linhas 686-689) para este card também.
-    if (!AppState.musics.length && !window._featuredRetryScheduled) {
+    if (navigator.onLine && !AppState.musics.length && !window._featuredRetryScheduled) {
         window._featuredRetryScheduled = true;
         const retry = () => {
             updateFeaturedMusic();
@@ -921,7 +945,7 @@ function renderLibrary() {
     const rcEl = document.getElementById('recentCount');
     if (rcEl) rcEl.innerText = recentCount;
     if (window.getAllCachedMusics) {
-        window.getAllCachedMusics().then(list => {
+        _getCachedMusicsSnapshot().then(list => {
             const el = document.getElementById('downloadsCount');
             if (el) el.innerText = list.length;
         });
@@ -929,10 +953,9 @@ function renderLibrary() {
 
     function rebind(id, fn) {
         const el = document.getElementById(id);
-        if (!el) return;
-        const clone = el.cloneNode(true);
-        el.parentNode.replaceChild(clone, el);
-        clone.addEventListener('click', fn);
+        if (!el || el.dataset.fendaBound === '1') return;
+        el.dataset.fendaBound = '1';
+        el.addEventListener('click', fn);
     }
 
     rebind('libSearchBtn', () => {
@@ -940,18 +963,16 @@ function renderLibrary() {
     });
     // libAddBtn removido (fix 5)
 
-    // Summary cards
+    // Summary cards: um listener por elemento, mesmo após vários renders.
     const dlCard = document.querySelector('.summary-card[data-type="downloads"]');
-    if (dlCard) {
-        const c = dlCard.cloneNode(true);
-        dlCard.parentNode.replaceChild(c, dlCard);
-        c.addEventListener('click', () => document.querySelector('.lib-main-tab[data-filter="downloads"]')?.click());
+    if (dlCard && dlCard.dataset.fendaBound !== '1') {
+        dlCard.dataset.fendaBound = '1';
+        dlCard.addEventListener('click', () => document.querySelector('.lib-main-tab[data-filter="downloads"]')?.click());
     }
     const rcCard = document.querySelector('.summary-card[data-type="recent"]');
-    if (rcCard) {
-        const c = rcCard.cloneNode(true);
-        rcCard.parentNode.replaceChild(c, rcCard);
-        c.addEventListener('click', () => document.querySelector('.lib-main-tab[data-filter="history"]')?.click());
+    if (rcCard && rcCard.dataset.fendaBound !== '1') {
+        rcCard.dataset.fendaBound = '1';
+        rcCard.addEventListener('click', () => document.querySelector('.lib-main-tab[data-filter="history"]')?.click());
     }
 
     // Podcasts públicos
@@ -1390,41 +1411,46 @@ fendamusic.com.br`;
                 showOnly(dlSection);
                 if (dlList.children.length === 0 && window.getAllCachedMusics) {
                     dlList.innerHTML = '<p style="text-align:center;padding:24px;color:rgba(255,255,255,0.3)">Carregando...</p>';
-                    window.getAllCachedMusics().then(async metas => {
+                    _getCachedMusicsSnapshot().then(async metas => {
                         dlList.innerHTML = '';
                         if (!metas.length) {
                             dlList.innerHTML = '<div class="empty-state"><span class="material-symbols-rounded">download</span><p>Nenhuma música baixada</p></div>';
                             return;
                         }
-                        for (const meta of metas) {
+                        const cards = await Promise.all(metas.map(meta => {
                             const music = AppState.musics.find(m => m.id === meta.musicId) || {
                                 id: meta.musicId, title: meta.title, artist: meta.artist, cover: meta.cover, src: meta.url
                             };
-                            if (typeof window.createMusicCardElement === 'function')
-                                dlList.appendChild(await window.createMusicCardElement(music));
-                        }
+                            return typeof window.createMusicCardElement === 'function'
+                                ? window.createMusicCardElement(music)
+                                : null;
+                        }));
+                        const fragment = document.createDocumentFragment();
+                        cards.filter(Boolean).forEach(card => fragment.appendChild(card));
+                        dlList.replaceChildren(fragment);
                     });
                 }
                 break;
         }
     }
 
-    // Abas — remove listeners duplicados clonando os elementos
+    // Abas — listeners delegados no container, sem clonar o DOM em cada render.
     const tabsContainer = document.querySelector('.library-main-tabs');
     if (tabsContainer) {
-        const newTabs = tabsContainer.cloneNode(true);
-        tabsContainer.parentNode.replaceChild(newTabs, tabsContainer);
-        newTabs.querySelectorAll('.lib-main-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                newTabs.querySelectorAll('.lib-main-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                filterLibrary(tab.dataset.filter);
-                // Atualiza URL
-                const url = window.getUrlForState
-                    ? window.getUrlForState({ tab: 'biblioteca', libFilter: tab.dataset.filter })
-                    : '/biblioteca';
-                history.pushState({ tab: 'biblioteca', libFilter: tab.dataset.filter }, '', url);
-            });
+        tabsContainer._fendaFilterLibrary = filterLibrary;
+    }
+    if (tabsContainer && tabsContainer.dataset.fendaBound !== '1') {
+        tabsContainer.dataset.fendaBound = '1';
+        tabsContainer.addEventListener('click', (event) => {
+            const tab = event.target.closest('.lib-main-tab');
+            if (!tab || !tabsContainer.contains(tab)) return;
+            tabsContainer.querySelectorAll('.lib-main-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            tabsContainer._fendaFilterLibrary?.(tab.dataset.filter);
+            const url = window.getUrlForState
+                ? window.getUrlForState({ tab: 'biblioteca', libFilter: tab.dataset.filter })
+                : '/biblioteca';
+            history.pushState({ tab: 'biblioteca', libFilter: tab.dataset.filter }, '', url);
         });
     }
 

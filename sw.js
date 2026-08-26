@@ -1,7 +1,7 @@
 // Fenda Music — Service Worker v16
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v73';
+const CACHE_NAME = 'fenda-v74';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
 const CRITICAL_RUNTIME = new Set([
@@ -21,12 +21,13 @@ const SHELL = [
   '/player.html', '/index.html', '/reset-password.html', '/manifest.json',
   '/termos.html', '/privacidade.html',
   '/css/base.css', '/css/inicio.css', '/css/busca.css', '/css/biblioteca.css',
-  '/css/perfil.css', '/css/login.css', '/css/artist-detail.css', '/css/painel.css', '/css/podcasts.css',
-  '/js/supabase-config.js', '/js/search.js',
+  '/css/perfil.css', '/css/login.css', '/css/artist-detail.css', '/css/painel.css', '/css/podcasts.css', '/css/theme-overrides.css',
+  '/fonts/material-symbols.css', '/fonts/material-symbols-rounded.woff2', '/imagens/fundo.png', '/imagens/logo.png',
+  '/js/i18n.js', '/js/supabase-config.js', '/js/search.js', '/js/stats.js', '/js/social-share.js',
   '/js/player-core.js', '/js/player-ui.js', '/js/player-audio-lyrics.js',
   '/js/player-menus-core.js', '/js/player-music-actions.js', '/js/player-playlists.js',
   '/js/player-session.js', '/js/notifications.js', '/css/notifications.css', '/js/inicio-extras.js', '/js/settings.js', '/js/podcasts.js',
-  '/js/playback-engine.js', '/js/realtime-catalog.js',
+  '/js/playback-engine.js', '/js/realtime-catalog.js', '/js/player-recommendations.js', '/js/themes-v6.js', '/js/notifications-follow.js',
 ];
 
 // Mensagem de skip waiting (forçar atualização imediata)
@@ -111,21 +112,22 @@ self.addEventListener('fetch', e => {
   }
 
   // 3. Rotas do player (URLs limpas) → serve player.html.
-  //    NETWORK-FIRST: uma aba online precisa receber o HTML novo antes
-  //    de iniciar os scripts do player. O fallback para cache preserva
-  //    o funcionamento offline.
+  //    Cache-first com atualização em segundo plano: a navegação abre
+  //    imediatamente mesmo sem rede, e a versão online é preparada para a
+  //    próxima abertura sem bloquear a interface.
   if (url.origin === self.location.origin && PLAYER_ROUTES.has(path)) {
     e.respondWith(
-      fetch('/player.html', { cache: 'no-store' })
-        .then(response => {
-          if (response.ok) {
-            caches.open(CACHE_NAME).then(c => c.put('/player.html', response.clone())).catch(() => {});
-          }
-          return response;
-        })
-        .catch(() => caches.match('/player.html').then(cached =>
-          cached || new Response('Service Unavailable', { status: 503 })
-        ))
+      caches.match('/player.html').then(cached => {
+        const networkFetch = fetch('/player.html', { cache: 'no-store' })
+          .then(response => {
+            if (response.ok) {
+              caches.open(CACHE_NAME).then(c => c.put('/player.html', response.clone())).catch(() => {});
+            }
+            return response;
+          })
+          .catch(() => cached || new Response('Service Unavailable', { status: 503 }));
+        return cached || networkFetch;
+      })
     );
     return;
   }
@@ -189,15 +191,10 @@ self.addEventListener('fetch', e => {
             }
             return response;
           })
-          .catch(err => {
-            // Rede falhou: se tem cache, não é problema
-            if (cached) return null; // será descartado abaixo
-            // Sem cache e sem rede: retorna 503
-            return new Response('Service Unavailable', {
-              status: 503,
-              headers: { 'Content-Type': 'text/plain' }
-            });
-          });
+          .catch(() => cached || new Response('Service Unavailable', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' }
+          }));
 
         if (cached) {
           // Serve do cache agora, atualiza em background

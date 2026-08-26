@@ -132,8 +132,8 @@ class FendaArtistNotifications {
     const title = `${notification.artistName} lançou uma nova música!`;
     const options = {
       body: notification.songTitle,
-      icon: '/images/icons/icon-192.png',
-      badge: '/images/icons/icon-192.png',
+      icon: '/imagens/logo.png',
+      badge: '/imagens/logo.png',
       tag: `release-${notification.songId}`,
       requireInteraction: false,
       actions: [

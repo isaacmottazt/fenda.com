@@ -891,11 +891,11 @@
     </div>
 
     <script src="js/i18n.js"></script>
-    <script src="js/player-core.js?v=streaming-resume-v4"></script>
-    <script src="js/player-session.js?v=streaming-resume-v5"></script>
+    <script src="js/player-core.js?v=offline-catalog-v1"></script>
+    <script src="js/player-session.js?v=resume-no-autoplay-v1"></script>
     <script src="js/player-audio-lyrics.js?v=streaming-resume-v2"></script>
     <script src="js/player-ui.js?v=streaming-resume-v2"></script>
-    <script src="js/player-playlists.js"></script>
+    <script src="js/player-playlists.js?v=offline-downloads-v1"></script>
     <script src="js/podcasts.js"></script>
     <script src="js/realtime-catalog.js"></script>
     <script src="js/player-menus-core.js?v=streaming-resume-v2"></script>
@@ -909,7 +909,7 @@
     <script src="js/notifications.js"></script>
     <script src="js/inicio-extras.js?v=streaming-resume-v3"></script>
     <!-- Novos módulos -->
-    <script src="js/settings.js"></script>
+    <script src="js/settings.js?v=offline-downloads-v1"></script>
     <script src="js/playback-engine.js"></script>
     <script src="js/themes-v6.js"></script>
     <script src="js/notifications-follow.js"></script>
@@ -943,7 +943,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=73", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=74", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

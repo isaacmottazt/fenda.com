@@ -173,6 +173,9 @@ setTimeout(() => {
 
 // ========== CATÁLOGO DE PODCASTS ==========
 async function loadPodcastsFromSupabase() {
+    if (navigator.onLine === false) {
+        return window.CacheDB?.load?.('catalog_podcasts') || [];
+    }
     try {
         const { data, error } = await supabaseClient
             .from('podcasts')
@@ -182,7 +185,7 @@ async function loadPodcastsFromSupabase() {
         return (data || []).filter(p => p.audio_url && p.title);
     } catch (e) {
         console.warn('loadPodcastsFromSupabase:', e);
-        return [];
+        return window.CacheDB?.load?.('catalog_podcasts') || [];
     }
 }
 
@@ -190,6 +193,9 @@ window.loadPodcastsFromSupabase = loadPodcastsFromSupabase;
 
 // ========== CRUD MÚSICAS ==========
 async function loadMusicsFromSupabase() {
+    if (navigator.onLine === false) {
+        return window.CacheDB?.load?.('catalog_musics') || [];
+    }
     try {
         const { data, error } = await supabaseClient
             .from('musics')
@@ -199,7 +205,7 @@ async function loadMusicsFromSupabase() {
         return data || [];
     } catch (e) {
         console.error('loadMusicsFromSupabase:', e);
-        return [];
+        return window.CacheDB?.load?.('catalog_musics') || [];
     }
 }
 
