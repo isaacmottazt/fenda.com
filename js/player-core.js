@@ -1108,6 +1108,10 @@ window.resetListenPosition = resetListenPosition;
 async function playMusicTrack(music, opts = {}) {
     if (!DOM.audio || !music) return;
 
+    // Se havia uma retomada pendente por bloqueio de autoplay, a escolha
+    // explícita do usuário passa a ser a única autoridade da reprodução.
+    window.cancelPendingPlayerResume?.();
+
     // Nunca bloqueia o gesto do usuário com rede, IndexedDB ou histórico.
     // Em celulares, qualquer await antes de play() pode fazer o navegador
     // rejeitar a reprodução por perda da user activation.
@@ -1375,6 +1379,28 @@ window.getUrlForState = function({ tab, libFilter, playlistId, artistName } = {}
 // Flag: após o boot, _activateTab já pode renderizar normalmente
 let _bootDone = false;
 
+// A restauração pode ser chamada pelo boot e pelo carregamento remoto. Evita
+// duas execuções concorrentes, mas libera nova tentativa quando a anterior
+// terminou sem encontrar a faixa no catálogo.
+let _playerSessionRestoreInFlight = null;
+async function restorePlayerSessionWhenReady() {
+    if (AppState.currentMusicId || typeof window.restorePlayerSession !== 'function') return false;
+    if (_playerSessionRestoreInFlight) return _playerSessionRestoreInFlight;
+
+    const attempt = Promise.resolve()
+        .then(() => window.restorePlayerSession())
+        .catch(error => {
+            console.warn('[Session] Falha ao restaurar sessão:', error);
+            return false;
+        });
+    _playerSessionRestoreInFlight = attempt;
+    try {
+        return await attempt;
+    } finally {
+        if (_playerSessionRestoreInFlight === attempt) _playerSessionRestoreInFlight = null;
+    }
+}
+
 window.restoreStateFromUrl = function() {
     const path = window.location.pathname;
     const playlistMatch = path.match(/^\/biblioteca\/playlist\/(.+)$/);
@@ -1601,10 +1627,8 @@ async function _fetchAllFromSupabase() {
         // Em uma instalação sem cache, a sessão pode ser lida antes de as
         // músicas chegarem. Tenta restaurar novamente quando o catálogo online
         // terminar de carregar, sem sobrescrever uma reprodução iniciada pelo usuário.
-        if (!AppState.currentMusicId && typeof window.restorePlayerSession === 'function') {
-            const restored = await window.restorePlayerSession();
-            if (restored) _rerender();
-        }
+        const restored = await restorePlayerSessionWhenReady();
+        if (restored) _rerender();
         console.log('[Cache] Músicas carregadas:', AppState.musics.length);
     }
 
@@ -2007,10 +2031,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // O catálogo já está disponível: restaura a última faixa e sua posição
     // e tenta retomar automaticamente dentro da janela de 12 horas.
-    if (!AppState.currentMusicId && typeof window.restorePlayerSession === 'function') {
-        const restored = await window.restorePlayerSession();
-        if (restored) window.refreshHomeInBackground?.();
-    }
+    const restored = await restorePlayerSessionWhenReady();
+    if (restored) window.refreshHomeInBackground?.();
     checkDeepLink();
 });
 

@@ -891,8 +891,8 @@
     </div>
 
     <script src="js/i18n.js"></script>
-    <script src="js/player-core.js?v=streaming-resume-v3"></script>
-    <script src="js/player-session.js?v=streaming-resume-v4"></script>
+    <script src="js/player-core.js?v=streaming-resume-v4"></script>
+    <script src="js/player-session.js?v=streaming-resume-v5"></script>
     <script src="js/player-audio-lyrics.js?v=streaming-resume-v2"></script>
     <script src="js/player-ui.js?v=streaming-resume-v2"></script>
     <script src="js/player-playlists.js"></script>
@@ -943,7 +943,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=72", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=73", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

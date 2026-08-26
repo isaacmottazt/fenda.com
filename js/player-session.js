@@ -10,6 +10,14 @@
 const SESSION_KEY = 'fenda_player_session';
 const SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
+// Se o navegador bloquear autoplay no boot, a retomada fica pendente até o
+// primeiro gesto do usuário. Uma nova escolha de faixa cancela esta pendência.
+let pendingResumeCleanup = null;
+function cancelPendingPlayerResume() {
+    if (typeof pendingResumeCleanup === 'function') pendingResumeCleanup();
+    pendingResumeCleanup = null;
+}
+
 // ── Salva o estado atual ──────────────────────────────────────
 function savePlayerSession() {
     try {
@@ -76,12 +84,15 @@ function loadPlayerSession() {
 // ── Restaura e dá play de onde parou ─────────────────────────
 // Chamado após AppState.musics estar preenchido.
 async function restorePlayerSession() {
+    cancelPendingPlayerResume();
     const session = loadPlayerSession();
     if (!session) return false;
 
     const music = AppState.musics.find(m => String(m.id) === String(session.musicId));
     if (!music) {
-        clearPlayerSession();
+        // O catálogo pode estar temporariamente parcial ou ainda em atualização.
+        // Não apagar a sessão aqui: uma tentativa posterior poderá encontrar a faixa.
+        console.warn('[Session] Faixa ainda não disponível no catálogo; sessão preservada.');
         return false;
     }
 
@@ -133,28 +144,51 @@ async function restorePlayerSession() {
     // Aplica o tempo exato antes de retomar. O play é tentado depois que o
     // navegador conhece a duração; assim a retomada não começa do zero.
     const targetTime = Math.max(0, Number(session.currentTime) || 0);
-    let resumeHandled = false;
-    const resumeAutomatically = async () => {
-        if (resumeHandled) return;
-        resumeHandled = true;
+    let positionHandled = false;
+    let autoplayResolved = false;
+    let retryListeners = [];
 
-        if (targetTime > 0 && (!Number.isFinite(audio.duration) || targetTime < (audio.duration - 3))) {
-            try { audio.currentTime = targetTime; } catch {}
+    const clearRetryListeners = () => {
+        retryListeners.forEach(({ type, handler }) => {
+            window.removeEventListener(type, handler, true);
+        });
+        retryListeners = [];
+        if (pendingResumeCleanup === clearRetryListeners) pendingResumeCleanup = null;
+    };
+
+    const resumeAutomatically = async () => {
+        if (AppState.currentMusicId !== music.id || autoplayResolved) return;
+        clearRetryListeners();
+
+        if (!positionHandled) {
+            positionHandled = true;
+            if (targetTime > 0 && (!Number.isFinite(audio.duration) || targetTime < (audio.duration - 3))) {
+                try { audio.currentTime = targetTime; } catch {}
+            }
         }
 
         try {
             await audio.play();
+            autoplayResolved = true;
             AppState.playing = true;
             if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
             if (typeof window.updateMediaSession === 'function') window.updateMediaSession(music);
             console.log('[Session] Retomada automática iniciada em', targetTime + 's');
         } catch (error) {
-            // Alguns navegadores bloqueiam autoplay sem gesto do usuário. Nesse
-            // caso, mantemos a música e a posição prontas no mini-player, sem
-            // recriar o card grande da Home.
+            // Alguns navegadores bloqueiam autoplay sem gesto no boot. Mantém a
+            // faixa e a posição prontas no mini-player e tenta novamente no
+            // primeiro gesto, sem recriar o card grande da Home.
+            autoplayResolved = false;
             AppState.playing = false;
             audio.pause();
             if (typeof window.updatePlayerUIState === 'function') window.updatePlayerUIState();
+
+            const retryOnGesture = () => { void resumeAutomatically(); };
+            ['pointerdown', 'touchend', 'keydown'].forEach(type => {
+                window.addEventListener(type, retryOnGesture, { once: true, capture: true });
+                retryListeners.push({ type, handler: retryOnGesture });
+            });
+            pendingResumeCleanup = clearRetryListeners;
             console.warn('[Session] Autoplay bloqueado; aguardando interação:', error?.name || error);
         }
     };
@@ -241,8 +275,9 @@ function initSessionPersistence() {
     console.log('[Session] Persistência ativa.');
 }
 
-window.savePlayerSession      = savePlayerSession;
-window.clearPlayerSession     = clearPlayerSession;
-window.loadPlayerSession      = loadPlayerSession;
-window.restorePlayerSession   = restorePlayerSession;
-window.initSessionPersistence = initSessionPersistence;
+window.savePlayerSession          = savePlayerSession;
+window.clearPlayerSession         = clearPlayerSession;
+window.loadPlayerSession          = loadPlayerSession;
+window.restorePlayerSession       = restorePlayerSession;
+window.initSessionPersistence     = initSessionPersistence;
+window.cancelPendingPlayerResume  = cancelPendingPlayerResume;
