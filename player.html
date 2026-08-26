@@ -110,8 +110,8 @@
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/supabase-config.js?v=privacy-consent-v1"></script>
-    <script src="/js/privacy.js?v=consent-location-v2"></script>
+    <script src="/js/supabase-config.js?v=privacy-consent-v2"></script>
+    <script src="/js/privacy.js?v=consent-prompt-v1"></script>
   </head>
   <body>
     <audio id="audio" class="fenda-audio-output" controls playsinline webkit-playsinline preload="metadata" aria-hidden="true"></audio>
@@ -891,8 +891,8 @@
       </div>
     </div>
 
-    <script src="/js/i18n.js"></script>
-    <script src="/js/player-core.js?v=privacy-consent-v1"></script>
+    <script src="/js/i18n.js?v=consent-prompt-v1"></script>
+    <script src="/js/player-core.js?v=privacy-consent-v2"></script>
     <script src="/js/player-session.js?v=resume-no-autoplay-v1"></script>
     <script src="/js/player-audio-lyrics.js?v=streaming-resume-v2"></script>
     <script src="/js/vendor/html2canvas.min.js"></script>
@@ -945,7 +945,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=89", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=90", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

@@ -2076,6 +2076,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.FendaPrivacy.load(AppState.userId).catch((error) => {
             console.warn('[FendaPrivacy] Boot sem sincronização de preferências:', error);
         });
+        // Exibe o consentimento somente depois da sessão estar autenticada e das preferências carregadas.
+        // O aviso não solicita localização até o usuário escolher essa opção.
+        Promise.resolve(window.FendaPrivacy.maybePrompt?.()).catch((error) => {
+            console.warn('[FendaPrivacy] Aviso inicial não pôde ser exibido:', error);
+        });
     }
 
     // Ativa a persistência antes de qualquer reprodução. Assim pausas,

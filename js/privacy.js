@@ -4,7 +4,7 @@
 (function () {
     'use strict';
 
-    const CONSENT_VERSION = '2026-08-26';
+    const CONSENT_VERSION = '2026-08-26-consent-prompt-v1';
     const LOCAL_PREFIX = 'fenda_privacy_prefs_';
     const DEFAULTS = Object.freeze({
         analytics: false,
@@ -28,6 +28,8 @@
     let prefs = { ...DEFAULTS };
     let loadPromise = null;
     const listeners = new Set();
+    let consentPromptEl = null;
+    let consentPromptPromise = null;
 
     function _storageKey(userId = currentUserId) {
         return userId ? `${LOCAL_PREFIX}${userId}` : `${LOCAL_PREFIX}anonymous`;
@@ -253,6 +255,149 @@
         return () => listeners.delete(fn);
     }
 
+    function hasDecision() {
+        return Boolean(prefs.consentedAt || prefs.revokedAt);
+    }
+
+    async function saveChoices(selection = {}) {
+        const next = { ...prefs };
+        next.analytics = Boolean(selection.analytics);
+        next.recommendations = Boolean(selection.recommendations);
+        next.location = Boolean(selection.location);
+        next.device = Boolean(selection.device);
+
+        if (next.location) {
+            const position = await _getPreciseLocation().catch(error => { throw _locationError(error); });
+            next.locationLatitude = Number(position.coords.latitude.toFixed(6));
+            next.locationLongitude = Number(position.coords.longitude.toFixed(6));
+            next.locationAccuracy = Number.isFinite(position.coords.accuracy) ? Number(position.coords.accuracy.toFixed(2)) : null;
+            next.locationCapturedAt = new Date().toISOString();
+            next.locationSource = 'browser-geolocation';
+        } else {
+            next.locationLatitude = null;
+            next.locationLongitude = null;
+            next.locationAccuracy = null;
+            next.locationCapturedAt = null;
+            next.locationSource = null;
+        }
+
+        if (next.device) {
+            const context = _deviceContext();
+            next.deviceTimezone = context.timezone;
+            next.deviceLanguage = context.language;
+            next.devicePlatform = context.platform;
+        } else {
+            next.deviceTimezone = null;
+            next.deviceLanguage = null;
+            next.devicePlatform = null;
+        }
+
+        next.consentedAt = new Date().toISOString();
+        next.revokedAt = next.analytics || next.recommendations || next.location || next.device ? null : next.consentedAt;
+        return _persist(next);
+    }
+
+    function _promptText(key, fallback) {
+        try {
+            const translated = window.t?.(key);
+            return translated && translated !== key ? translated : fallback;
+        } catch { return fallback; }
+    }
+
+    function _injectConsentPromptCss() {
+        if (document.getElementById('fenda-consent-prompt-css')) return;
+        const style = document.createElement('style');
+        style.id = 'fenda-consent-prompt-css';
+        style.textContent = `
+          .fenda-consent-backdrop{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(3,2,8,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+          .fenda-consent-card{width:min(560px,100%);max-height:calc(100vh - 28px);overflow:auto;background:linear-gradient(145deg,#1c1230,#0d0918 72%);border:1px solid rgba(192,132,252,.42);border-radius:24px;box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 45px rgba(146,76,255,.16);padding:22px 18px 18px;color:#fff}
+          .fenda-consent-card h2{font-size:20px;line-height:1.15;margin:0 0 8px;font-weight:900;letter-spacing:-.25px}
+          .fenda-consent-card>p{font-size:13px;line-height:1.5;color:rgba(255,255,255,.68);margin:0 0 15px}
+          .fenda-consent-options{display:grid;gap:8px}
+          .fenda-consent-option{display:flex;align-items:flex-start;gap:11px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(255,255,255,.045);cursor:pointer}
+          .fenda-consent-option:has(input:checked){border-color:rgba(192,132,252,.55);background:rgba(146,76,255,.13)}
+          .fenda-consent-option input{width:18px;height:18px;accent-color:#924cff;flex:0 0 auto;margin:1px 0 0}
+          .fenda-consent-option strong{display:block;font-size:13px;margin-bottom:3px}
+          .fenda-consent-option small{display:block;color:rgba(255,255,255,.55);font-size:11.5px;line-height:1.4}
+          .fenda-consent-status{min-height:18px;margin:12px 0 0;color:#fbbf24;font-size:12px;line-height:1.4}
+          .fenda-consent-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+          .fenda-consent-actions button{flex:1;min-width:130px;border-radius:14px;padding:12px 10px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;color:#fff;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07)}
+          .fenda-consent-actions button.primary{border:none;background:linear-gradient(135deg,#924cff,#6a2ad4)}
+          .fenda-consent-actions button:disabled{opacity:.5;cursor:wait}
+          .fenda-consent-foot{font-size:10.5px;line-height:1.45;color:rgba(255,255,255,.38);margin:12px 2px 0}
+        `;
+        document.head.appendChild(style);
+    }
+
+    function _closeConsentPrompt() {
+        if (consentPromptEl) consentPromptEl.remove();
+        consentPromptEl = null;
+    }
+
+    function maybePrompt() {
+        if (hasDecision()) return Promise.resolve(false);
+        if (consentPromptPromise) return consentPromptPromise;
+        consentPromptPromise = new Promise(resolve => {
+            _injectConsentPromptCss();
+            const t = _promptText;
+            const backdrop = document.createElement('div');
+            backdrop.className = 'fenda-consent-backdrop';
+            backdrop.setAttribute('role', 'dialog');
+            backdrop.setAttribute('aria-modal', 'true');
+            backdrop.setAttribute('aria-labelledby', 'fendaConsentTitle');
+            backdrop.innerHTML = `
+              <section class="fenda-consent-card">
+                <h2 id="fendaConsentTitle">${t('privacy_prompt_title', 'Escolha como seus dados serão usados')}</h2>
+                <p>${t('privacy_prompt_intro', 'Antes de continuar, escolha quais informações o Fenda Music pode usar. Nenhuma dessas opções é ativada sem a sua decisão.')}</p>
+                <div class="fenda-consent-options">
+                  <label class="fenda-consent-option"><input type="checkbox" data-consent-kind="analytics"><span><strong>${t('privacy_analytics', 'Análise de uso')}</strong><small>${t('privacy_analytics_sub', 'Usa histórico de reprodução e buscas para melhorar o app.')}</small></span></label>
+                  <label class="fenda-consent-option"><input type="checkbox" data-consent-kind="recommendations"><span><strong>${t('privacy_recommendations', 'Recomendações personalizadas')}</strong><small>${t('privacy_recommendations_sub', 'Usa seu histórico para adaptar sugestões e descobertas.')}</small></span></label>
+                  <label class="fenda-consent-option"><input type="checkbox" data-consent-kind="location"><span><strong>${t('privacy_location', 'Localização precisa')}</strong><small>${t('privacy_location_sub', 'Solicita o GPS preciso somente depois que você confirmar esta opção.')}</small></span></label>
+                  <label class="fenda-consent-option"><input type="checkbox" data-consent-kind="device"><span><strong>${t('privacy_device', 'Dados técnicos do aparelho')}</strong><small>${t('privacy_device_sub', 'Usa idioma, fuso horário e plataforma, sem identificador bruto do navegador.')}</small></span></label>
+                </div>
+                <div class="fenda-consent-status" id="fendaConsentStatus" aria-live="polite"></div>
+                <div class="fenda-consent-actions">
+                  <button type="button" data-consent-decline>${t('privacy_prompt_decline', 'Não aceitar agora')}</button>
+                  <button type="button" data-consent-all>${t('privacy_prompt_all', 'Aceitar tudo')}</button>
+                  <button type="button" class="primary" data-consent-save>${t('privacy_prompt_save', 'Salvar escolhas')}</button>
+                </div>
+                <p class="fenda-consent-foot">${t('privacy_prompt_footer', 'Você pode mudar ou revogar essas escolhas em Configurações → Privacidade e dados. A localização precisa só é lida com a permissão do navegador.')}</p>
+              </section>`;
+            document.body.appendChild(backdrop);
+            consentPromptEl = backdrop;
+            const status = backdrop.querySelector('#fendaConsentStatus');
+            const controls = [...backdrop.querySelectorAll('[data-consent-kind]')];
+            const setBusy = busy => backdrop.querySelectorAll('button').forEach(button => { button.disabled = busy; });
+            const finish = accepted => { _closeConsentPrompt(); resolve(accepted); };
+            const save = async all => {
+                const selected = Object.fromEntries(controls.map(control => [control.dataset.consentKind, all ? true : control.checked]));
+                setBusy(true);
+                status.textContent = selected.location ? t('privacy_prompt_location_wait', 'Aguardando a permissão de localização…') : t('privacy_prompt_saving', 'Salvando suas escolhas…');
+                try {
+                    await saveChoices(selected);
+                    finish(true);
+                } catch (error) {
+                    setBusy(false);
+                    status.textContent = error?.message || t('privacy_prompt_error', 'Não foi possível salvar agora. Tente novamente.');
+                }
+            };
+            backdrop.querySelector('[data-consent-all]').addEventListener('click', () => save(true));
+            backdrop.querySelector('[data-consent-save]').addEventListener('click', () => save(false));
+            backdrop.querySelector('[data-consent-decline]').addEventListener('click', async () => {
+                try { await saveChoices({}); }
+                catch {
+                    const now = new Date().toISOString();
+                    prefs = { ...DEFAULTS, consentedAt: now, revokedAt: now };
+                    _writeLocal(currentUserId, prefs);
+                    _emit();
+                }
+                finish(false);
+            });
+            controls[0]?.focus();
+        });
+        return consentPromptPromise.finally(() => { consentPromptPromise = null; });
+    }
+
     window.FendaPrivacy = {
         CONSENT_VERSION,
         load,
@@ -261,6 +406,9 @@
         setConsent,
         clearAllCollectedData,
         onChange,
+        hasDecision,
+        saveChoices,
+        maybePrompt,
     };
 
     document.addEventListener('fenda:userLoaded', event => {
