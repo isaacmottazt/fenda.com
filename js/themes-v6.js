@@ -130,8 +130,10 @@ class FendaThemes {
       .player-fav-big,.player-action-btn{color:${L?inkLow:'rgba(255,255,255,0.5)'}!important}
       .player-fav-big.active,.player-action-btn.active{color:#f472b6!important}
       .player-lyrics-header{color:${inkMid}!important}
-      .lyrics-container-content p{color:${L?inkFnt:'rgba(255,255,255,0.32)'}!important}
-      .lyrics-container-content p.active{color:${ink}!important}
+      .lyrics-container-content p{color:${L?'rgba(28,24,40,0.46)':'rgba(255,255,255,0.30)'}!important}
+      .lyrics-container-content p.past{color:${L?'rgba(28,24,40,0.62)':'rgba(255,255,255,0.43)'}!important}
+      .lyrics-container-content p.upcoming{color:${L?'rgba(28,24,40,0.38)':'rgba(255,255,255,0.27)'}!important}
+      .lyrics-container-content p.active{color:${L?'#1c1828':'#fff'}!important}
       .player-top-context,.player-top-playlist{color:${inkMid}!important}
 
       .modal-content-box{background:${surf}!important;color:${ink}!important}

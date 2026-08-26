@@ -427,13 +427,16 @@ function updateLyricsHighlight(currentTime) {
 
     if (activeIndex === -1) return;
 
-    // Destaca a linha ativa
+    // Mantém uma hierarquia visual clara: trecho já ouvido, linha atual e próximas linhas.
     if (activeIndex !== _lastLyricIndex) {
         _lastLyricIndex = activeIndex;
-        document.querySelectorAll('.lyric-line').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.lyric-line').forEach((el, index) => {
+            el.classList.toggle('active', index === activeIndex);
+            el.classList.toggle('past', index < activeIndex);
+            el.classList.toggle('upcoming', index > activeIndex);
+        });
         const activeLine = document.getElementById(`lyric-line-${activeIndex}`);
         if (activeLine) {
-            activeLine.classList.add('active');
             _scrollToLyricLine(activeLine);
         }
     }
