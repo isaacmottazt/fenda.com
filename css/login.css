@@ -2977,3 +2977,49 @@ body {
         display: none;
     }
 }
+
+
+/* ===== LOGIN V16 — COMPOSIÇÃO LATERAL COMPACTA ===== */
+@media (min-width: 761px) {
+    .login-context {
+        justify-content: flex-start;
+    }
+
+    .login-context .context-copy {
+        margin-top: 46px;
+        padding-top: 0;
+    }
+
+    .login-context .context-art {
+        height: 122px;
+        margin: 13px 0 10px;
+    }
+
+    .login-context .context-art .vinyl-disc {
+        top: 0;
+        width: 116px;
+    }
+
+    .login-context .context-points {
+        margin-top: 0;
+        padding-top: 14px;
+    }
+}
+
+
+/* ===== LOGIN V17 — PAINEL LATERAL SEM ALTURA VAZIA ===== */
+@media (min-width: 761px) {
+    .login-screen {
+        align-items: flex-start;
+    }
+
+    .login-context {
+        align-self: flex-start;
+        height: auto;
+        min-height: 0;
+    }
+
+    .login-container {
+        align-self: stretch;
+    }
+}
