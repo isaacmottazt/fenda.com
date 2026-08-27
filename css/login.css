@@ -2848,3 +2848,91 @@ body {
         white-space: nowrap;
     }
 }
+
+
+/* ===== LOGIN V14 — INFORMAÇÃO AO LADO, SEM GRID INTERNO ===== */
+@media (min-width: 761px) {
+    .login-screen {
+        width: min(100%, 1100px);
+        max-width: 1100px;
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 0;
+        overflow: visible;
+        border: 0;
+        border-radius: 30px;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .login-context,
+    .login-container {
+        width: 50%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .login-context {
+        display: flex;
+        flex-direction: column;
+        padding: 38px 42px 34px;
+        border: 1px solid rgba(192, 132, 252, .24);
+        border-right: 0;
+        border-bottom: 1px solid rgba(192, 132, 252, .24);
+        border-radius: 30px 0 0 30px;
+        background:
+            radial-gradient(circle at 82% 8%, rgba(192, 132, 252, .2), transparent 30%),
+            linear-gradient(145deg, rgba(35, 20, 64, .96), rgba(10, 6, 18, .98));
+        box-shadow: 0 28px 70px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .08);
+    }
+
+    .login-container {
+        border: 1px solid rgba(192, 132, 252, .24);
+        border-left: 1px solid rgba(255, 255, 255, .07);
+        border-radius: 0 30px 30px 0;
+        background: rgba(12, 8, 21, .98);
+        box-shadow: 0 28px 70px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .05);
+    }
+
+    .login-context .context-copy {
+        margin-top: auto;
+        padding-top: 78px;
+    }
+
+    .login-context .context-art {
+        height: 166px;
+        margin: 0 0 22px;
+    }
+
+    .login-context .context-art .vinyl-disc {
+        top: -2px;
+        left: 6%;
+        width: 164px;
+    }
+
+    .login-context .context-art .showcase-track {
+        right: 0;
+        bottom: 8px;
+        width: 72%;
+        min-height: 76px;
+        padding: 13px 15px;
+        border: 1px solid rgba(192, 132, 252, .2);
+        border-radius: 16px;
+        background: rgba(10, 6, 18, .64);
+        box-shadow: 0 18px 34px rgba(0, 0, 0, .2);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .login-context .context-points {
+        gap: 23px;
+        padding-top: 18px;
+    }
+}
+
+@media (max-width: 760px) {
+    .login-screen {
+        display: block;
+    }
+}
