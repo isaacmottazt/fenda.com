@@ -3107,3 +3107,44 @@ body {
         mix-blend-mode: normal;
     }
 }
+
+
+/* ===== LOGIN V21 — ANIMAÇÃO INTEGRADA SEM FUNDO ===== */
+@media (min-width: 761px) {
+    .login-context .robot-preview-art {
+        height: 220px;
+        margin: 12px 0 6px;
+        overflow: visible;
+    }
+
+    .login-context .robot-preview-art .robot-dance-video {
+        width: min(100%, 430px);
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        mix-blend-mode: normal;
+        filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .28));
+    }
+}
+
+
+/* ===== LOGIN V22 — CANVAS TRANSPARENTE NO ESTILO ORIGINAL ===== */
+.robot-dance-canvas {
+    display: none;
+}
+
+.robot-canvas-mode .login-context .robot-preview-art .robot-dance-video {
+    display: none;
+}
+
+.robot-canvas-mode .login-context .robot-preview-art .robot-dance-canvas {
+    display: block;
+    position: relative;
+    z-index: 1;
+    width: min(100%, 430px);
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .28));
+}

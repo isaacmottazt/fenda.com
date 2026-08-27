@@ -80,6 +80,7 @@
                         <source src="preview-assets/robot-vinyl-dance.mp4" type="video/mp4">
                         <img src="preview-assets/robot-vinyl.webp" alt="Robozinho colocando um disco de vinil no toca-discos">
                     </video>
+                    <canvas class="robot-dance-canvas" aria-hidden="true"></canvas>
                 </div>
                 <div class="context-points">
                     <div class="benefit-item">
@@ -481,6 +482,69 @@
                     .catch(err => console.warn('[SW] Falha:', err));
             });
         }
+    </script>
+    <script>
+        (() => {
+            const video = document.querySelector('.robot-dance-video');
+            const canvas = document.querySelector('.robot-dance-canvas');
+            if (!video || !canvas) return;
+
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) return;
+
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let started = false;
+
+            const renderFrame = () => {
+                if (!video.videoWidth || !video.videoHeight) return;
+                const width = 560;
+                const height = Math.round(width * video.videoHeight / video.videoWidth);
+                if (canvas.width !== width || canvas.height !== height) {
+                    canvas.width = width;
+                    canvas.height = height;
+                }
+
+                ctx.drawImage(video, 0, 0, width, height);
+                const frame = ctx.getImageData(0, 0, width, height);
+                const data = frame.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    const brightest = Math.max(r, g, b);
+                    const chroma = brightest - Math.min(r, g, b);
+                    const baseAlpha = Math.max(0, Math.min(255, (brightest - 9) * 5.2));
+                    data[i + 3] = chroma > 14 && brightest > 22
+                        ? Math.max(baseAlpha, Math.min(255, baseAlpha + chroma * 1.8))
+                        : baseAlpha;
+                }
+                ctx.putImageData(frame, 0, 0);
+                document.documentElement.classList.add('robot-canvas-mode');
+            };
+
+            const animate = () => {
+                renderFrame();
+                if (!reduceMotion) {
+                    if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+                        video.requestVideoFrameCallback(animate);
+                    } else {
+                        requestAnimationFrame(animate);
+                    }
+                }
+            };
+
+            const start = () => {
+                if (started) return;
+                started = true;
+                video.muted = true;
+                video.play().catch(() => {});
+                animate();
+            };
+
+            video.addEventListener('loadeddata', start, { once: true });
+            video.addEventListener('canplay', start, { once: true });
+            if (video.readyState >= 2) start();
+        })();
     </script>
 </body>
 </html>
