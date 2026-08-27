@@ -60,41 +60,31 @@
         });
     })();
 </script>
-    <div class="login-screen">
-        <div class="login-container">
-            <div class="login-header">
-                <h1>Fenda Music</h1>
-                <p>Sua música. Seu mundo.</p>
-            </div>
+    <main class="login-screen">
+        <section class="login-aside" aria-label="Apresentação do Fenda Music">
+            <div class="aside-topline"><span class="aside-live-dot"></span><span>Fenda Music</span><span class="aside-line"></span><span>Seu espaço para ouvir</span></div>
+            <div class="aside-copy"><span class="aside-kicker">SUA MÚSICA, DO SEU JEITO</span><h2>Encontre o som que combina com <em>você.</em></h2><p>Uma experiência feita para descobrir, guardar e ouvir músicas que fazem parte da sua história.</p></div>
+            <div class="login-showcase" aria-hidden="true"><div class="showcase-glow"></div><div class="vinyl-disc"><span class="vinyl-hole"></span><span class="vinyl-label">FM</span></div><div class="showcase-track"><span class="material-symbols-rounded track-icon">graphic_eq</span><div><small>AGORA TOCANDO</small><strong>Seu próximo momento</strong></div><span class="material-symbols-rounded track-arrow">arrow_forward</span></div></div>
+            <div class="aside-points"><div><span class="material-symbols-rounded">explore</span><span><strong>Descubra</strong><small>novos sons para sua rotina</small></span></div><div><span class="material-symbols-rounded">favorite</span><span><strong>Guarde</strong><small>o que merece ser ouvido de novo</small></span></div></div>
+        </section>
+        <section class="login-container" aria-label="Acesso à conta">
+            <div class="login-header"><div class="brand-lockup"><span class="brand-symbol"><span class="material-symbols-rounded">graphic_eq</span></span><div><h1>Fenda Music</h1><p>Sua música. Seu mundo.</p></div></div><span class="secure-badge"><span class="material-symbols-rounded">verified_user</span> acesso seguro</span></div>
+            <div class="auth-heading"><span id="authEyebrow" class="auth-eyebrow">BEM-VINDO DE VOLTA</span><h2 id="authHeading">Entre na sua conta</h2><p id="authSubheading">Continue de onde você parou.</p></div>
 
             <!-- Botões de alternância -->
-            <div class="auth-toggle">
-                <button id="loginModeBtn" class="toggle-btn active">Entrar</button>
-                <button id="signupModeBtn" class="toggle-btn">Criar conta</button>
+            <div class="auth-toggle" role="tablist" aria-label="Escolha uma ação">
+                <button id="loginModeBtn" class="toggle-btn active" type="button" role="tab" aria-selected="true">Entrar</button>
+                <button id="signupModeBtn" class="toggle-btn" type="button" role="tab" aria-selected="false">Criar conta</button>
             </div>
 
             <!-- Formulário unificado -->
             <form id="authForm">
                 <!-- Campos que aparecem APENAS no modo cadastro -->
                 <div id="signupFields" class="dynamic-fields hidden">
-                    <div class="input-group">
-                        <input type="text" id="signupName" placeholder="Nome completo">
-                    </div>
-                    <div class="input-group">
-                        <input type="email" id="signupEmail" placeholder="E-mail">
-                    </div>
-                    <div class="input-group password-group">
-                        <input type="password" id="signupPassword" placeholder="Senha (mínimo 6 caracteres)">
-                        <button type="button" class="toggle-password-btn" data-target="signupPassword" aria-label="Mostrar senha">
-                            <span class="material-symbols-rounded">visibility</span>
-                        </button>
-                    </div>
-                    <div class="input-group password-group">
-                        <input type="password" id="signupConfirmPassword" placeholder="Confirmar senha">
-                        <button type="button" class="toggle-password-btn" data-target="signupConfirmPassword" aria-label="Mostrar senha">
-                            <span class="material-symbols-rounded">visibility</span>
-                        </button>
-                    </div>
+                    <div class="input-group"><label for="signupName">Como podemos chamar você?</label><div class="input-shell"><span class="material-symbols-rounded field-icon">person</span><input type="text" id="signupName" placeholder="Nome completo" autocomplete="name"></div></div>
+                    <div class="input-group"><label for="signupEmail">Seu melhor e-mail</label><div class="input-shell"><span class="material-symbols-rounded field-icon">mail</span><input type="email" id="signupEmail" placeholder="E-mail" autocomplete="email"></div></div>
+                    <div class="input-group password-group"><label for="signupPassword">Crie uma senha</label><div class="input-shell"><span class="material-symbols-rounded field-icon">lock</span><input type="password" id="signupPassword" placeholder="Mínimo de 6 caracteres" autocomplete="new-password"><button type="button" class="toggle-password-btn" data-target="signupPassword" aria-label="Mostrar senha"><span class="material-symbols-rounded">visibility</span></button></div></div>
+                    <div class="input-group password-group"><label for="signupConfirmPassword">Confirme sua senha</label><div class="input-shell"><span class="material-symbols-rounded field-icon">lock_reset</span><input type="password" id="signupConfirmPassword" placeholder="Digite a senha novamente" autocomplete="new-password"><button type="button" class="toggle-password-btn" data-target="signupConfirmPassword" aria-label="Mostrar senha"><span class="material-symbols-rounded">visibility</span></button></div></div>
                     <label class="terms-check" for="signupTermsCheck">
                         <input type="checkbox" id="signupTermsCheck">
                         <span class="terms-check-box"></span>
@@ -107,15 +97,8 @@
 
                 <!-- Campos que aparecem APENAS no modo login -->
                 <div id="loginFields" class="dynamic-fields">
-                    <div class="input-group">
-                        <input type="email" id="loginEmail" placeholder="E-mail">
-                    </div>
-                    <div class="input-group password-group">
-                        <input type="password" id="loginPassword" placeholder="Senha">
-                        <button type="button" class="toggle-password-btn" data-target="loginPassword" aria-label="Mostrar senha">
-                            <span class="material-symbols-rounded">visibility</span>
-                        </button>
-                    </div>
+                    <div class="input-group"><label for="loginEmail">E-mail</label><div class="input-shell"><span class="material-symbols-rounded field-icon">mail</span><input type="email" id="loginEmail" placeholder="voce@exemplo.com" autocomplete="email"></div></div>
+                    <div class="input-group password-group"><label for="loginPassword">Senha</label><div class="input-shell"><span class="material-symbols-rounded field-icon">lock</span><input type="password" id="loginPassword" placeholder="Digite sua senha" autocomplete="current-password"><button type="button" class="toggle-password-btn" data-target="loginPassword" aria-label="Mostrar senha"><span class="material-symbols-rounded">visibility</span></button></div></div>
                 </div>
 
                 <div class="forgot-password" id="forgotPasswordContainer">
@@ -126,15 +109,13 @@
             </form>
 
             <div class="divider">
-                <span>ou</span>
+                <span>ou continue com</span>
             </div>
 
-            <button id="googleLoginBtn" class="google-btn">
-                <span class="material-symbols-rounded">account_circle</span>
-                Continuar com Google
-            </button>
-        </div>
-    </div>
+            <button id="googleLoginBtn" class="google-btn"><span class="google-mark">G</span><span>Continuar com Google</span></button>
+            <p class="login-footnote"><span class="material-symbols-rounded">lock</span> Seus dados são protegidos durante o acesso.</p>
+        </section>
+    </main>
 
     <!-- MODAL PARA REDEFINIR SENHA -->
     <div id="resetModal" class="modal-backdrop">
@@ -183,22 +164,35 @@
         const loginFields = document.getElementById('loginFields');
         const forgotContainer = document.getElementById('forgotPasswordContainer');
         const submitBtn = document.getElementById('submitBtn');
+        const authHeading = document.getElementById('authHeading');
+        const authSubheading = document.getElementById('authSubheading');
+        const authEyebrow = document.getElementById('authEyebrow');
 
         function updateUIMode() {
             if (isLoginMode) {
                 signupFields.classList.add('hidden');
                 loginFields.classList.remove('hidden');
                 submitBtn.textContent = 'Entrar';
+                if (authEyebrow) authEyebrow.textContent = 'BEM-VINDO DE VOLTA';
+                if (authHeading) authHeading.textContent = 'Entre na sua conta';
+                if (authSubheading) authSubheading.textContent = 'Continue de onde você parou.';
                 forgotContainer.style.display = 'block';
                 loginModeBtn.classList.add('active');
                 signupModeBtn.classList.remove('active');
+                loginModeBtn.setAttribute('aria-selected', 'true');
+                signupModeBtn.setAttribute('aria-selected', 'false');
             } else {
                 signupFields.classList.remove('hidden');
                 loginFields.classList.add('hidden');
                 submitBtn.textContent = 'Criar conta';
+                if (authEyebrow) authEyebrow.textContent = 'COMECE AQUI';
+                if (authHeading) authHeading.textContent = 'Crie seu espaço';
+                if (authSubheading) authSubheading.textContent = 'Leva menos de um minuto para começar.';
                 forgotContainer.style.display = 'none';
                 signupModeBtn.classList.add('active');
                 loginModeBtn.classList.remove('active');
+                signupModeBtn.setAttribute('aria-selected', 'true');
+                loginModeBtn.setAttribute('aria-selected', 'false');
             }
         }
 
