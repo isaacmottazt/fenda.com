@@ -3065,3 +3065,45 @@ body {
         animation: none;
     }
 }
+
+
+/* ===== LOGIN V19 — ROBÔ COLOCA O DISCO E DANÇA ===== */
+@media (min-width: 761px) {
+    .login-context .robot-preview-art .robot-dance-video {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: min(100%, 430px);
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        mix-blend-mode: normal;
+        filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .38));
+    }
+
+    .login-context .robot-preview-art .robot-dance-video img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-context .robot-preview-art .robot-dance-video {
+        animation: none;
+    }
+}
+
+
+/* ===== LOGIN V20 — PALCO DO ROBÔ ===== */
+@media (min-width: 761px) {
+    .login-context .robot-preview-art .robot-dance-video {
+        width: min(100%, 430px);
+        border-radius: 18px;
+        box-shadow: inset 0 0 0 1px rgba(192, 132, 252, .16), 0 16px 30px rgba(0, 0, 0, .22);
+        mix-blend-mode: normal;
+    }
+}
