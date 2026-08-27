@@ -10,3 +10,8 @@ A prévia local foi aberta em viewport desktop. Foram confirmados o painel de ap
 
 
 A versão final foi recarregada e a alternância para cadastro foi testada novamente. O cabeçalho mudou para `Crie seu espaço`, o subtítulo passou a explicar o cadastro e os campos de nome, e-mail, senha, confirmação e termos permaneceram funcionais.
+
+
+## Publicação
+
+O commit `a829fc3` foi enviado ao repositório `isaacmottazt/fenda.com` e o deploy correspondente do projeto principal ficou em estado `READY` no Vercel. O domínio público está servindo os marcadores do novo HTML e CSS, incluindo `login-aside`, `authHeading`, `secure-badge`, `brand-lockup`, `input-shell` e o breakpoint responsivo para telas menores. O repositório ficou limpo após o commit.
