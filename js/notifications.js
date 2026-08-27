@@ -295,6 +295,7 @@ const FendaNotifications = (() => {
                     title: item.title || 'Comunicado do Fenda Music',
                     body: item.body || '',
                     image: item.image_url || null,
+                    musicId: item.metadata?.musicId || null,
                     adminNotificationId: item.id,
                 });
                 received.push(item);

@@ -409,7 +409,7 @@
                 // próprio arquivo sw.js — sem isso, o Chrome pode servir um
                 // sw.js de até 24h atrás mesmo com CACHE_NAME já incrementado
                 // no arquivo novo, porque nunca chega a baixar a versão nova.
-                navigator.serviceWorker.register('/sw.js?v=94', { scope: '/', updateViaCache: 'none' })
+                navigator.serviceWorker.register('/sw.js?v=95', { scope: '/', updateViaCache: 'none' })
                     .then(reg => {
                         console.log('[SW] Registrado:', reg.scope);
                         // Força checar por atualização a cada carregamento desta tela
