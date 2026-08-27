@@ -3023,3 +3023,45 @@ body {
         align-self: stretch;
     }
 }
+
+
+/* ===== LOGIN V18 — ROBÔ DO TOCA-DISCOS ===== */
+@media (min-width: 761px) {
+    .login-context .robot-preview-art {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 220px;
+        margin: 12px 0 6px;
+        overflow: visible;
+    }
+
+    .login-context .robot-preview-art .showcase-glow {
+        inset: 8% 14% 4%;
+        opacity: .7;
+    }
+
+    .login-context .robot-preview-art img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: min(100%, 330px);
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .38));
+        animation: fenda-login-robot-float 4.8s ease-in-out infinite;
+    }
+}
+
+@keyframes fenda-login-robot-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-context .robot-preview-art img {
+        animation: none;
+    }
+}
