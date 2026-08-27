@@ -1543,3 +1543,41 @@ body {
         padding: 25px 18px 23px;
     }
 }
+
+
+/* ===== LOGIN V4 — FORMULÁRIO ÚNICO ===== */
+.login-screen {
+    width: min(100%, 520px);
+    max-width: 520px;
+}
+
+.login-container {
+    min-height: 0;
+    max-width: 520px;
+    margin: auto;
+    padding: 40px 36px 32px;
+}
+
+.login-container .login-brand {
+    display: inline-flex;
+    margin-bottom: 16px;
+}
+
+.login-header {
+    text-align: center;
+}
+
+.login-trust,
+.login-footer {
+    text-align: center;
+}
+
+.login-trust {
+    justify-content: center;
+}
+
+@media (max-width: 560px) {
+    .login-container {
+        padding: 28px 20px 25px;
+    }
+}
