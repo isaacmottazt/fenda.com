@@ -1,7 +1,7 @@
-// Fenda Music — Service Worker v17
+// Fenda Music — Service Worker v18
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v97';
+const CACHE_NAME = 'fenda-v98';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
 const CRITICAL_RUNTIME = new Set([
@@ -152,25 +152,21 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // 4. Rotas de login → serve index.html (mesmo tratamento de 3)
+  // 4. Rotas de login → rede primeiro, cache apenas como fallback offline.
+  //    A tela de autenticação precisa receber HTML/CSS novo imediatamente;
+  //    cache-first mantinha versões antigas do login em instalações PWA.
   if (url.origin === self.location.origin && LOGIN_ROUTES.has(path)) {
     e.respondWith(
-      caches.match('/index.html').then(cached => {
-        const networkFetch = fetch('/index.html')
-          .then(response => {
-            if (response.ok) {
-              caches.open(CACHE_NAME).then(c => c.put('/index.html', response.clone())).catch(() => {});
-            }
-            return response;
-          })
-          .catch(() => null);
-
-        if (cached) {
-          networkFetch.catch(() => {});
-          return cached;
-        }
-        return networkFetch.then(r => r || new Response('Service Unavailable', { status: 503 }));
-      })
+      fetch('/index.html', { cache: 'no-store' })
+        .then(response => {
+          if (response.ok) {
+            caches.open(CACHE_NAME).then(c => c.put('/index.html', response.clone())).catch(() => {});
+          }
+          return response;
+        })
+        .catch(() => caches.match('/index.html').then(cached =>
+          cached || new Response('Service Unavailable', { status: 503 })
+        ))
     );
     return;
   }
