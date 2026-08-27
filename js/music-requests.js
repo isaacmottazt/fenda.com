@@ -3,6 +3,7 @@
 
   let overlay = null;
   let selectedSource = null;
+  let manualVagalumeUrl = null;
   let lookupSerial = 0;
 
   function esc(value) {
@@ -56,6 +57,12 @@
       .music-request-source-result strong, .music-request-source-result small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .music-request-source-result strong { font-size: 11px; }
       .music-request-source-result small { margin-top: 3px; color: #91a2bd; font-size: 10px; }
+      .music-request-manual-source { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px; background: rgba(119,169,255,.06); border: 1px solid rgba(119,169,255,.16); border-radius: 12px; }
+      .music-request-manual-source-copy strong, .music-request-manual-source-copy small { display: block; }
+      .music-request-manual-source-copy strong { color: #dfe8ff; font-size: 10px; }
+      .music-request-manual-source-copy small { margin-top: 3px; color: #91a2bd; font-size: 9px; line-height: 1.35; }
+      .music-request-vagalume { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; min-height: 32px; padding: 0 9px; color: #cfe0ff; background: rgba(119,169,255,.12); border: 1px solid rgba(119,169,255,.24); border-radius: 9px; font-size: 10px; font-weight: 800; }
+      .music-request-vagalume:hover { background: rgba(119,169,255,.2); }
       .music-request-note { display: flex; align-items: flex-start; gap: 8px; padding: 11px; color: #9eacc5; background: rgba(126,232,225,.06); border: 1px solid rgba(126,232,225,.13); border-radius: 12px; font-size: 10px; line-height: 1.5; }
       .music-request-note .material-symbols-rounded { color: #7ee8e1; font-size: 16px; }
       .music-request-actions { display: flex; gap: 9px; justify-content: flex-end; margin-top: 4px; }
@@ -68,10 +75,26 @@
       .search-request-cta-copy strong { color: #edf3ff; font-size: 12px; }
       .search-request-cta-copy small { margin-top: 4px; color: #91a2bd; font-size: 10px; line-height: 1.4; }
       .search-request-cta button { min-height: 35px; display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 0 11px; color: #07101e; background: #7ee8e1; border: 0; border-radius: 10px; font-size: 10px; font-weight: 800; }
-      @media (max-width: 540px) { .music-request-overlay { align-items: end; padding: 0; } .music-request-modal { max-height: 92vh; padding: 19px 16px 20px; border-bottom: 0; border-radius: 22px 22px 0 0; } .music-request-head h2 { font-size: 21px; } .music-request-actions { flex-direction: column-reverse; } .music-request-actions button { width: 100%; } .search-request-cta { align-items: flex-start; flex-direction: column; } .search-request-cta button { width: 100%; justify-content: center; } }
+      @media (max-width: 540px) { .music-request-overlay { align-items: end; padding: 0; } .music-request-modal { max-height: 92vh; padding: 19px 16px 20px; border-bottom: 0; border-radius: 22px 22px 0 0; } .music-request-head h2 { font-size: 21px; } .music-request-actions { flex-direction: column-reverse; } .music-request-actions button { width: 100%; } .music-request-manual-source { align-items: flex-start; flex-direction: column; } .music-request-vagalume { width: 100%; justify-content: center; } .search-request-cta { align-items: flex-start; flex-direction: column; } .search-request-cta button { width: 100%; justify-content: center; } }
       @media (prefers-reduced-motion: reduce) { .music-request-overlay, .music-request-modal { transition: none; } }
     `;
     document.head.appendChild(style);
+  }
+
+  function currentVagalumeQuery() {
+    const title = document.getElementById('musicRequestTitle')?.value.trim() || '';
+    const artist = document.getElementById('musicRequestArtist')?.value.trim() || '';
+    const fallback = document.getElementById('globalSearchInput')?.value.trim() || '';
+    return [title, artist].filter(Boolean).join(' ') || fallback;
+  }
+
+  function openVagalumeSearch() {
+    const query = currentVagalumeQuery();
+    if (!query) { show('Informe pelo menos o nome da música ou do artista.', 'info'); return; }
+    selectedSource = null;
+    manualVagalumeUrl = `https://www.vagalume.com.br/search?q=${encodeURIComponent(query)}`;
+    window.open(manualVagalumeUrl, '_blank', 'noopener,noreferrer');
+    show('Busca oficial do Vagalume aberta para conferência manual.', 'info');
   }
 
   function renderSourceResults(results, state) {
@@ -154,6 +177,7 @@
     }
     injectStyles();
     selectedSource = null;
+    manualVagalumeUrl = null;
     if (!overlay) {
       overlay = document.createElement('div');
       overlay.className = 'music-request-overlay';
@@ -164,7 +188,7 @@
             <div class="music-request-field"><label for="musicRequestTitle">Título da música</label><input id="musicRequestTitle" maxlength="160" required></div>
             <div class="music-request-field"><label for="musicRequestArtist">Artista</label><input id="musicRequestArtist" maxlength="160" placeholder="Ex.: Djavan" required></div>
             <div class="music-request-field"><label for="musicRequestGenre">Gênero ou estilo (opcional)</label><input id="musicRequestGenre" maxlength="100" placeholder="Ex.: MPB, Pop, Adoração"></div>
-            <div class="music-request-source"><div class="music-request-source-head"><span>Encontrar metadados</span><span id="musicRequestSourceState" class="music-request-source-state">pronto para pesquisar</span></div><div id="musicRequestSources"></div></div>
+            <div class="music-request-source"><div class="music-request-source-head"><span>Encontrar metadados</span><span id="musicRequestSourceState" class="music-request-source-state">pronto para pesquisar</span></div><div id="musicRequestSources"></div><div class="music-request-manual-source"><div class="music-request-manual-source-copy"><strong>Fonte brasileira</strong><small>Abra a busca oficial para conferir título e artista manualmente.</small></div><button type="button" class="music-request-vagalume"><span class="material-symbols-rounded">open_in_new</span>Pesquisar no Vagalume</button></div></div>
             <div class="music-request-note"><span class="material-symbols-rounded">verified_user</span><span>O pedido guarda apenas título, artista e metadados. Não fazemos download automático de áudio de plataformas externas.</span></div>
             <div class="music-request-actions"><button type="button" class="music-request-cancel">Cancelar</button><button type="submit" class="music-request-submit"><span class="material-symbols-rounded">send</span>Enviar solicitação</button></div>
           </form>
@@ -175,6 +199,7 @@
       });
       overlay.querySelector('.music-request-close').addEventListener('click', close);
       overlay.querySelector('.music-request-cancel').addEventListener('click', close);
+      overlay.querySelector('.music-request-vagalume').addEventListener('click', openVagalumeSearch);
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       overlay.querySelector('form').addEventListener('submit', submit);
     }
@@ -220,8 +245,8 @@
       genre,
       album: selectedSource?.album || null,
       search_query: document.getElementById('globalSearchInput')?.value.trim() || `${title} ${artist}`,
-      source_provider: selectedSource?.source || null,
-      source_url: selectedSource?.sourceUrl || null,
+      source_provider: selectedSource?.source || (manualVagalumeUrl ? 'Vagalume' : null),
+      source_url: selectedSource?.sourceUrl || manualVagalumeUrl || null,
       cover_url: selectedSource?.image || null,
     };
     const { error } = await window.supabaseClient.from('music_requests').insert(payload);
