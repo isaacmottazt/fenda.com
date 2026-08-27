@@ -64,9 +64,12 @@
     <div class="login-screen">
         <div class="login-container">
             <div class="login-header">
-                <div class="login-brand" aria-label="Fenda Music">
-                    <img src="imagens/logo.png" alt="">
-                    <span>FENDA MUSIC</span>
+                <div class="login-header-top">
+                    <div class="login-brand" aria-label="Fenda Music">
+                        <img src="imagens/logo.png" alt="">
+                        <span>FENDA MUSIC</span>
+                    </div>
+                    <span class="secure-badge"><span class="material-symbols-rounded" aria-hidden="true">lock</span> acesso seguro</span>
                 </div>
                 <span class="login-eyebrow">SUA MÚSICA, DO SEU JEITO</span>
                 <h1>Entre na sua música</h1>
@@ -78,28 +81,35 @@
                 <button id="loginModeBtn" class="toggle-btn active">Entrar</button>
                 <button id="signupModeBtn" class="toggle-btn">Criar conta</button>
             </div>
+            <div class="access-pill"><span class="material-symbols-rounded" aria-hidden="true">account_circle</span><span>Conta Fenda Music</span></div>
 
             <!-- Formulário unificado -->
             <form id="authForm">
                 <!-- Campos que aparecem APENAS no modo cadastro -->
                 <div id="signupFields" class="dynamic-fields hidden">
                     <div class="input-group">
-                        <input type="text" id="signupName" placeholder="Nome completo" autocomplete="name">
+                        <label for="signupName">Nome completo</label>
+                        <div class="input-shell"><span class="material-symbols-rounded field-icon" aria-hidden="true">person</span><input type="text" id="signupName" placeholder="Como podemos chamar você?" autocomplete="name"></div>
                     </div>
                     <div class="input-group">
-                        <input type="email" id="signupEmail" placeholder="E-mail" autocomplete="email">
+                        <label for="signupEmail">E-mail</label>
+                        <div class="input-shell"><span class="material-symbols-rounded field-icon" aria-hidden="true">mail</span><input type="email" id="signupEmail" placeholder="voce@exemplo.com" autocomplete="email"></div>
                     </div>
                     <div class="input-group password-group">
-                        <input type="password" id="signupPassword" placeholder="Senha (mínimo 6 caracteres)" autocomplete="new-password">
-                        <button type="button" class="toggle-password-btn" data-target="signupPassword" aria-label="Mostrar senha">
-                            <span class="material-symbols-rounded">visibility</span>
-                        </button>
+                        <label for="signupPassword">Senha</label>
+                        <div class="input-shell"><span class="material-symbols-rounded field-icon" aria-hidden="true">key</span><input type="password" id="signupPassword" placeholder="Mínimo de 6 caracteres" autocomplete="new-password">
+                            <button type="button" class="toggle-password-btn" data-target="signupPassword" aria-label="Mostrar senha">
+                                <span class="material-symbols-rounded">visibility</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="input-group password-group">
-                        <input type="password" id="signupConfirmPassword" placeholder="Confirmar senha" autocomplete="new-password">
-                        <button type="button" class="toggle-password-btn" data-target="signupConfirmPassword" aria-label="Mostrar senha">
-                            <span class="material-symbols-rounded">visibility</span>
-                        </button>
+                        <label for="signupConfirmPassword">Confirmar senha</label>
+                        <div class="input-shell"><span class="material-symbols-rounded field-icon" aria-hidden="true">verified</span><input type="password" id="signupConfirmPassword" placeholder="Digite a senha novamente" autocomplete="new-password">
+                            <button type="button" class="toggle-password-btn" data-target="signupConfirmPassword" aria-label="Mostrar senha">
+                                <span class="material-symbols-rounded">visibility</span>
+                            </button>
+                        </div>
                     </div>
                     <label class="terms-check" for="signupTermsCheck">
                         <input type="checkbox" id="signupTermsCheck">
@@ -114,13 +124,16 @@
                 <!-- Campos que aparecem APENAS no modo login -->
                 <div id="loginFields" class="dynamic-fields">
                     <div class="input-group">
-                        <input type="email" id="loginEmail" placeholder="E-mail" autocomplete="email">
+                        <label for="loginEmail">E-mail</label>
+                        <div class="input-shell"><span class="material-symbols-rounded field-icon" aria-hidden="true">mail</span><input type="email" id="loginEmail" placeholder="voce@exemplo.com" autocomplete="email"></div>
                     </div>
                     <div class="input-group password-group">
-                        <input type="password" id="loginPassword" placeholder="Senha" autocomplete="current-password">
-                        <button type="button" class="toggle-password-btn" data-target="loginPassword" aria-label="Mostrar senha">
-                            <span class="material-symbols-rounded">visibility</span>
-                        </button>
+                        <label for="loginPassword">Senha</label>
+                        <div class="input-shell"><span class="material-symbols-rounded field-icon" aria-hidden="true">key</span><input type="password" id="loginPassword" placeholder="Digite sua senha" autocomplete="current-password">
+                            <button type="button" class="toggle-password-btn" data-target="loginPassword" aria-label="Mostrar senha">
+                                <span class="material-symbols-rounded">visibility</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
