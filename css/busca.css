@@ -465,6 +465,47 @@
     color: rgba(255, 255, 255, 0.28);
 }
 
+/* ── Solicitação de inclusão ── */
+.search-request-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    margin-top: 12px;
+    border: 1px solid rgba(126, 232, 225, .2);
+    border-radius: 15px;
+    background: linear-gradient(100deg, rgba(126, 232, 225, .08), rgba(119, 169, 255, .08));
+}
+.search-request-cta-copy strong,
+.search-request-cta-copy small { display: block; }
+.search-request-cta-copy strong { color: #edf3ff; font-size: 12px; }
+.search-request-cta-copy small { margin-top: 4px; color: rgba(255, 255, 255, .42); font-size: 10px; line-height: 1.4; }
+.search-request-cta button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 35px;
+    flex: 0 0 auto;
+    padding: 0 11px;
+    color: #07101e;
+    background: #7ee8e1;
+    border: 0;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    transition: transform .16s ease, filter .16s ease;
+}
+.search-request-cta button:hover { filter: brightness(1.06); }
+.search-request-cta button:active { transform: scale(.97); }
+.search-request-cta button .material-symbols-rounded { font-size: 16px; }
+@media (max-width: 540px) {
+    .search-request-cta { align-items: flex-start; flex-direction: column; }
+    .search-request-cta button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .search-request-cta button { transition: none; } }
+
 /* ── Artistas nos resultados — row horizontal ── */
 .search-artists-results-row {
     display: flex;

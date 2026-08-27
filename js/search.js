@@ -2,6 +2,7 @@
 
 let searchInput = null;
 let recentSearches = [];
+let searchRequestSerial = 0;
 
 function syncSearchStartHint() {
     const hint = document.getElementById('searchStartHint');
@@ -66,7 +67,9 @@ function resetSearch() {
 }
 
 async function handleSearch() {
-    const query = searchInput.value.trim().toLowerCase();
+    const requestSerial = ++searchRequestSerial;
+    const rawQuery = searchInput.value.trim();
+    const query = rawQuery.toLowerCase();
 
     if (!query) {
         document.getElementById('searchResults').style.display = 'none';
@@ -86,6 +89,7 @@ async function handleSearch() {
     if (typeof window.searchArtists === 'function') {
         tableArtists = await window.searchArtists(query);
     }
+    if (requestSerial !== searchRequestSerial || searchInput.value.trim().toLowerCase() !== query) return;
 
     const artistSet = new Set(musicResults.map(m => m.artist));
     tableArtists.forEach(a => artistSet.delete(a.name));
@@ -150,8 +154,23 @@ async function handleSearch() {
             </div>`;
     }
 
+    if (rawQuery.length >= 2 && !musicResults.length) {
+        html += `
+          <div class="search-request-cta">
+            <div class="search-request-cta-copy">
+              <strong>Não encontrou o que queria?</strong>
+              <small>Solicite “${escapeHtml(rawQuery)}” para a equipe analisar.</small>
+            </div>
+            <button type="button" id="openMusicRequestBtn"><span class="material-symbols-rounded">playlist_add</span>Solicitar inclusão</button>
+          </div>`;
+    }
+
     const resultsEl = document.getElementById('searchResults');
     resultsEl.innerHTML = html;
+    resultsEl.querySelector('#openMusicRequestBtn')?.addEventListener('click', () => {
+        if (window.FendaMusicRequest?.open) window.FendaMusicRequest.open({ query: rawQuery });
+        else if (typeof window.showToast === 'function') window.showToast('A solicitação ainda está carregando. Tente novamente.', 'info');
+    });
 
     // Clique em músicas
     resultsEl.querySelectorAll('[data-type="music"]').forEach(el => {
