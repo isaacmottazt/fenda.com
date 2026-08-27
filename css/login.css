@@ -2373,3 +2373,295 @@ body {
         display: none;
     }
 }
+
+
+/* ===== LOGIN V8 — PRIMEIRAS INFORMAÇÕES INTEGRADAS EM UM ÚNICO CARTÃO ===== */
+.login-screen {
+    width: min(100%, 650px);
+    max-width: 650px;
+}
+
+.login-container {
+    min-height: 0;
+    max-width: none;
+    padding: 32px clamp(24px, 5vw, 42px) 28px;
+    border-radius: 30px;
+}
+
+.login-context {
+    position: relative;
+    z-index: 1;
+    padding-bottom: 24px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid rgba(192, 132, 252, .16);
+}
+
+.context-topline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, .58);
+    font-size: 10px;
+    font-weight: 750;
+}
+
+.context-topline > span:last-child {
+    color: rgba(255, 255, 255, .36);
+    white-space: nowrap;
+}
+
+.context-topline .aside-line {
+    height: 1px;
+    flex: 1;
+    margin: 0 3px;
+    background: linear-gradient(90deg, rgba(192, 132, 252, .35), rgba(192, 132, 252, .08));
+}
+
+.login-context .aside-live-dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #e879f9;
+    box-shadow: 0 0 0 4px rgba(232, 121, 249, .1), 0 0 15px rgba(232, 121, 249, .65);
+}
+
+.context-copy {
+    margin-top: 24px;
+}
+
+.context-copy .showcase-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--login-site-violet-up);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .18em;
+}
+
+.context-copy .showcase-kicker::before {
+    content: '';
+    width: 25px;
+    height: 2px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--login-site-magenta), var(--login-site-violet-up));
+}
+
+.context-copy h2 {
+    max-width: 570px;
+    margin: 13px 0 9px;
+    color: #fff;
+    font-size: clamp(31px, 5vw, 45px);
+    font-weight: 850;
+    letter-spacing: -.065em;
+    line-height: .99;
+}
+
+.context-copy h2 em {
+    color: var(--login-site-violet-up);
+    font-style: normal;
+    background: linear-gradient(100deg, #fff, var(--login-site-violet-up) 68%, #e879f9);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.context-copy p {
+    max-width: 520px;
+    margin: 0;
+    color: rgba(255, 255, 255, .6);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.context-art {
+    position: relative;
+    height: 98px;
+    margin: 14px 0 12px;
+}
+
+.context-art .showcase-glow {
+    position: absolute;
+    inset: -20% 16% -35% 25%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192, 132, 252, .23), transparent 64%);
+    filter: blur(20px);
+}
+
+.context-art .vinyl-disc {
+    top: -10px;
+    left: 6%;
+    width: 112px;
+    box-shadow: 12px 12px 0 rgba(0, 0, 0, .12), 0 18px 34px rgba(0, 0, 0, .34);
+}
+
+.context-art .showcase-track {
+    right: 0;
+    bottom: 0;
+    width: 73%;
+    min-height: 62px;
+    padding: 10px 13px;
+    border-radius: 14px;
+}
+
+.context-art .track-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 17px;
+}
+
+.context-art .showcase-track small {
+    font-size: 7px;
+}
+
+.context-art .showcase-track strong {
+    font-size: 11px;
+}
+
+.context-art .track-arrow {
+    font-size: 17px;
+}
+
+.context-points {
+    display: flex;
+    gap: 24px;
+    padding-top: 13px;
+    border-top: 1px solid rgba(192, 132, 252, .12);
+}
+
+.context-points .benefit-item {
+    flex: 1;
+}
+
+.context-points .benefit-item > .material-symbols-rounded {
+    font-size: 18px;
+}
+
+.context-points .benefit-item strong {
+    font-size: 10px;
+}
+
+.context-points .benefit-item small {
+    font-size: 9px;
+}
+
+.login-container > .login-header {
+    margin-bottom: 23px;
+}
+
+@media (max-width: 760px) {
+    .login-screen {
+        width: min(100%, 560px);
+        max-width: 560px;
+    }
+
+    .login-context {
+        display: none;
+    }
+
+    .login-container {
+        min-height: 0;
+        max-width: none;
+    }
+}
+
+
+/* ===== LOGIN V9 — COMPOSIÇÃO ÚNICA COM INFORMAÇÃO COMPACTA ===== */
+.login-container {
+    padding: 30px clamp(24px, 5vw, 42px) 27px;
+}
+
+.login-context {
+    padding-bottom: 17px;
+    margin-bottom: 19px;
+}
+
+.context-topline {
+    font-size: 9px;
+}
+
+.context-copy {
+    margin-top: 14px;
+}
+
+.context-copy h2 {
+    max-width: 560px;
+    margin: 10px 0 8px;
+    font-size: clamp(28px, 4vw, 38px);
+}
+
+.context-copy p {
+    max-width: 540px;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.context-art {
+    height: 76px;
+    margin: 9px 0 10px;
+}
+
+.context-art .vinyl-disc {
+    top: -8px;
+    left: 8%;
+    width: 88px;
+}
+
+.context-art .showcase-track {
+    width: 72%;
+    min-height: 54px;
+    padding: 8px 11px;
+    border-radius: 12px;
+}
+
+.context-art .track-icon {
+    width: 27px;
+    height: 27px;
+    font-size: 15px;
+}
+
+.context-art .showcase-track strong {
+    font-size: 10px;
+}
+
+.context-points {
+    gap: 20px;
+    padding-top: 10px;
+}
+
+.login-container > .login-header {
+    margin-bottom: 20px;
+}
+
+.login-container > .login-header h1 {
+    font-size: clamp(26px, 4vw, 32px);
+}
+
+@media (max-width: 760px) {
+    .login-context {
+        display: none;
+    }
+}
+
+
+/* ===== LOGIN V10 — INFORMAÇÃO ORIGINAL SEM REPETIÇÃO ===== */
+@media (min-width: 761px) {
+    .login-container > .login-header .login-brand {
+        display: none;
+    }
+
+    .login-container > .login-header .login-header-top {
+        justify-content: flex-end;
+    }
+
+    .login-container > .login-header .login-eyebrow {
+        display: none;
+    }
+
+    .login-container > .login-header {
+        margin-bottom: 18px;
+        text-align: left;
+    }
+}
