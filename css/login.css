@@ -2936,3 +2936,44 @@ body {
         display: block;
     }
 }
+
+
+/* ===== LOGIN V15 — DISCO GIRANDO ===== */
+@media (min-width: 761px) {
+    .login-context .context-art {
+        position: relative;
+        display: block;
+        height: 136px;
+        margin: 16px 0 10px;
+    }
+
+    .login-context .context-art .showcase-glow {
+        inset: -18% 18% -18% 22%;
+    }
+
+    .login-context .context-art .vinyl-disc {
+        top: 0;
+        left: 50%;
+        width: 128px;
+        transform: translateX(-50%);
+        animation: fenda-login-disc-spin 8s linear infinite;
+        will-change: transform;
+    }
+}
+
+@keyframes fenda-login-disc-spin {
+    from { transform: translateX(-50%) rotate(0deg); }
+    to { transform: translateX(-50%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-context .vinyl-disc {
+        animation: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .login-context {
+        display: none;
+    }
+}
