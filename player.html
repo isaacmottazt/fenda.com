@@ -907,7 +907,7 @@
          faixa sem tocar nada), quebrando o avanço automático de música. O único fix
          real que ele trazia (buildAutoQueue tolerante a tipo de id) foi incorporado
          direto em player-core.js. -->
-    <script src="/js/notifications.js?v=admin-notifications-v2"></script>
+    <script src="/js/notifications.js?v=admin-notifications-v3"></script>
     <script src="/js/inicio-extras.js?v=privacy-controls-v1"></script>
     <!-- Novos módulos -->
     <script src="/js/settings.js?v=privacy-controls-v1"></script>
@@ -944,7 +944,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=95", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=96", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

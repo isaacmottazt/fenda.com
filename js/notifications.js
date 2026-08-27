@@ -276,11 +276,23 @@ const FendaNotifications = (() => {
     // permissão de notificação do navegador/Android e sem expor quem criou
     // os comunicados ou dados administrativos.
     let _adminSyncTimer = null;
+    let _adminAuthListenerInstalled = false;
+
+    async function resolveNotificationUserId(client) {
+        const appUserId = window.AppState?.userId;
+        if (appUserId) return appUserId;
+        try {
+            const { data } = await client?.auth?.getSession?.();
+            return data?.session?.user?.id || null;
+        } catch {
+            return null;
+        }
+    }
 
     async function syncAdminAnnouncements() {
         const client = window.supabaseClient;
-        const userId = window.AppState?.userId;
-        if (!client?.rpc || !userId || !navigator.onLine) return [];
+        const userId = await resolveNotificationUserId(client);
+        if (!client?.rpc || !userId || navigator.onLine === false) return [];
 
         try {
             const { data, error } = await client.rpc('list_fenda_in_app_announcements');
@@ -317,9 +329,21 @@ const FendaNotifications = (() => {
 
     function startAdminAnnouncementSync() {
         if (_adminSyncTimer) clearInterval(_adminSyncTimer);
+        const client = window.supabaseClient;
+        if (!_adminAuthListenerInstalled && client?.auth?.onAuthStateChange) {
+            _adminAuthListenerInstalled = true;
+            client.auth.onAuthStateChange((_event, session) => {
+                if (session?.user?.id) setTimeout(() => { void syncAdminAnnouncements(); }, 0);
+            });
+        }
         void syncAdminAnnouncements();
         _adminSyncTimer = setInterval(() => { void syncAdminAnnouncements(); }, 60_000);
     }
+
+    window.addEventListener('focus', () => { void syncAdminAnnouncements(); });
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') void syncAdminAnnouncements();
+    });
 
     function _showInAppToast(title, body) {
         if (typeof window.showToast === 'function') {
