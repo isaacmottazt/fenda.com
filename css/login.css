@@ -2018,3 +2018,48 @@ body {
         margin-top: 27px;
     }
 }
+
+
+/* ===== LOGIN V6 — VITRINE LATERAL ANTIGA, SEM GRID ===== */
+@media (min-width: 761px) {
+    .login-screen {
+        width: min(100%, 1080px);
+        max-width: 1080px;
+    }
+
+    .login-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.04fr) minmax(430px, .96fr);
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .login-showcase {
+        min-height: 650px;
+    }
+
+    .login-container {
+        min-height: 650px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .login-screen {
+        width: min(100%, 560px);
+        max-width: 560px;
+    }
+
+    .login-layout {
+        display: block;
+    }
+
+    .login-showcase {
+        display: none;
+    }
+
+    .login-container {
+        min-height: 0;
+        max-width: 560px;
+    }
+}
