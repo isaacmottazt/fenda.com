@@ -1,0 +1,882 @@
+/*
+ * Fenda Music — tema alternativo Workspace Admin
+ * O tema atual continua sendo o padrão. Todas as regras abaixo só entram
+ * quando html[data-fenda-design="admin"] estiver ativo.
+ */
+
+html[data-fenda-design="admin"] {
+  --admin-bg: #070b14;
+  --admin-bg-deep: #050810;
+  --admin-surface: #0e1524;
+  --admin-surface-2: #121c2d;
+  --admin-surface-3: #172338;
+  --admin-surface-hover: #1a2940;
+  --admin-line: rgba(173, 196, 232, .12);
+  --admin-line-strong: rgba(173, 196, 232, .2);
+  --admin-text: #f6f8ff;
+  --admin-text-soft: #b8c3d9;
+  --admin-text-muted: #73819b;
+  --admin-blue: #77a9ff;
+  --admin-blue-strong: #4c83f1;
+  --admin-cyan: #7ee8e1;
+  --admin-violet: #a58bff;
+  --admin-green: #70ddb1;
+  --admin-yellow: #f4c96b;
+  --admin-red: #ff8f9b;
+  background: var(--admin-bg-deep) !important;
+}
+
+html[data-fenda-design="admin"] body {
+  min-height: 100vh;
+  color: var(--admin-text) !important;
+  background:
+    radial-gradient(900px 500px at 86% -10%, rgba(76, 131, 241, .16), transparent 66%),
+    radial-gradient(700px 500px at 35% 110%, rgba(165, 139, 255, .08), transparent 64%),
+    var(--admin-bg) !important;
+  font-family: Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+html[data-fenda-design="admin"] .app-container {
+  max-width: 480px;
+  background: linear-gradient(180deg, #0a1020 0%, #070b14 100%) !important;
+}
+
+html[data-fenda-design="admin"] .admin-design-rail {
+  display: none;
+}
+
+html[data-fenda-design="admin"] .admin-design-topbar {
+  display: flex;
+}
+
+html[data-fenda-design="admin"] .admin-design-topbar,
+html[data-fenda-design="admin"] .main-content {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] .main-content {
+  padding-top: 18px;
+  background: transparent !important;
+}
+
+html[data-fenda-design="admin"] .nav-bar {
+  background: rgba(8, 13, 24, .94) !important;
+  border-top-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .nav-btn {
+  color: var(--admin-text-muted) !important;
+}
+
+html[data-fenda-design="admin"] .nav-btn.active {
+  color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .featured-card {
+  min-height: 222px;
+  background: linear-gradient(125deg, #132646 0%, #111b30 56%, #171d3b 100%) !important;
+  border: 1px solid rgba(119, 169, 255, .22) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .18) !important;
+}
+
+html[data-fenda-design="admin"] .featured-card::before,
+html[data-fenda-design="admin"] .featured-card::after {
+  opacity: .72;
+}
+
+html[data-fenda-design="admin"] .featured-badge {
+  color: var(--admin-cyan) !important;
+  background: rgba(126, 232, 225, .1) !important;
+  border: 1px solid rgba(126, 232, 225, .2) !important;
+}
+
+html[data-fenda-design="admin"] .featured-content h2,
+html[data-fenda-design="admin"] .section-header h2,
+html[data-fenda-design="admin"] .section-title,
+html[data-fenda-design="admin"] .home-section h2 {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] .featured-content p,
+html[data-fenda-design="admin"] .section-header p,
+html[data-fenda-design="admin"] .section-subtitle {
+  color: var(--admin-text-soft) !important;
+}
+
+html[data-fenda-design="admin"] .featured-play-btn,
+html[data-fenda-design="admin"] .playlist-play-all-btn {
+  color: #07101e !important;
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
+  box-shadow: 0 10px 22px rgba(76, 131, 241, .18) !important;
+}
+
+html[data-fenda-design="admin"] .section-header h2 .material-symbols-rounded,
+html[data-fenda-design="admin"] .section-see-all,
+html[data-fenda-design="admin"] .home-section > .section-header > .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .section-see-all {
+  font-weight: 800 !important;
+}
+
+html[data-fenda-design="admin"] .music-card,
+html[data-fenda-design="admin"] .artist-card,
+html[data-fenda-design="admin"] .playlist-card,
+html[data-fenda-design="admin"] .podcast-card,
+html[data-fenda-design="admin"] .recent-item,
+html[data-fenda-design="admin"] .search-result-item,
+html[data-fenda-design="admin"] .search-artist-result-pill,
+html[data-fenda-design="admin"] .summary-card,
+html[data-fenda-design="admin"] .lib-playlist-card,
+html[data-fenda-design="admin"] .lib-top-artist-card,
+html[data-fenda-design="admin"] .artist-card-lib {
+  background: rgba(14, 21, 36, .82) !important;
+  border-color: var(--admin-line) !important;
+  box-shadow: none !important;
+}
+
+html[data-fenda-design="admin"] .music-card:hover,
+html[data-fenda-design="admin"] .artist-card:hover,
+html[data-fenda-design="admin"] .playlist-card:hover,
+html[data-fenda-design="admin"] .search-result-item:hover,
+html[data-fenda-design="admin"] .recent-item:hover {
+  background: var(--admin-surface-hover) !important;
+  border-color: var(--admin-line-strong) !important;
+}
+
+html[data-fenda-design="admin"] .music-card-title,
+html[data-fenda-design="admin"] .artist-card-name,
+html[data-fenda-design="admin"] .playlist-card-title,
+html[data-fenda-design="admin"] .result-title,
+html[data-fenda-design="admin"] .recent-text,
+html[data-fenda-design="admin"] .summary-card h3,
+html[data-fenda-design="admin"] .lib-top-artist-card strong {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] .music-card-artist,
+html[data-fenda-design="admin"] .artist-card-genre,
+html[data-fenda-design="admin"] .playlist-card-count,
+html[data-fenda-design="admin"] .result-subtitle,
+html[data-fenda-design="admin"] .recent-meta,
+html[data-fenda-design="admin"] .summary-card p,
+html[data-fenda-design="admin"] .lib-top-artist-card small {
+  color: var(--admin-text-muted) !important;
+}
+
+html[data-fenda-design="admin"] .search-top {
+  background: transparent !important;
+}
+
+html[data-fenda-design="admin"] .search-bar-new,
+html[data-fenda-design="admin"] .artists-search,
+html[data-fenda-design="admin"] .search-result-item,
+html[data-fenda-design="admin"] .recent-item {
+  border-color: var(--admin-line) !important;
+  background: rgba(14, 21, 36, .78) !important;
+}
+
+html[data-fenda-design="admin"] .search-bar-new:focus-within,
+html[data-fenda-design="admin"] .artists-search:focus-within {
+  border-color: rgba(126, 232, 225, .42) !important;
+  box-shadow: 0 0 0 3px rgba(126, 232, 225, .06) !important;
+}
+
+html[data-fenda-design="admin"] #globalSearchInput,
+html[data-fenda-design="admin"] .search-bar-new input,
+html[data-fenda-design="admin"] .artists-search input {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] #globalSearchInput::placeholder,
+html[data-fenda-design="admin"] .search-bar-new input::placeholder,
+html[data-fenda-design="admin"] .artists-search input::placeholder {
+  color: #5d6b84 !important;
+}
+
+html[data-fenda-design="admin"] .profile-hero {
+  background: linear-gradient(125deg, #132646 0%, #111b30 56%, #171d3b 100%) !important;
+  border: 1px solid rgba(119, 169, 255, .22) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .18) !important;
+}
+
+html[data-fenda-design="admin"] .profile-stat,
+html[data-fenda-design="admin"] .profile-menu-item {
+  background: rgba(14, 21, 36, .82) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .profile-menu-item:hover,
+html[data-fenda-design="admin"] .profile-stat:hover {
+  background: var(--admin-surface-hover) !important;
+  border-color: var(--admin-line-strong) !important;
+}
+
+html[data-fenda-design="admin"] .profile-menu-title,
+html[data-fenda-design="admin"] .profile-stat-num,
+html[data-fenda-design="admin"] #profileName {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] .profile-menu-sub,
+html[data-fenda-design="admin"] .profile-stat-label,
+html[data-fenda-design="admin"] #profileUsername,
+html[data-fenda-design="admin"] #profileBio {
+  color: var(--admin-text-muted) !important;
+}
+
+html[data-fenda-design="admin"] .profile-stat .material-symbols-rounded,
+html[data-fenda-design="admin"] .profile-menu-arrow {
+  color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .player-bottom-bar {
+  background: rgba(8, 13, 24, .9) !important;
+  border: 1px solid var(--admin-line-strong) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .28) !important;
+}
+
+html[data-fenda-design="admin"] .mini-info h4,
+html[data-fenda-design="admin"] .mini-ctrl-btn {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] .mini-info p {
+  color: var(--admin-text-muted) !important;
+}
+
+html[data-fenda-design="admin"] .mini-ctrl-play,
+html[data-fenda-design="admin"] .player-mini-play,
+html[data-fenda-design="admin"] .ctrl-play {
+  color: #07101e !important;
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
+  box-shadow: 0 8px 22px rgba(76, 131, 241, .24) !important;
+}
+
+html[data-fenda-design="admin"] .lyrics-full-screen {
+  background: linear-gradient(145deg, #0b1324 0%, #050810 100%) !important;
+  border-left: 1px solid var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .player-top-bar,
+html[data-fenda-design="admin"] .player-lyrics-header {
+  background: rgba(7, 11, 20, .82) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .player-top-context,
+html[data-fenda-design="admin"] .player-top-playlist,
+html[data-fenda-design="admin"] .player-lyrics-header,
+html[data-fenda-design="admin"] .queue-header-title h2 {
+  color: var(--admin-text-soft) !important;
+}
+
+html[data-fenda-design="admin"] .queue-panel,
+html[data-fenda-design="admin"] .modal-content-box,
+html[data-fenda-design="admin"] .context-menu-modal {
+  background: var(--admin-surface) !important;
+  border-color: var(--admin-line-strong) !important;
+}
+
+html[data-fenda-design="admin"] .queue-panel-header,
+html[data-fenda-design="admin"] .queue-item,
+html[data-fenda-design="admin"] .modal-content-box {
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] input,
+html[data-fenda-design="admin"] textarea,
+html[data-fenda-design="admin"] select {
+  color: var(--admin-text) !important;
+  background: rgba(14, 21, 36, .78) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] input:focus,
+html[data-fenda-design="admin"] textarea:focus,
+html[data-fenda-design="admin"] select:focus {
+  border-color: rgba(126, 232, 225, .42) !important;
+  box-shadow: 0 0 0 3px rgba(126, 232, 225, .06) !important;
+}
+
+html[data-fenda-design="admin"] .premium-toast {
+  color: var(--admin-text) !important;
+  background: var(--admin-surface) !important;
+  border: 1px solid var(--admin-line) !important;
+}
+
+/* ── Rail e topbar, somente no tema Workspace Admin ─────────────── */
+.admin-design-topbar,
+.admin-design-rail {
+  display: none;
+}
+
+.admin-design-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  min-height: 68px;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 16px;
+  background: rgba(7, 11, 20, .84);
+  border-bottom: 1px solid var(--admin-line);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.admin-design-breadcrumb {
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-design-breadcrumb small {
+  display: block;
+  overflow: hidden;
+  color: var(--admin-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-design-breadcrumb strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--admin-text);
+  font-size: 18px;
+  letter-spacing: -.04em;
+}
+
+.admin-design-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-design-topbar-search,
+.admin-design-topbar-icon,
+.admin-rail-command,
+.admin-rail-link {
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin-design-topbar-search {
+  min-width: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 12px;
+  color: var(--admin-text-muted);
+  background: rgba(14, 21, 36, .78);
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.admin-design-topbar-search span:nth-child(2) {
+  overflow: hidden;
+  flex: 1;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-design-topbar-search .material-symbols-rounded,
+.admin-design-topbar-icon .material-symbols-rounded {
+  color: var(--admin-cyan);
+}
+
+.admin-design-topbar-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+}
+
+.admin-design-topbar-search kbd,
+.admin-design-rail kbd,
+.fenda-command-footer kbd,
+.fenda-command-item kbd {
+  padding: 3px 6px;
+  color: var(--admin-text-muted);
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--admin-line);
+  border-radius: 6px;
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* desktop workspace: a estrutura passa a ser rail + topbar + conteúdo amplo */
+@media (min-width: 900px) {
+  html[data-fenda-design="admin"] .app-container {
+    width: calc(100% - 252px);
+    max-width: none;
+    margin-left: 252px;
+  }
+
+  html[data-fenda-design="admin"] .main-content {
+    width: min(100%, 1480px);
+    margin: 0 auto;
+    padding: 30px clamp(20px, 4vw, 48px) 120px;
+  }
+
+  html[data-fenda-design="admin"] .nav-bar {
+    display: none !important;
+  }
+
+  html[data-fenda-design="admin"] .player-bottom-bar {
+    left: 274px;
+    right: 26px;
+    max-width: none;
+    margin: 0;
+  }
+
+  html[data-fenda-design="admin"] .lyrics-full-screen {
+    left: 252px;
+    width: calc(100% - 252px);
+    max-width: none;
+    transform: translateY(100%);
+  }
+
+  html[data-fenda-design="admin"] .lyrics-full-screen.expanded {
+    transform: translateY(0);
+  }
+
+  html[data-fenda-design="admin"] .admin-design-rail {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 80;
+    width: 252px;
+    display: flex;
+    flex-direction: column;
+    padding: 26px 16px 18px;
+    color: var(--admin-text);
+    background: rgba(8, 13, 24, .92);
+    border-right: 1px solid var(--admin-line);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  html[data-fenda-design="admin"] .admin-design-topbar {
+    min-height: 76px;
+    padding: 14px clamp(20px, 4vw, 48px);
+  }
+
+  .admin-rail-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 10px 26px;
+  }
+
+  .admin-rail-mark {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    color: #07101e;
+    background: linear-gradient(145deg, var(--admin-cyan), var(--admin-blue));
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(119, 169, 255, .28);
+  }
+
+  .admin-rail-mark .material-symbols-rounded {
+    font-size: 22px;
+  }
+
+  .admin-rail-brand-copy strong,
+  .admin-rail-brand-copy small {
+    display: block;
+  }
+
+  .admin-rail-brand-copy strong {
+    font-size: 15px;
+    letter-spacing: -.02em;
+  }
+
+  .admin-rail-brand-copy small {
+    margin-top: 3px;
+    color: var(--admin-text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .admin-rail-label {
+    padding: 12px 12px 8px;
+    color: #55647e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .admin-rail-nav {
+    display: grid;
+    gap: 3px;
+  }
+
+  .admin-rail-link,
+  .admin-rail-command {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    color: var(--admin-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    transition: color .18s, background .18s, border-color .18s, transform .16s;
+  }
+
+  .admin-rail-link:hover,
+  .admin-rail-command:hover {
+    color: var(--admin-text-soft);
+    background: rgba(255, 255, 255, .04);
+  }
+
+  .admin-rail-link:active,
+  .admin-rail-command:active {
+    transform: scale(.985);
+  }
+
+  .admin-rail-link.active {
+    color: var(--admin-text);
+    background: linear-gradient(100deg, rgba(76, 131, 241, .2), rgba(126, 232, 225, .06));
+    border-color: rgba(119, 169, 255, .22);
+    box-shadow: inset 3px 0 0 var(--admin-blue);
+  }
+
+  .admin-rail-link.active .material-symbols-rounded,
+  .admin-rail-command .material-symbols-rounded {
+    color: var(--admin-cyan);
+  }
+
+  .admin-rail-link span:nth-child(2),
+  .admin-rail-command span:nth-child(2) {
+    flex: 1;
+  }
+
+  .admin-rail-divider {
+    height: 1px;
+    margin: 18px 12px 8px;
+    background: var(--admin-line);
+  }
+
+  .admin-rail-command {
+    min-height: 40px;
+    font-size: 11px;
+  }
+
+  .admin-rail-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding: 14px 12px 0;
+    color: var(--admin-text-muted);
+    border-top: 1px solid var(--admin-line);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .admin-rail-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--admin-green);
+    box-shadow: 0 0 0 4px rgba(112, 221, 177, .1);
+  }
+}
+
+/* ── Paleta de comandos ──────────────────────────────────────────── */
+.fenda-command-palette {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: start center;
+  padding: min(14vh, 120px) 16px 24px;
+  background: rgba(3, 6, 12, .72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.fenda-command-palette[hidden] {
+  display: none;
+}
+
+.fenda-command-dialog {
+  width: min(100%, 560px);
+  max-height: min(680px, 82vh);
+  overflow: hidden;
+  color: var(--admin-text);
+  background: #0e1524;
+  border: 1px solid rgba(173, 196, 232, .2);
+  border-radius: 20px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .46);
+}
+
+.fenda-command-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 22px 22px 14px;
+}
+
+.fenda-command-eyebrow {
+  color: var(--admin-cyan);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.fenda-command-head h2 {
+  margin-top: 7px;
+  font-size: 21px;
+  letter-spacing: -.05em;
+}
+
+.fenda-command-close {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: var(--admin-text-muted);
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.fenda-command-search {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 16px 12px;
+  padding: 0 12px;
+  color: var(--admin-text-muted);
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+}
+
+.fenda-command-search:focus-within {
+  border-color: rgba(126, 232, 225, .42);
+  box-shadow: 0 0 0 3px rgba(126, 232, 225, .06);
+}
+
+.fenda-command-search input {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  color: var(--admin-text);
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0;
+  box-shadow: none !important;
+}
+
+.fenda-command-search input::placeholder {
+  color: var(--admin-text-muted);
+}
+
+.fenda-command-results {
+  max-height: 470px;
+  overflow-y: auto;
+  padding: 0 10px 10px;
+}
+
+.fenda-command-item {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  color: var(--admin-text-soft);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fenda-command-item:hover,
+.fenda-command-item.selected {
+  color: var(--admin-text);
+  background: var(--admin-surface-3);
+  border-color: var(--admin-line);
+}
+
+.fenda-command-item > .material-symbols-rounded {
+  color: var(--admin-cyan);
+}
+
+.fenda-command-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.fenda-command-copy strong,
+.fenda-command-copy small {
+  display: block;
+}
+
+.fenda-command-copy strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fenda-command-copy small {
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--admin-text-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fenda-command-empty {
+  padding: 22px 12px;
+  color: var(--admin-text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.fenda-command-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 18px 14px;
+  color: var(--admin-text-muted);
+  border-top: 1px solid var(--admin-line);
+  font-size: 10px;
+}
+
+html[data-fenda-design="admin"] .fenda-command-palette {
+  color: var(--admin-text);
+}
+
+@media (max-width: 460px) {
+  html[data-fenda-design="admin"] .admin-design-topbar-search {
+    max-width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  html[data-fenda-design="admin"] .admin-design-topbar-search span:nth-child(2),
+  html[data-fenda-design="admin"] .admin-design-topbar-search kbd {
+    display: none;
+  }
+
+  .fenda-command-palette {
+    padding-top: 7vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-rail-link,
+  .admin-rail-command,
+  .fenda-command-item {
+    transition: none !important;
+  }
+}
+
+/* ── Configurações no Workspace Admin ───────────────────────────── */
+html[data-fenda-design="admin"] .fs-overlay {
+  color: var(--admin-text) !important;
+  background: var(--admin-bg) !important;
+}
+
+html[data-fenda-design="admin"] .fs-header {
+  background: rgba(7, 11, 20, .94) !important;
+  border-bottom-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .fs-header h1,
+html[data-fenda-design="admin"] .fs-row-title,
+html[data-fenda-design="admin"] .fs-subsection-title,
+html[data-fenda-design="admin"] .fs-theme-intro > strong {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] .fs-section {
+  color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .fs-card,
+html[data-fenda-design="admin"] .fs-theme-option,
+html[data-fenda-design="admin"] .fs-form input,
+html[data-fenda-design="admin"] .fs-select {
+  background: rgba(14, 21, 36, .82) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .fs-theme-option:hover,
+html[data-fenda-design="admin"] .fs-theme-option.active {
+  background: linear-gradient(100deg, rgba(76, 131, 241, .18), rgba(126, 232, 225, .06)) !important;
+  border-color: rgba(119, 169, 255, .34) !important;
+}
+
+html[data-fenda-design="admin"] .fs-theme-option.active .fs-theme-check,
+html[data-fenda-design="admin"] .fs-row .material-symbols-rounded,
+html[data-fenda-design="admin"] .fs-subsection-title {
+  color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .fs-row {
+  border-bottom-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .fs-row-sub,
+html[data-fenda-design="admin"] .fs-hint,
+html[data-fenda-design="admin"] .fs-avatar-text span,
+html[data-fenda-design="admin"] .fs-shortcut-keys kbd {
+  color: var(--admin-text-muted) !important;
+}
+
+html[data-fenda-design="admin"] .fs-btn {
+  color: #07101e !important;
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
+}
+
+html[data-fenda-design="admin"] .fs-btn.ghost {
+  color: var(--admin-text-soft) !important;
+  background: rgba(255, 255, 255, .045) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .fs-switch input:checked + i {
+  background: var(--admin-blue-strong) !important;
+}
+
+html[data-fenda-design="admin"] .fs-theme-preview-classic {
+  opacity: .72;
+}
+
+html[data-fenda-design="admin"] .fs-theme-preview-admin {
+  box-shadow: 0 0 0 2px rgba(126, 232, 225, .22);
+}
