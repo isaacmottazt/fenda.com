@@ -18,6 +18,9 @@ html[data-fenda-design="admin"] {
   --admin-text-muted: #73819b;
   --admin-blue: #77a9ff;
   --admin-blue-strong: #4c83f1;
+  --admin-up: #c5dbff;
+  --admin-blue-glow: rgba(119, 169, 255, .42);
+  --admin-blue-soft: rgba(119, 169, 255, .14);
   --admin-cyan: #7ee8e1;
   --admin-violet: #9ebeff;
   --admin-green: #70ddb1;
@@ -865,4 +868,237 @@ html[data-fenda-design="admin"] .profile-menu-icon.pmi-upload .material-symbols-
   html[data-fenda-design="admin"] .main-content {
     padding-top: 18px !important;
   }
+}
+
+/* Biblioteca: isolamento completo da paleta Admin. Estes overrides vêm por último
+   para neutralizar gradientes legados de biblioteca.css, inclusive pseudo-elementos. */
+html[data-fenda-design="admin"] #biblioteca,
+html[data-fenda-design="admin"] .library-container {
+  --lib-surface: rgba(14, 21, 36, .82) !important;
+  --lib-surface-2: #121c2d !important;
+  --lib-surface-hi: rgba(255, 255, 255, .05) !important;
+  --lib-border: rgba(173, 196, 232, .12) !important;
+  --lib-border-hi: rgba(126, 232, 225, .42) !important;
+  --lib-violet: var(--admin-blue) !important;
+  --lib-violet-hi: var(--admin-cyan) !important;
+  --lib-violet-up: var(--admin-up) !important;
+  --lib-violet-glow: var(--admin-blue-glow) !important;
+  --lib-magenta: var(--admin-cyan) !important;
+  --lib-magenta-soft: var(--admin-blue-soft) !important;
+  --lib-ink: var(--admin-text) !important;
+  --lib-ink-mid: var(--admin-text-soft) !important;
+  --lib-ink-low: var(--admin-text-muted) !important;
+  --lib-ink-faint: rgba(184, 195, 217, .42) !important;
+}
+
+html[data-fenda-design="admin"] .library-container::before {
+  background: radial-gradient(circle, rgba(119, 169, 255, .14), transparent 68%) !important;
+}
+html[data-fenda-design="admin"] .library-header h1 {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: var(--admin-text) !important;
+  -webkit-text-fill-color: var(--admin-text) !important;
+  filter: none !important;
+}
+html[data-fenda-design="admin"] .lib-icon-btn,
+html[data-fenda-design="admin"] .summary-card,
+html[data-fenda-design="admin"] .lib-top-artist-card,
+html[data-fenda-design="admin"] .artist-card-lib,
+html[data-fenda-design="admin"] .history-card,
+html[data-fenda-design="admin"] .history-empty,
+html[data-fenda-design="admin"] .empty-state,
+html[data-fenda-design="admin"] .lib-all-pl-item,
+html[data-fenda-design="admin"] .lib-all-fav-card {
+  background-color: var(--admin-surface) !important;
+  border-color: var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .lib-icon-btn:active,
+html[data-fenda-design="admin"] .summary-card:active,
+html[data-fenda-design="admin"] .artist-card-lib:active,
+html[data-fenda-design="admin"] .history-card:active,
+html[data-fenda-design="admin"] .lib-all-pl-item:active,
+html[data-fenda-design="admin"] .playlist-item-modern:active,
+html[data-fenda-design="admin"] .music-card:active {
+  background: rgba(119, 169, 255, .12) !important;
+  border-color: rgba(126, 232, 225, .42) !important;
+  box-shadow: 0 0 18px rgba(119, 169, 255, .18) !important;
+}
+html[data-fenda-design="admin"] .lib-main-tab.active,
+html[data-fenda-design="admin"] .artists-sort-btn.active,
+html[data-fenda-design="admin"] .playlist-play-all-btn,
+html[data-fenda-design="admin"] .lib-top-artist-plays,
+html[data-fenda-design="admin"] .lib-all-see-all {
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue-strong)) !important;
+  border-color: transparent !important;
+  color: #07101e !important;
+  box-shadow: 0 6px 18px rgba(119, 169, 255, .24) !important;
+}
+html[data-fenda-design="admin"] .lib-main-tab,
+html[data-fenda-design="admin"] .artists-sort-btn,
+html[data-fenda-design="admin"] .playlist-shuffle-btn,
+html[data-fenda-design="admin"] .text-btn {
+  color: var(--admin-text-muted) !important;
+  background: rgba(14, 21, 36, .72) !important;
+  border-color: var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .playlist-shuffle-btn:active,
+html[data-fenda-design="admin"] .text-btn:active,
+html[data-fenda-design="admin"] .playlist-more:active {
+  color: var(--admin-cyan) !important;
+  background: rgba(119, 169, 255, .14) !important;
+  border-color: rgba(126, 232, 225, .42) !important;
+}
+html[data-fenda-design="admin"] .summary-card::after {
+  background: radial-gradient(circle, var(--admin-cyan), var(--admin-blue)) !important;
+}
+html[data-fenda-design="admin"] .summary-card[data-type="downloads"] .summary-card-icon,
+html[data-fenda-design="admin"] .summary-card[data-type="recent"] .summary-card-icon,
+html[data-fenda-design="admin"] .lib-top-artist-avatar,
+html[data-fenda-design="admin"] .artist-avatar-lib,
+html[data-fenda-design="admin"] .playlist-icon,
+html[data-fenda-design="admin"] .lib-all-pl-icon,
+html[data-fenda-design="admin"] .lib-all-pl-liked {
+  background: linear-gradient(135deg, rgba(126, 232, 225, .22), rgba(119, 169, 255, .28)) !important;
+  border-color: rgba(126, 232, 225, .2) !important;
+  box-shadow: 0 6px 18px rgba(119, 169, 255, .18) !important;
+}
+html[data-fenda-design="admin"] .summary-card[data-type="downloads"] .summary-card-icon,
+html[data-fenda-design="admin"] .summary-card[data-type="recent"] .summary-card-icon,
+html[data-fenda-design="admin"] .lib-top-artist-avatar .material-symbols-rounded,
+html[data-fenda-design="admin"] .artist-avatar-lib .material-symbols-rounded,
+html[data-fenda-design="admin"] .playlist-icon .material-symbols-rounded,
+html[data-fenda-design="admin"] .lib-all-pl-icon .material-symbols-rounded,
+html[data-fenda-design="admin"] .lib-all-pl-liked .material-symbols-rounded,
+html[data-fenda-design="admin"] .section-header h2 .material-symbols-rounded,
+html[data-fenda-design="admin"] .lib-artists-top-label .material-symbols-rounded,
+html[data-fenda-design="admin"] .artists-divider-label .material-symbols-rounded,
+html[data-fenda-design="admin"] .artists-search-empty .material-symbols-rounded,
+html[data-fenda-design="admin"] .empty-state .material-symbols-rounded,
+html[data-fenda-design="admin"] .empty-state-box .material-symbols-rounded,
+html[data-fenda-design="admin"] .lib-all-section-label .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+  filter: none !important;
+}
+html[data-fenda-design="admin"] .lib-top-artist-plays .material-symbols-rounded,
+html[data-fenda-design="admin"] .playlist-item-modern:first-child .playlist-icon .material-symbols-rounded {
+  color: #07101e !important;
+}
+html[data-fenda-design="admin"] .lib-top-artist-card.rank-1,
+html[data-fenda-design="admin"] .lib-top-artist-card.rank-1 .lib-top-artist-avatar {
+  border-color: rgba(244, 201, 107, .42) !important;
+}
+html[data-fenda-design="admin"] .lib-top-artist-card:active {
+  border-color: rgba(126, 232, 225, .42) !important;
+}
+html[data-fenda-design="admin"] .lib-top-artist-plays,
+html[data-fenda-design="admin"] .lib-all-see-all {
+  text-shadow: none !important;
+}
+html[data-fenda-design="admin"] .lib-artists-top-label,
+html[data-fenda-design="admin"] .artists-divider-label,
+html[data-fenda-design="admin"] .artists-toolbar-count,
+html[data-fenda-design="admin"] .artists-search-empty,
+html[data-fenda-design="admin"] .lib-all-pl-count {
+  color: var(--admin-text-muted) !important;
+}
+html[data-fenda-design="admin"] .artists-search,
+html[data-fenda-design="admin"] .artists-sort {
+  background: rgba(14, 21, 36, .78) !important;
+  border-color: var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .artists-search:focus-within {
+  border-color: rgba(126, 232, 225, .42) !important;
+  background: rgba(14, 21, 36, .92) !important;
+}
+html[data-fenda-design="admin"] .artists-search .material-symbols-rounded,
+html[data-fenda-design="admin"] .artists-letter-header,
+html[data-fenda-design="admin"] .playlist-more,
+html[data-fenda-design="admin"] .music-card-actions,
+html[data-fenda-design="admin"] .music-card-details p,
+html[data-fenda-design="admin"] .playlist-info p,
+html[data-fenda-design="admin"] .history-card p {
+  color: var(--admin-text-muted) !important;
+}
+html[data-fenda-design="admin"] .playlist-icon .material-symbols-rounded,
+html[data-fenda-design="admin"] .playlist-more:active,
+html[data-fenda-design="admin"] .music-card.playing::before,
+html[data-fenda-design="admin"] .inline-play-btn,
+html[data-fenda-design="admin"] .inline-play-btn.active-inline,
+html[data-fenda-design="admin"] .music-card.playing {
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
+  color: #07101e !important;
+}
+html[data-fenda-design="admin"] .music-card.playing {
+  background: rgba(119, 169, 255, .12) !important;
+}
+html[data-fenda-design="admin"] .music-card.playing::before {
+  width: 3px !important;
+}
+html[data-fenda-design="admin"] .inline-play-btn {
+  box-shadow: 0 0 0 1px rgba(126, 232, 225, .2) !important;
+}
+html[data-fenda-design="admin"] .favorite-btn.active {
+  color: var(--admin-red) !important;
+}
+html[data-fenda-design="admin"] .playlist-detail-cover {
+  background: linear-gradient(145deg, #28549b, #16396f, #07101e) !important;
+  box-shadow: 0 20px 50px rgba(119, 169, 255, .24) !important;
+}
+html[data-fenda-design="admin"] .playlist-play-all-btn {
+  color: #07101e !important;
+}
+html[data-fenda-design="admin"] #backToPlaylistsBtn {
+  background: var(--admin-surface) !important;
+  color: var(--admin-text-soft) !important;
+  border: 1px solid var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .lib-all-section-label,
+html[data-fenda-design="admin"] .playlist-detail-header h2,
+html[data-fenda-design="admin"] .summary-card h3,
+html[data-fenda-design="admin"] .playlist-info h4,
+html[data-fenda-design="admin"] .music-card-details h3,
+html[data-fenda-design="admin"] .history-card h4,
+html[data-fenda-design="admin"] .lib-all-pl-name,
+html[data-fenda-design="admin"] .lib-all-fav-title {
+  color: var(--admin-text) !important;
+}
+html[data-fenda-design="admin"] .create-playlist-item .playlist-icon {
+  background: transparent !important;
+  border-color: rgba(126, 232, 225, .32) !important;
+}
+html[data-fenda-design="admin"] .create-playlist-item .playlist-icon .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+}
+html[data-fenda-design="admin"] .lib-all-see-all {
+  color: #07101e !important;
+}
+
+/* Podcasts também fazem parte da Biblioteca e não podem manter o gradiente legado. */
+html[data-fenda-design="admin"] .podcast-card {
+  background: var(--admin-surface) !important;
+  border-color: var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .podcast-card:hover,
+html[data-fenda-design="admin"] .podcast-card:focus-visible {
+  background: var(--admin-surface-hover) !important;
+  border-color: rgba(126, 232, 225, .42) !important;
+}
+html[data-fenda-design="admin"] .podcast-cover {
+  background: linear-gradient(135deg, #132f52, #0e182b) !important;
+}
+html[data-fenda-design="admin"] .podcast-play {
+  color: #07101e !important;
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
+  box-shadow: 0 8px 24px rgba(119, 169, 255, .24) !important;
+}
+html[data-fenda-design="admin"] .podcast-card-body span,
+html[data-fenda-design="admin"] .podcast-card-body small,
+html[data-fenda-design="admin"] .podcast-card-body em,
+html[data-fenda-design="admin"] .podcast-empty {
+  color: var(--admin-text-muted) !important;
+}
+html[data-fenda-design="admin"] .podcast-empty .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
 }
