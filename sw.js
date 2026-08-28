@@ -1,7 +1,7 @@
 // Fenda Music — Service Worker v18
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v105';
+const CACHE_NAME = 'fenda-v106';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
 const CRITICAL_RUNTIME = new Set([
@@ -24,7 +24,7 @@ const SHELL = [
   '/player.html', '/index.html', '/reset-password.html', '/manifest.json',
   '/termos.html', '/privacidade.html',
   '/css/base.css', '/css/inicio.css', '/css/busca.css', '/css/biblioteca.css',
-  '/css/perfil.css?v=theme-profile-v2', '/css/login.css', '/css/artist-detail.css', '/css/painel.css', '/css/podcasts.css', '/css/theme-overrides.css', '/css/theme-admin.css?v=design-v5',
+  '/css/perfil.css?v=theme-profile-v2', '/css/login.css', '/css/artist-detail.css', '/css/painel.css', '/css/podcasts.css', '/css/theme-overrides.css', '/css/theme-admin.css?v=design-v6',
   '/fonts/material-symbols.css', '/fonts/material-symbols-rounded.woff2', '/imagens/fundo.png', '/imagens/logo.png',
   '/js/i18n.js', '/js/supabase-config.js', '/js/privacy.js', '/js/search.js', '/js/stats.js', '/js/social-share.js',
   '/js/player-core.js', '/js/player-ui.js', '/js/player-audio-lyrics.js',

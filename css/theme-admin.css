@@ -1102,3 +1102,103 @@ html[data-fenda-design="admin"] .podcast-empty {
 html[data-fenda-design="admin"] .podcast-empty .material-symbols-rounded {
   color: var(--admin-cyan) !important;
 }
+
+/* Histórico: neutralização final da lista Spotify e da cápsula mensal. */
+html[data-fenda-design="admin"] .history-card:active,
+html[data-fenda-design="admin"] .history-track-row:active {
+  background: rgba(119, 169, 255, .12) !important;
+  border-color: rgba(126, 232, 225, .42) !important;
+  box-shadow: 0 0 18px rgba(119, 169, 255, .18) !important;
+}
+html[data-fenda-design="admin"] .history-empty .material-symbols-rounded,
+html[data-fenda-design="admin"] .empty-state .material-symbols-rounded,
+html[data-fenda-design="admin"] .empty-state-box .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+}
+html[data-fenda-design="admin"] .history-date-header .hdh-line,
+html[data-fenda-design="admin"] .history-track-row + .history-track-row::before {
+  background: var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .hdh-label,
+html[data-fenda-design="admin"] .htr-artist,
+html[data-fenda-design="admin"] .htr-dur,
+html[data-fenda-design="admin"] .htr-time,
+html[data-fenda-design="admin"] .history-more-btn {
+  color: var(--admin-text-muted) !important;
+}
+html[data-fenda-design="admin"] .htr-title,
+html[data-fenda-design="admin"] .history-card h4 {
+  color: var(--admin-text) !important;
+}
+html[data-fenda-design="admin"] .history-more-btn {
+  background: var(--admin-surface) !important;
+  border-color: var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .history-more-btn:active {
+  background: rgba(119, 169, 255, .14) !important;
+  color: var(--admin-cyan) !important;
+}
+html[data-fenda-design="admin"] .more-btn:active,
+html[data-fenda-design="admin"] .playlist-shuffle-btn:active {
+  background: rgba(119, 169, 255, .14) !important;
+  color: var(--admin-cyan) !important;
+  border-color: rgba(126, 232, 225, .42) !important;
+}
+html[data-fenda-design="admin"] .sound-capsule {
+  background:
+    radial-gradient(ellipse 150% 70% at 96% 8%, rgba(119, 169, 255, .18), transparent 68%),
+    radial-gradient(ellipse 140% 80% at 4% 58%, rgba(126, 232, 225, .08), transparent 72%),
+    linear-gradient(180deg, #132646 0%, #101b30 48%, #0b1425 100%) !important;
+  border-color: rgba(119, 169, 255, .42) !important;
+}
+html[data-fenda-design="admin"] .sound-capsule::before {
+  background:
+    radial-gradient(ellipse 150% 70% at 96% 8%, rgba(119, 169, 255, .18), transparent 68%),
+    radial-gradient(ellipse 140% 80% at 4% 58%, rgba(126, 232, 225, .08), transparent 72%),
+    linear-gradient(180deg, #132646 0%, #101b30 48%, #0b1425 100%) !important;
+}
+html[data-fenda-design="admin"] .sound-capsule--current {
+  border-color: rgba(126, 232, 225, .52) !important;
+}
+html[data-fenda-design="admin"] .sc-glow {
+  background: radial-gradient(circle, rgba(119, 169, 255, .34), rgba(126, 232, 225, .1), transparent 65%) !important;
+}
+html[data-fenda-design="admin"] .sc-eyebrow,
+html[data-fenda-design="admin"] .sc-hero-sub {
+  color: var(--admin-cyan) !important;
+}
+html[data-fenda-design="admin"] .sc-head-mins,
+html[data-fenda-design="admin"] .sc-chevron,
+html[data-fenda-design="admin"] .sc-hero-label,
+html[data-fenda-design="admin"] .sc-rhythm-legend,
+html[data-fenda-design="admin"] .sc-share {
+  color: var(--admin-text-muted) !important;
+}
+html[data-fenda-design="admin"] .sc-share {
+  background: rgba(14, 21, 36, .72) !important;
+  border-color: var(--admin-line) !important;
+}
+html[data-fenda-design="admin"] .sc-share:active {
+  background: rgba(119, 169, 255, .14) !important;
+  color: var(--admin-cyan) !important;
+}
+html[data-fenda-design="admin"] .sc-bar {
+  background: linear-gradient(180deg, var(--admin-blue), var(--admin-blue-strong)) !important;
+}
+html[data-fenda-design="admin"] .sc-bar--peak {
+  background: linear-gradient(180deg, #f6f8ff, var(--admin-cyan)) !important;
+  box-shadow: 0 0 10px rgba(126, 232, 225, .42) !important;
+}
+html[data-fenda-design="admin"] .sc-rhythm-peak,
+html[data-fenda-design="admin"] .sc-pill .material-symbols-rounded,
+html[data-fenda-design="admin"] .sc-top-label {
+  color: var(--admin-cyan) !important;
+}
+html[data-fenda-design="admin"] .sc-pill--fire {
+  color: var(--admin-cyan) !important;
+  background: rgba(126, 232, 225, .1) !important;
+  border-color: rgba(126, 232, 225, .24) !important;
+}
+html[data-fenda-design="admin"] .sc-pill--fire .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+}
