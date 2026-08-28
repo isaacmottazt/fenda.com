@@ -47,6 +47,10 @@ class FendaThemes {
   }
 
   apply(color, mode) {
+    if (this.root.dataset.fendaDesign === 'admin') {
+      this.applyAdmin();
+      return;
+    }
     mode = 'dark'; // modo claro removido do app — sempre escuro
     const p = this.generatePalette(color);
     const L = mode === 'light';
@@ -237,6 +241,75 @@ class FendaThemes {
     localStorage.setItem('fenda-mode', mode);
     this.savedColor = color;
     this.savedMode = mode;
+  }
+
+  applyAdmin() {
+    const admin = {
+      base: '#77a9ff',
+      hi: '#7ee8e1',
+      up: '#c5dbff',
+      dark: '#2f5fb3',
+      darker: '#16396f',
+      glow: 'rgba(119,169,255,.42)',
+      soft: 'rgba(119,169,255,.14)',
+      line: 'rgba(119,169,255,.25)',
+      grad: 'linear-gradient(135deg,#7ee8e1,#77a9ff)',
+      gradDark: 'linear-gradient(135deg,#28549b,#16396f,#0b1b38)',
+      gradProfile: 'linear-gradient(145deg,#28549b,#16396f,#07101e)',
+      gradMagenta: 'linear-gradient(135deg,#496ea8,#7ee8e1)',
+      gradHero: 'linear-gradient(120deg,#f6f8ff 25%,#77a9ff 65%,#7ee8e1 100%)',
+    };
+    const root = this.root;
+    const set = (name, value) => root.style.setProperty(name, value);
+    set('--primary-base', admin.base);
+    set('--primary-hi', admin.hi);
+    set('--primary-up', admin.up);
+    set('--primary-dark', admin.dark);
+    set('--primary-darker', admin.darker);
+    set('--primary-glow', admin.glow);
+    set('--primary-soft', admin.soft);
+    set('--primary-line', admin.line);
+    set('--primary-grad', admin.grad);
+    set('--primary-grad-dark', admin.gradDark);
+    set('--primary-grad-light', admin.gradMagenta);
+    set('--grad-hero', admin.gradHero);
+    set('--grad-profile', admin.gradProfile);
+    set('--grad-magenta', admin.gradMagenta);
+    set('--secondary-hi', admin.up);
+    set('--secondary-glow', admin.glow);
+    set('--secondary-soft', admin.soft);
+
+    const styleEl = document.getElementById('fenda-theme-inject') || (() => {
+      const el = document.createElement('style');
+      el.id = 'fenda-theme-inject';
+      document.head.appendChild(el);
+      return el;
+    })();
+    styleEl.textContent = `
+      body{background:#070b14!important;color:#f6f8ff!important}
+      .app-container{background:linear-gradient(180deg,#0a1020 0%,#070b14 100%)!important}
+      .nav-bar{background:rgba(8,13,24,.94)!important;border-top-color:rgba(173,196,232,.12)!important}
+      .nav-btn{color:rgba(184,195,217,.42)!important}.nav-btn.active{color:#7ee8e1!important}.nav-btn p,.nav-btn span{color:inherit!important}
+      .player-bottom-bar{background:rgba(8,13,24,.9)!important;box-shadow:0 18px 40px rgba(0,0,0,.28),0 0 0 1px rgba(119,169,255,.25)!important}
+      .mini-ring-fill{stroke:#7ee8e1!important}.mini-ctrl-play,.player-mini-play,.ctrl-play{background:linear-gradient(135deg,#7ee8e1,#77a9ff)!important;box-shadow:0 8px 22px rgba(119,169,255,.28)!important}
+      .mini-info h4,.player-mini-info span:first-child{color:#f6f8ff!important}.mini-info p,.player-mini-info span:last-child{color:#73819b!important}
+      .lyrics-full-screen{background:linear-gradient(145deg,#0b1324 0%,#050810 100%)!important}.player-bg{background:linear-gradient(135deg,#28549b,#16396f,#07101e)!important}
+      .player-seek-fill,.player-seek-thumb{background:#77a9ff!important}.player-mini-controls{background:rgba(7,11,20,.98)!important;border-top-color:rgba(126,232,225,.2)!important}
+      .player-lyrics-header,.player-top-context,.player-top-playlist{color:rgba(184,195,217,.82)!important}
+      .modal-content-box,.context-menu-modal{background:#0e1524!important;color:#f6f8ff!important}.modal-btn-ok{background:linear-gradient(135deg,#7ee8e1,#77a9ff)!important;color:#07101e!important}
+      input,textarea,select{background:rgba(14,21,36,.78)!important;color:#f6f8ff!important;border-color:rgba(173,196,232,.12)!important}
+      input::placeholder,textarea::placeholder{color:rgba(184,195,217,.42)!important}
+      .featured-card{background:linear-gradient(125deg,#132646 0%,#111b30 56%,#171d3b 100%)!important}.featured-badge{background:rgba(126,232,225,.1)!important;border-color:rgba(126,232,225,.2)!important;color:#7ee8e1!important}.featured-play-btn{background:linear-gradient(135deg,#7ee8e1,#77a9ff)!important;color:#07101e!important}
+      .section-header h2{color:#f6f8ff!important}.section-see-all{color:#7ee8e1!important}
+      #biblioteca{--lib-violet:#77a9ff;--lib-violet-hi:#7ee8e1;--lib-violet-up:#c5dbff;--lib-violet-glow:rgba(119,169,255,.42);--lib-ink:#f6f8ff;--lib-ink-mid:rgba(184,195,217,.72);--lib-ink-low:#73819b;--lib-ink-faint:rgba(184,195,217,.42);--lib-surface:rgba(14,21,36,.78);--lib-surface-2:#0e1524;--lib-border:rgba(173,196,232,.12);--lib-border-hi:rgba(119,169,255,.25);--lib-surface-hi:rgba(255,255,255,.05)}
+      .lib-main-tab{color:#73819b!important;background:rgba(255,255,255,.035)!important}.lib-main-tab.active{background:#4c83f1!important;color:#f6f8ff!important}.library-header h1{color:#f6f8ff!important}.summary-card{background:rgba(14,21,36,.82)!important}.summary-card h3{color:#77a9ff!important}.summary-card p{color:#73819b!important}.playlist-play-all-btn{background:#4c83f1!important;color:#f6f8ff!important}.playlist-shuffle-btn{border-color:rgba(119,169,255,.25)!important;color:#7ee8e1!important;background:rgba(119,169,255,.14)!important}
+      .search-top{background:transparent!important}.search-bar-new{background:rgba(14,21,36,.78)!important;border-color:rgba(173,196,232,.12)!important}.search-bar-new:focus-within{border-color:rgba(126,232,225,.42)!important}.search-icon-static{color:#73819b!important}.search-section-header button{color:#7ee8e1!important}
+      .profile-hero{background:linear-gradient(145deg,#28549b,#16396f,#07101e)!important}.profile-stat,.profile-menu-item{background:rgba(14,21,36,.82)!important;border-color:rgba(173,196,232,.12)!important}.profile-stat .material-symbols-rounded{color:#7ee8e1!important}.profile-stat-num,.profile-menu-title,#profileName{color:#f6f8ff!important}.profile-stat-label,.profile-menu-sub,#profileUsername{color:#73819b!important}.profile-edit-chip{border-color:rgba(119,169,255,.25)!important;color:#77a9ff!important;background:rgba(119,169,255,.14)!important}
+      .notifications-overlay{background:#070b14!important}.notif-header{border-bottom-color:rgba(173,196,232,.12)!important}.notif-header-icon,.notif-tab.active{color:#7ee8e1!important}.notif-tab.active{border-bottom-color:#7ee8e1!important}.notif-prompt-card{background:rgba(119,169,255,.14)!important;border-color:rgba(119,169,255,.25)!important}.notif-activate-btn{background:linear-gradient(135deg,#7ee8e1,#77a9ff)!important;color:#07101e!important}
+      .queue-panel{background:#0e1524!important;border-left-color:rgba(119,169,255,.25)!important}.qp-playing-bar{background:linear-gradient(135deg,#7ee8e1,#77a9ff)!important}.premium-toast{background:#0e1524!important;color:#f6f8ff!important}
+      [style*="background"][style*="#7c3aed"],[style*="background"][style*="#a855f7"],[style*="background"][style*="#c084fc"],[style*="background"][style*="#9333ea"],[style*="background"][style*="#5b21b6"],[style*="background"][style*="#d8b4fe"],[style*="background"][style*="#924cff"]{background:linear-gradient(135deg,#7ee8e1,#77a9ff)!important}
+      [style*="color"][style*="#7c3aed"],[style*="color"][style*="#a855f7"],[style*="color"][style*="#c084fc"],[style*="color"][style*="#9333ea"],[style*="color"][style*="#5b21b6"],[style*="color"][style*="#d8b4fe"],[style*="color"][style*="#924cff"]{color:#7ee8e1!important}
+    `;
   }
 
   applyPlayerTrackPalette(color) {

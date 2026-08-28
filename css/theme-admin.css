@@ -19,10 +19,26 @@ html[data-fenda-design="admin"] {
   --admin-blue: #77a9ff;
   --admin-blue-strong: #4c83f1;
   --admin-cyan: #7ee8e1;
-  --admin-violet: #a58bff;
+  --admin-violet: #9ebeff;
   --admin-green: #70ddb1;
   --admin-yellow: #f4c96b;
   --admin-red: #ff8f9b;
+  --vp-ink: #f6f8ff;
+  --vp-ink-mid: rgba(184,195,217,.72);
+  --vp-ink-low: #73819b;
+  --vp-ink-faint: rgba(184,195,217,.42);
+  --vp-bg: #070b14;
+  --vp-surface: rgba(14,21,36,.78);
+  --vp-surface-2: #121c2d;
+  --vp-violet: #77a9ff;
+  --vp-violet-hi: #7ee8e1;
+  --vp-violet-up: #c5dbff;
+  --vp-violet-line: rgba(119,169,255,.25);
+  --lib-violet: #77a9ff;
+  --lib-violet-hi: #7ee8e1;
+  --lib-violet-up: #c5dbff;
+  --qp-accent: #77a9ff;
+  --qp-accent-2: #7ee8e1;
   background: var(--admin-bg-deep) !important;
 }
 
@@ -31,7 +47,7 @@ html[data-fenda-design="admin"] body {
   color: var(--admin-text) !important;
   background:
     radial-gradient(900px 500px at 86% -10%, rgba(76, 131, 241, .16), transparent 66%),
-    radial-gradient(700px 500px at 35% 110%, rgba(165, 139, 255, .08), transparent 64%),
+    radial-gradient(700px 500px at 35% 110%, rgba(126, 232, 225, .05), transparent 64%),
     var(--admin-bg) !important;
   font-family: Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
@@ -358,7 +374,7 @@ html[data-fenda-design="admin"] .premium-toast {
 
 .admin-design-topbar-search,
 .admin-design-topbar-icon,
-.admin-rail-command,
+.admin-rail-utility,
 .admin-rail-link {
   font: inherit;
   cursor: pointer;
@@ -403,19 +419,6 @@ html[data-fenda-design="admin"] .premium-toast {
   border-radius: 12px;
 }
 
-.admin-design-topbar-search kbd,
-.admin-design-rail kbd,
-.fenda-command-footer kbd,
-.fenda-command-item kbd {
-  padding: 3px 6px;
-  color: var(--admin-text-muted);
-  background: rgba(255, 255, 255, .05);
-  border: 1px solid var(--admin-line);
-  border-radius: 6px;
-  font-family: "DM Mono", monospace;
-  font-size: 10px;
-  white-space: nowrap;
-}
 
 /* desktop workspace: a estrutura passa a ser rail + topbar + conteúdo amplo */
 @media (min-width: 900px) {
@@ -530,7 +533,7 @@ html[data-fenda-design="admin"] .premium-toast {
   }
 
   .admin-rail-link,
-  .admin-rail-command {
+  .admin-rail-utility {
     width: 100%;
     min-height: 44px;
     display: flex;
@@ -548,13 +551,13 @@ html[data-fenda-design="admin"] .premium-toast {
   }
 
   .admin-rail-link:hover,
-  .admin-rail-command:hover {
+  .admin-rail-utility:hover {
     color: var(--admin-text-soft);
     background: rgba(255, 255, 255, .04);
   }
 
   .admin-rail-link:active,
-  .admin-rail-command:active {
+  .admin-rail-utility:active {
     transform: scale(.985);
   }
 
@@ -566,12 +569,12 @@ html[data-fenda-design="admin"] .premium-toast {
   }
 
   .admin-rail-link.active .material-symbols-rounded,
-  .admin-rail-command .material-symbols-rounded {
+  .admin-rail-utility .material-symbols-rounded {
     color: var(--admin-cyan);
   }
 
   .admin-rail-link span:nth-child(2),
-  .admin-rail-command span:nth-child(2) {
+  .admin-rail-utility span:nth-child(2) {
     flex: 1;
   }
 
@@ -581,7 +584,7 @@ html[data-fenda-design="admin"] .premium-toast {
     background: var(--admin-line);
   }
 
-  .admin-rail-command {
+  .admin-rail-utility {
     min-height: 40px;
     font-size: 11px;
   }
@@ -607,179 +610,6 @@ html[data-fenda-design="admin"] .premium-toast {
   }
 }
 
-/* ── Paleta de comandos ──────────────────────────────────────────── */
-.fenda-command-palette {
-  position: fixed;
-  inset: 0;
-  z-index: 12000;
-  display: grid;
-  place-items: start center;
-  padding: min(14vh, 120px) 16px 24px;
-  background: rgba(3, 6, 12, .72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.fenda-command-palette[hidden] {
-  display: none;
-}
-
-.fenda-command-dialog {
-  width: min(100%, 560px);
-  max-height: min(680px, 82vh);
-  overflow: hidden;
-  color: var(--admin-text);
-  background: #0e1524;
-  border: 1px solid rgba(173, 196, 232, .2);
-  border-radius: 20px;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, .46);
-}
-
-.fenda-command-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 22px 22px 14px;
-}
-
-.fenda-command-eyebrow {
-  color: var(--admin-cyan);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .16em;
-}
-
-.fenda-command-head h2 {
-  margin-top: 7px;
-  font-size: 21px;
-  letter-spacing: -.05em;
-}
-
-.fenda-command-close {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  color: var(--admin-text-muted);
-  background: rgba(255, 255, 255, .05);
-  border: 1px solid var(--admin-line);
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.fenda-command-search {
-  height: 46px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0 16px 12px;
-  padding: 0 12px;
-  color: var(--admin-text-muted);
-  background: rgba(255, 255, 255, .045);
-  border: 1px solid var(--admin-line);
-  border-radius: 12px;
-}
-
-.fenda-command-search:focus-within {
-  border-color: rgba(126, 232, 225, .42);
-  box-shadow: 0 0 0 3px rgba(126, 232, 225, .06);
-}
-
-.fenda-command-search input {
-  min-width: 0;
-  flex: 1;
-  height: 100%;
-  color: var(--admin-text);
-  background: transparent !important;
-  border: 0 !important;
-  outline: 0;
-  box-shadow: none !important;
-}
-
-.fenda-command-search input::placeholder {
-  color: var(--admin-text-muted);
-}
-
-.fenda-command-results {
-  max-height: 470px;
-  overflow-y: auto;
-  padding: 0 10px 10px;
-}
-
-.fenda-command-item {
-  width: 100%;
-  min-height: 58px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 9px 10px;
-  color: var(--admin-text-soft);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.fenda-command-item:hover,
-.fenda-command-item.selected {
-  color: var(--admin-text);
-  background: var(--admin-surface-3);
-  border-color: var(--admin-line);
-}
-
-.fenda-command-item > .material-symbols-rounded {
-  color: var(--admin-cyan);
-}
-
-.fenda-command-copy {
-  min-width: 0;
-  flex: 1;
-}
-
-.fenda-command-copy strong,
-.fenda-command-copy small {
-  display: block;
-}
-
-.fenda-command-copy strong {
-  overflow: hidden;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fenda-command-copy small {
-  margin-top: 3px;
-  overflow: hidden;
-  color: var(--admin-text-muted);
-  font-size: 10px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fenda-command-empty {
-  padding: 22px 12px;
-  color: var(--admin-text-muted);
-  font-size: 12px;
-  text-align: center;
-}
-
-.fenda-command-footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 11px 18px 14px;
-  color: var(--admin-text-muted);
-  border-top: 1px solid var(--admin-line);
-  font-size: 10px;
-}
-
-html[data-fenda-design="admin"] .fenda-command-palette {
-  color: var(--admin-text);
-}
-
 @media (max-width: 460px) {
   html[data-fenda-design="admin"] .admin-design-topbar-search {
     max-width: 40px;
@@ -787,20 +617,14 @@ html[data-fenda-design="admin"] .fenda-command-palette {
     justify-content: center;
   }
 
-  html[data-fenda-design="admin"] .admin-design-topbar-search span:nth-child(2),
-  html[data-fenda-design="admin"] .admin-design-topbar-search kbd {
+  html[data-fenda-design="admin"] .admin-design-topbar-search span:nth-child(2) {
     display: none;
-  }
-
-  .fenda-command-palette {
-    padding-top: 7vh;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .admin-rail-link,
-  .admin-rail-command,
-  .fenda-command-item {
+  .admin-rail-utility {
     transition: none !important;
   }
 }
@@ -853,8 +677,7 @@ html[data-fenda-design="admin"] .fs-row {
 
 html[data-fenda-design="admin"] .fs-row-sub,
 html[data-fenda-design="admin"] .fs-hint,
-html[data-fenda-design="admin"] .fs-avatar-text span,
-html[data-fenda-design="admin"] .fs-shortcut-keys kbd {
+html[data-fenda-design="admin"] .fs-avatar-text span {
   color: var(--admin-text-muted) !important;
 }
 
@@ -879,4 +702,118 @@ html[data-fenda-design="admin"] .fs-theme-preview-classic {
 
 html[data-fenda-design="admin"] .fs-theme-preview-admin {
   box-shadow: 0 0 0 2px rgba(126, 232, 225, .22);
+}
+
+/* ── Isolamento final da paleta antiga no Workspace Admin ────────── */
+html[data-fenda-design="admin"] #inicio::before {
+  background: radial-gradient(circle, rgba(76, 131, 241, .18), transparent 65%) !important;
+}
+
+html[data-fenda-design="admin"] #inicio::after {
+  background: radial-gradient(circle, rgba(126, 232, 225, .12), transparent 65%) !important;
+}
+
+html[data-fenda-design="admin"] .inicio-avatar {
+  background: linear-gradient(135deg, #77a9ff, #28549b) !important;
+  border-color: rgba(126, 232, 225, .5) !important;
+  box-shadow: 0 6px 20px -8px rgba(76, 131, 241, .6), 0 0 0 4px rgba(76, 131, 241, .12) !important;
+}
+
+html[data-fenda-design="admin"] .inicio-avatar:hover {
+  border-color: #7ee8e1 !important;
+}
+
+html[data-fenda-design="admin"] .featured-overlay {
+  background: linear-gradient(180deg, rgba(7, 11, 20, .08) 0%, rgba(7, 11, 20, .58) 55%, rgba(7, 11, 20, .94) 100%) !important;
+}
+
+html[data-fenda-design="admin"] .featured-card::before {
+  background: radial-gradient(circle at 82% 0%, rgba(126, 232, 225, .22), transparent 62%) !important;
+}
+
+html[data-fenda-design="admin"] .featured-card::after {
+  background: linear-gradient(180deg, transparent, rgba(5, 8, 16, .28)) !important;
+}
+
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-pink .material-symbols-rounded,
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-green .material-symbols-rounded,
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-yellow .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-pink,
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-green,
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-yellow {
+  background: rgba(119, 169, 255, .14) !important;
+}
+
+html[data-fenda-design="admin"] .podcast-empty .material-symbols-rounded,
+html[data-fenda-design="admin"] .ado-bio-toggle,
+html[data-fenda-design="admin"] .search-start-hint .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .podcast-card,
+html[data-fenda-design="admin"] .artist-detail-card,
+html[data-fenda-design="admin"] .search-start-hint {
+  border-color: var(--admin-line) !important;
+  background: rgba(14, 21, 36, .82) !important;
+}
+
+html[data-fenda-design="admin"] .podcast-empty,
+html[data-fenda-design="admin"] .search-start-hint {
+  color: var(--admin-text-muted) !important;
+}
+
+html[data-fenda-design="admin"] .notifications-overlay .notif-card:active,
+html[data-fenda-design="admin"] .context-menu-modal .ctx-btn:active,
+html[data-fenda-design="admin"] .profile-menu-item:active {
+  background: rgba(119, 169, 255, .14) !important;
+}
+
+html[data-fenda-design="admin"] .player-fav-big.active,
+html[data-fenda-design="admin"] .player-action-btn.active,
+html[data-fenda-design="admin"] .pmi-pink .material-symbols-rounded {
+  color: var(--admin-cyan) !important;
+}
+
+/* Consentimento também respeita integralmente o Workspace Admin */
+html[data-fenda-design="admin"] .fenda-consent-backdrop {
+  background: rgba(3, 6, 12, .82) !important;
+}
+
+html[data-fenda-design="admin"] .fenda-consent-card {
+  color: var(--admin-text) !important;
+  background: linear-gradient(145deg, #132646, #0e1524 72%) !important;
+  border-color: rgba(119, 169, 255, .34) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .55), 0 0 45px rgba(76, 131, 241, .12) !important;
+}
+
+html[data-fenda-design="admin"] .fenda-consent-card > p,
+html[data-fenda-design="admin"] .fenda-consent-option small,
+html[data-fenda-design="admin"] .fenda-consent-foot {
+  color: var(--admin-text-muted) !important;
+}
+
+html[data-fenda-design="admin"] .fenda-consent-option {
+  background: rgba(255, 255, 255, .045) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .fenda-consent-option:has(input:checked) {
+  background: rgba(119, 169, 255, .14) !important;
+  border-color: rgba(126, 232, 225, .48) !important;
+}
+
+html[data-fenda-design="admin"] .fenda-consent-option input {
+  accent-color: var(--admin-cyan) !important;
+}
+
+html[data-fenda-design="admin"] .fenda-consent-status {
+  color: var(--admin-yellow) !important;
+}
+
+html[data-fenda-design="admin"] .fenda-consent-actions button.primary {
+  color: #07101e !important;
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
 }

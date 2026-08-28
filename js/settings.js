@@ -124,7 +124,7 @@
 .fs-about-footer-dot{display:none;opacity:.5}
 @media (min-width:520px){.fs-about-footer{flex-direction:row;gap:8px}.fs-about-footer-copyright{font-size:12px}.fs-about-footer-dot{display:inline}}
 .open_in_new_icon{font-size:16px !important;opacity:.3}
-.fs-theme-intro{padding-bottom:5px}.fs-theme-intro>strong{display:block;font-size:14px}.fs-theme-options{display:grid;gap:8px;padding:0 10px 10px}.fs-theme-option{width:100%;display:flex;align-items:center;gap:11px;padding:10px;color:#fff;background:rgba(255,255,255,.025);border:1px solid transparent;border-radius:14px;text-align:left;cursor:pointer;transition:background .18s,border-color .18s,transform .16s}.fs-theme-option:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}.fs-theme-option:active{transform:scale(.99)}.fs-theme-option.active{background:rgba(146,76,255,.12);border-color:rgba(192,132,252,.38)}.fs-theme-option-copy{min-width:0;flex:1}.fs-theme-option-copy b,.fs-theme-option-copy small{display:block}.fs-theme-option-copy b{font-size:13px}.fs-theme-option-copy small{margin-top:3px;color:rgba(255,255,255,.45);font-size:11px;line-height:1.35}.fs-theme-check{display:none;color:#c084fc;font-size:19px}.fs-theme-option.active .fs-theme-check{display:block}.fs-theme-preview{width:58px;height:42px;position:relative;display:grid;grid-template-columns:13px 1fr;gap:4px;flex:0 0 auto;padding:5px;border-radius:9px;overflow:hidden;background:#120f1c}.fs-theme-preview i{display:block;border-radius:4px}.fs-theme-preview i:first-child{grid-row:span 3}.fs-theme-preview i:nth-child(2){height:9px}.fs-theme-preview i:nth-child(3){height:9px}.fs-theme-preview-classic{background:linear-gradient(135deg,#261148,#100b1d)}.fs-theme-preview-classic i:first-child{background:#914cff}.fs-theme-preview-classic i:nth-child(2){background:#c026d3}.fs-theme-preview-classic i:nth-child(3){background:rgba(255,255,255,.2)}.fs-theme-preview-admin{background:linear-gradient(135deg,#132646,#07101e)}.fs-theme-preview-admin i:first-child{background:#77a9ff}.fs-theme-preview-admin i:nth-child(2){background:#7ee8e1}.fs-theme-preview-admin i:nth-child(3){background:rgba(173,196,232,.22)}.fs-shortcut-row{gap:10px}.fs-shortcut-keys{display:flex;gap:3px;flex:0 0 auto}.fs-shortcut-keys kbd{min-width:20px;padding:3px 5px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:5px;font-size:10px;text-align:center}
+.fs-theme-intro{padding-bottom:5px}.fs-theme-intro>strong{display:block;font-size:14px}.fs-theme-options{display:grid;gap:8px;padding:0 10px 10px}.fs-theme-option{width:100%;display:flex;align-items:center;gap:11px;padding:10px;color:#fff;background:rgba(255,255,255,.025);border:1px solid transparent;border-radius:14px;text-align:left;cursor:pointer;transition:background .18s,border-color .18s,transform .16s}.fs-theme-option:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}.fs-theme-option:active{transform:scale(.99)}.fs-theme-option.active{background:rgba(146,76,255,.12);border-color:rgba(192,132,252,.38)}.fs-theme-option-copy{min-width:0;flex:1}.fs-theme-option-copy b,.fs-theme-option-copy small{display:block}.fs-theme-option-copy b{font-size:13px}.fs-theme-option-copy small{margin-top:3px;color:rgba(255,255,255,.45);font-size:11px;line-height:1.35}.fs-theme-check{display:none;color:#c084fc;font-size:19px}.fs-theme-option.active .fs-theme-check{display:block}.fs-theme-preview{width:58px;height:42px;position:relative;display:grid;grid-template-columns:13px 1fr;gap:4px;flex:0 0 auto;padding:5px;border-radius:9px;overflow:hidden;background:#120f1c}.fs-theme-preview i{display:block;border-radius:4px}.fs-theme-preview i:first-child{grid-row:span 3}.fs-theme-preview i:nth-child(2){height:9px}.fs-theme-preview i:nth-child(3){height:9px}.fs-theme-preview-classic{background:linear-gradient(135deg,#261148,#100b1d)}.fs-theme-preview-classic i:first-child{background:#914cff}.fs-theme-preview-classic i:nth-child(2){background:#c026d3}.fs-theme-preview-classic i:nth-child(3){background:rgba(255,255,255,.2)}.fs-theme-preview-admin{background:linear-gradient(135deg,#132646,#07101e)}.fs-theme-preview-admin i:first-child{background:#77a9ff}.fs-theme-preview-admin i:nth-child(2){background:#7ee8e1}.fs-theme-preview-admin i:nth-child(3){background:rgba(173,196,232,.22)}
 `;
         document.head.appendChild(st);
     }
@@ -630,24 +630,6 @@
               </div>
             </div>
 
-            <div class="fs-section">Atalhos rápidos</div>
-            <div class="fs-card fs-shortcuts-card">
-              <div class="fs-row fs-shortcut-row" style="cursor:default">
-                <span class="material-symbols-rounded">keyboard</span>
-                <div class="fs-row-text"><span class="fs-row-title">Navegar pelas áreas</span><span class="fs-row-sub">Use os números quando não estiver digitando</span></div>
-                <span class="fs-shortcut-keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></span>
-              </div>
-              <div class="fs-row fs-shortcut-row" style="cursor:default">
-                <span class="material-symbols-rounded">search</span>
-                <div class="fs-row-text"><span class="fs-row-title">Busca rápida</span><span class="fs-row-sub">Abra a busca diretamente de qualquer tela</span></div>
-                <span class="fs-shortcut-keys"><kbd>/</kbd></span>
-              </div>
-              <div class="fs-row fs-shortcut-row" style="cursor:default">
-                <span class="material-symbols-rounded">apps</span>
-                <div class="fs-row-text"><span class="fs-row-title">Central de comandos</span><span class="fs-row-sub">Atalhos de navegação, configurações e visual</span></div>
-                <span class="fs-shortcut-keys"><kbd>⌘</kbd><kbd>K</kbd></span>
-              </div>
-            </div>
 
             <div class="fs-section" data-i18n="settings_general">Geral</div>
             <div class="fs-card">
