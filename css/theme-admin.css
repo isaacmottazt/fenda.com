@@ -854,3 +854,15 @@ html[data-fenda-design="admin"] .profile-menu-icon.pmi-upload {
 html[data-fenda-design="admin"] .profile-menu-icon.pmi-upload .material-symbols-rounded {
   color: #07101e !important;
 }
+
+/* No mobile, a navegação inferior e o menu do Perfil já fornecem os acessos.
+   O cabeçalho do Workspace ficava redundante e ocupava a faixa exibida na captura. */
+@media (max-width: 899px) {
+  html[data-fenda-design="admin"] .admin-design-topbar {
+    display: none !important;
+  }
+
+  html[data-fenda-design="admin"] .main-content {
+    padding-top: 18px !important;
+  }
+}
