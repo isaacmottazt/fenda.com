@@ -817,3 +817,40 @@ html[data-fenda-design="admin"] .fenda-consent-actions button.primary {
   color: #07101e !important;
   background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
 }
+
+html[data-fenda-design="admin"] .profile-avatar-wrap {
+  background: rgba(197, 219, 255, .9) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .4), 0 0 0 4px rgba(119, 169, 255, .12) !important;
+}
+
+html[data-fenda-design="admin"] .profile-avatar-wrap img,
+html[data-fenda-design="admin"] .profile-avatar-icon {
+  background: #132646 !important;
+  border-color: #0e1524 !important;
+}
+
+html[data-fenda-design="admin"] .profile-avatar-icon {
+  color: rgba(126, 232, 225, .72) !important;
+}
+
+html[data-fenda-design="admin"] .profile-hero-text .profile-bio-text {
+  color: rgba(246, 248, 255, .86) !important;
+}
+
+html[data-fenda-design="admin"] .profile-identity h1 {
+  color: var(--admin-text) !important;
+}
+
+html[data-fenda-design="admin"] .profile-handle {
+  color: var(--admin-text-soft) !important;
+  background: rgba(119, 169, 255, .12) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-upload {
+  background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
+}
+
+html[data-fenda-design="admin"] .profile-menu-icon.pmi-upload .material-symbols-rounded {
+  color: #07101e !important;
+}

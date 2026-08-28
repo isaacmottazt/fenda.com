@@ -706,6 +706,19 @@
         document.addEventListener('fenda:designChanged', refreshDesignOptions);
         refreshDesignOptions();
 
+        _overlay.querySelectorAll('[data-design-option]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const selected = button.dataset.designOption;
+                if (window.FendaDesign?.set) {
+                    window.FendaDesign.set(selected);
+                } else {
+                    try { localStorage.setItem('fenda-design', selected); } catch (_) {}
+                    document.documentElement.dataset.fendaDesign = selected;
+                }
+                refreshDesignOptions();
+            });
+        });
+
         _overlay.querySelector('#fsCloseBtn').addEventListener('click', close);
 
         // e-mail da sessão

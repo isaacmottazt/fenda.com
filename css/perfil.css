@@ -240,6 +240,8 @@
 .pmi-yellow .material-symbols-rounded { color: #fbbf24; }
 .pmi-gray  { background: rgba(255,255,255,0.06); }
 .pmi-gray  .material-symbols-rounded { color: rgba(255,255,255,0.4); }
+.pmi-upload { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+.pmi-upload .material-symbols-rounded { color: #fff; }
 
 .profile-menu-text {
     flex: 1;
