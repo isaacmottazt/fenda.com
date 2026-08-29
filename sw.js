@@ -1,7 +1,7 @@
 // Fenda Music — Service Worker v18
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v107';
+const CACHE_NAME = 'fenda-v108';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
 const CRITICAL_RUNTIME = new Set([
@@ -26,7 +26,7 @@ const SHELL = [
   '/css/base.css', '/css/inicio.css', '/css/busca.css', '/css/biblioteca.css',
   '/css/perfil.css?v=theme-profile-v2', '/css/login.css', '/css/artist-detail.css', '/css/painel.css', '/css/podcasts.css', '/css/theme-overrides.css', '/css/theme-admin.css?v=design-v7',
   '/fonts/material-symbols.css', '/fonts/material-symbols-rounded.woff2', '/imagens/fundo.png', '/imagens/logo.png',
-  '/js/i18n.js', '/js/supabase-config.js', '/js/privacy.js', '/js/search.js', '/js/stats.js', '/js/social-share.js',
+  '/js/i18n.js', '/js/supabase-config.js', '/js/privacy.js', '/js/search.js?v=music-requests-v4', '/js/stats.js', '/js/social-share.js',
   '/js/player-core.js', '/js/player-ui.js', '/js/player-audio-lyrics.js',
   '/js/player-menus-core.js', '/js/player-music-actions.js', '/js/player-playlists.js',
   '/js/player-session.js', '/js/notifications.js', '/css/notifications.css', '/js/inicio-extras.js', '/js/podcasts.js',

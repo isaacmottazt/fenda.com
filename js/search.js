@@ -1,6 +1,7 @@
 // ===== ABA BUSCAR — REDESIGN PREMIUM =====
 
 let searchInput = null;
+let searchBoundInput = null;
 let recentSearches = [];
 let searchRequestSerial = 0;
 
@@ -15,8 +16,15 @@ function syncSearchStartHint() {
 }
 
 function initSearch() {
-    searchInput = document.getElementById('globalSearchInput');
-    if (!searchInput) return;
+    const input = document.getElementById('globalSearchInput');
+    if (!input) return;
+    if (searchBoundInput === input) {
+        renderRecentSearches();
+        renderFeaturedArtists();
+        return;
+    }
+    searchInput = input;
+    searchBoundInput = input;
 
     const clearBtn    = document.getElementById('searchClearBtn');
     const backBtn     = document.getElementById('searchBackBtn');
