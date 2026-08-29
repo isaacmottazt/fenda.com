@@ -1021,13 +1021,26 @@ html[data-fenda-design="admin"] .playlist-info p,
 html[data-fenda-design="admin"] .history-card p {
   color: var(--admin-text-muted) !important;
 }
-html[data-fenda-design="admin"] .playlist-icon .material-symbols-rounded,
 html[data-fenda-design="admin"] .playlist-more:active,
 html[data-fenda-design="admin"] .music-card.playing::before,
 html[data-fenda-design="admin"] .inline-play-btn,
 html[data-fenda-design="admin"] .inline-play-btn.active-inline,
 html[data-fenda-design="admin"] .music-card.playing {
   background: linear-gradient(135deg, var(--admin-cyan), var(--admin-blue)) !important;
+  color: #07101e !important;
+}
+html[data-fenda-design="admin"] .playlist-icon .material-symbols-rounded {
+  display: inline-flex !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--admin-cyan) !important;
+}
+html[data-fenda-design="admin"] .playlist-item-modern:first-child .playlist-icon .material-symbols-rounded {
   color: #07101e !important;
 }
 html[data-fenda-design="admin"] .music-card.playing {
