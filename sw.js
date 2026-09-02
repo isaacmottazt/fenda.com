@@ -1,7 +1,7 @@
 // Fenda Music — Service Worker v18
 // Correção: fetch handler robusto (stale-while-revalidate),
 // install com retry, recuperação de cache corrompido.
-const CACHE_NAME = 'fenda-v113';
+const CACHE_NAME = 'fenda-v114';
 
 const PLAYER_ROUTES = new Set(['/player.html', '/player', '/inicio', '/busca', '/biblioteca', '/perfil']);
 const CRITICAL_RUNTIME = new Set([
@@ -14,8 +14,7 @@ const CRITICAL_RUNTIME = new Set([
   '/js/share-ui.js?v=share-ui-v2',
   '/js/privacy.js',
   '/js/design-system.js',
-  '/js/settings.js',
-  '/js/podcasts.js',
+  '/js/lazy-modules.js?v=lazy-tabs-v1',
   '/js/realtime-catalog.js',
 ]);
 const LOGIN_ROUTES  = new Set(['/index.html', '/login', '/']);
@@ -25,14 +24,14 @@ const SHELL = [
   '/share.html',
   '/player.html', '/index.html', '/reset-password.html', '/manifest.json',
   '/termos.html', '/privacidade.html',
-  '/css/base.css', '/css/inicio.css', '/css/busca.css', '/css/biblioteca.css',
-  '/css/perfil.css?v=theme-profile-v2', '/css/login.css', '/css/artist-detail.css', '/css/painel.css', '/css/podcasts.css', '/css/theme-overrides.css', '/css/theme-admin.css?v=design-v7',
+  '/css/base.css', '/css/inicio.css', '/css/busca.css',
+  '/css/perfil.css?v=theme-profile-v2', '/css/login.css', '/css/artist-detail.css', '/css/painel.css', '/css/theme-overrides.css', '/css/theme-admin.css?v=design-v7',
   '/fonts/material-symbols.css', '/fonts/material-symbols-rounded.woff2', '/imagens/fundo.png', '/imagens/logo.png',
   '/js/i18n.js', '/js/supabase-config.js', '/js/privacy.js', '/js/search.js?v=music-requests-v4', '/js/stats.js', '/js/social-share.js',
   '/js/player-core.js', '/js/player-ui.js', '/js/player-audio-lyrics.js',
-  '/js/player-menus-core.js', '/js/player-music-actions.js', '/js/player-playlists.js',
-  '/js/player-session.js', '/js/share-ui.js?v=share-ui-v2', '/js/notifications.js', '/css/notifications.css', '/js/inicio-extras.js', '/js/podcasts.js',
-  '/js/playback-engine.js', '/js/realtime-catalog.js', '/js/player-recommendations.js', '/js/themes-v6.js', '/js/design-system.js?v=design-v2', '/js/settings.js?v=design-switch-v2', '/js/notifications-follow.js',
+  '/js/player-menus-core.js', '/js/player-music-actions.js',
+  '/js/player-session.js', '/js/lazy-modules.js?v=lazy-tabs-v1', '/js/share-ui.js?v=share-ui-v2', '/js/notifications.js', '/css/notifications.css', '/js/inicio-extras.js',
+  '/js/playback-engine.js', '/js/realtime-catalog.js', '/js/player-recommendations.js', '/js/themes-v6.js', '/js/design-system.js?v=design-v2', '/js/notifications-follow.js',
 ];
 
 // Mensagem de skip waiting (forçar atualização imediata)

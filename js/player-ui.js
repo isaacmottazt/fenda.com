@@ -1555,7 +1555,12 @@ fendamusic.com.br`;
         switch (filter) {
             case 'all':      showOnly(summaryCards, playlistsSEl, podcastsSEl, libAllSection); break;
             case 'playlists': showOnly(playlistsSEl); break;
-            case 'podcasts': showOnly(podcastsSEl); if (typeof window.renderPodcastSection === 'function') window.renderPodcastSection(); break;
+            case 'podcasts': {
+                showOnly(podcastsSEl);
+                const loadPodcasts = window.loadAppModule?.('podcasts') || Promise.resolve();
+                loadPodcasts.then(() => window.renderPodcastSection?.()).catch(error => console.error('[Lazy] Podcasts:', error));
+                break;
+            }
             case 'artists':  showOnly(artistsSEl); renderArtistsGrid(); break;
             case 'history':  showOnly(histSection); break;
             case 'downloads':
@@ -1688,8 +1693,14 @@ async function renderProfile() {
             document.querySelector('.nav-btn[data-tab="biblioteca"]')?.click();
             setTimeout(() => document.querySelector('.lib-main-tab[data-filter="downloads"]')?.click(), 200);
         });
-        rebind('settingsNavBtn', () => window.FendaSettings?.open());
-        rebind('submitMusicNavBtn', () => window.FendaSubmit?.open());
+        rebind('settingsNavBtn', () => {
+            const loadSettings = window.loadAppModule?.('settings') || Promise.resolve();
+            loadSettings.then(() => window.FendaSettings?.open?.()).catch(error => console.error('[Lazy] Configurações:', error));
+        });
+        rebind('submitMusicNavBtn', () => {
+            const loadSettings = window.loadAppModule?.('settings') || Promise.resolve();
+            loadSettings.then(() => window.FendaSubmit?.open?.()).catch(error => console.error('[Lazy] Envio de música:', error));
+        });
 
         // Retry de segurança: se o full_name real ainda não chegou (só
         // temos o fallback do e-mail), tenta buscar o perfil direto do

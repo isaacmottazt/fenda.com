@@ -14,8 +14,6 @@
     <link rel="stylesheet" href="/css/base.css?v=lyrics-redesign-v3" />
     <link rel="stylesheet" href="/css/inicio.css" />
     <link rel="stylesheet" href="/css/busca.css" />
-    <link rel="stylesheet" href="/css/biblioteca.css" />
-    <link rel="stylesheet" href="/css/podcasts.css" />
     <link rel="stylesheet" href="/css/perfil.css?v=theme-profile-v2" />
     <link rel="stylesheet" href="/css/notifications.css" />
     <link rel="stylesheet" href="/css/artist-detail.css" />
@@ -912,11 +910,10 @@
     <script src="/js/i18n.js?v=consent-prompt-v1"></script>
     <script src="/js/player-core.js?v=lyrics-restore-v2"></script>
     <script src="/js/player-session.js?v=resume-lyrics-v2"></script>
+    <script src="/js/lazy-modules.js?v=lazy-tabs-v1"></script>
     <script src="/js/share-ui.js?v=share-ui-v2"></script>
     <script src="/js/player-audio-lyrics.js?v=lyrics-ui-v5"></script>
     <script src="/js/player-ui.js?v=summary-share-image-v15"></script>
-    <script src="/js/player-playlists.js?v=offline-downloads-v1"></script>
-    <script src="/js/podcasts.js"></script>
     <script src="/js/realtime-catalog.js"></script>
     <script src="/js/player-menus-core.js?v=streaming-resume-v2"></script>
     <script src="/js/player-music-actions.js"></script>
@@ -931,7 +928,6 @@
     <script src="/js/inicio-extras.js?v=privacy-controls-v1"></script>
     <!-- Novos módulos -->
     <script src="/js/design-system.js?v=design-v2"></script>
-    <script src="/js/settings.js?v=design-switch-v2"></script>
     <script src="/js/playback-engine.js"></script>
     <script src="/js/themes-v6.js?v=admin-palette-v2"></script>
     <script src="/js/notifications-follow.js"></script>
@@ -965,7 +961,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=113", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=114", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,

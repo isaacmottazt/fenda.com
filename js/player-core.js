@@ -1559,14 +1559,23 @@ function _activateTab(tabId, noRender = false) {
     const tabEl = document.getElementById(tabId);
     if (tabEl) tabEl.classList.add('active');
     AppState.currentTab = tabId;
-    if (noRender) return;
+    if (noRender) {
+        if (tabId === 'biblioteca') {
+            const loadLibrary = window.loadAppModule?.('library') || Promise.resolve();
+            loadLibrary.then(() => window.renderLibrary?.()).catch(error => console.error('[Lazy] Biblioteca inicial:', error));
+        }
+        return;
+    }
     // A navegação inicial já é renderizada pelo boot. Trocar de aba não
     // deve reconstruir a home nem mover o scroll do usuário.
     if (tabId === 'inicio' && window._homeNeedsRefresh) {
         window.refreshHomeInBackground?.();
     }
     if (tabId === 'buscar'     && typeof window.initSearch    === 'function') window.initSearch();
-    if (tabId === 'biblioteca' && typeof window.renderLibrary === 'function') window.renderLibrary();
+    if (tabId === 'biblioteca') {
+        const loadLibrary = window.loadAppModule?.('library') || Promise.resolve();
+        loadLibrary.then(() => window.renderLibrary?.()).catch(error => console.error('[Lazy] Biblioteca:', error));
+    }
     if (tabId === 'perfil'     && typeof window.renderProfile === 'function') window.renderProfile();
 }
 
@@ -1592,7 +1601,10 @@ function initTabs() {
             window.refreshHomeInBackground?.();
         }
         if (tabId === 'buscar'     && typeof window.initSearch    === 'function') window.initSearch();
-        if (tabId === 'biblioteca' && typeof window.renderLibrary === 'function') window.renderLibrary();
+        if (tabId === 'biblioteca') {
+        const loadLibrary = window.loadAppModule?.('library') || Promise.resolve();
+        loadLibrary.then(() => window.renderLibrary?.()).catch(error => console.error('[Lazy] Biblioteca:', error));
+    }
         if (tabId === 'perfil'     && typeof window.renderProfile === 'function') window.renderProfile();
         history.pushState({ tab: tabId }, '', window.getUrlForState({ tab: tabId }));
     }
