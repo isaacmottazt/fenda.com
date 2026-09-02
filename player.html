@@ -115,6 +115,18 @@
     <script src="/js/privacy.js?v=consent-prompt-v2"></script>
   </head>
   <body>
+    <script>
+      (() => {
+        const params = new URLSearchParams(window.location.search);
+        const musicId = params.get('music_id');
+        if (params.get('share') === '1' && musicId && !window.location.pathname.endsWith('/share.html')) {
+          const preview = new URL('/share.html', window.location.origin);
+          preview.searchParams.set('music_id', musicId);
+          preview.searchParams.set('share', '1');
+          window.location.replace(preview.toString());
+        }
+      })();
+    </script>
     <audio id="audio" class="fenda-audio-output" controls playsinline webkit-playsinline preload="metadata" aria-hidden="true"></audio>
 
     <div class="app-container">
@@ -951,7 +963,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=110", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=111", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
