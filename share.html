@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#09111f">
+  <meta name="theme-color" content="#160b2b">
   <title>Música compartilhada — Fenda Music</title>
   <style>
     :root {
       color-scheme: dark;
-      --accent: #7ee8e1;
-      --accent-2: #77a9ff;
-      --bg: #060a13;
-      --surface: rgba(15, 24, 42, .92);
-      --surface-soft: rgba(126, 232, 225, .07);
+      --accent: #a855f7;
+      --accent-2: #7c3aed;
+      --bg: #08050f;
+      --surface: rgba(20, 12, 37, .92);
+      --surface-soft: rgba(168, 85, 247, .08);
       --text: #f5f8ff;
       --muted: #9ba9c1;
       --line: rgba(173, 196, 232, .16);
@@ -26,24 +26,24 @@
       padding: 20px;
       overflow-x: hidden;
       color: var(--text);
-      background: radial-gradient(680px 420px at 50% -8%, rgba(119, 169, 255, .18), transparent 68%), var(--bg);
+      background: radial-gradient(680px 420px at 50% -8%, rgba(168, 85, 247, .18), transparent 68%), var(--bg);
       font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       -webkit-font-smoothing: antialiased;
     }
     .shell { width: min(100%, 500px); }
     .brand { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 0 auto 16px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; color: #07111f; background: linear-gradient(145deg, var(--accent), var(--accent-2)); border-radius: 10px; font-size: 17px; }
+    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; color: #12071f; background: linear-gradient(145deg, var(--accent), var(--accent-2)); border-radius: 10px; font-size: 17px; }
     .card { position: relative; overflow: hidden; padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 23px; box-shadow: 0 24px 70px rgba(0, 0, 0, .34); backdrop-filter: blur(20px); }
-    .card::before { content: ""; position: absolute; width: 220px; height: 220px; right: -110px; top: -120px; border-radius: 50%; background: radial-gradient(circle, rgba(126, 232, 225, .13), transparent 70%); pointer-events: none; }
+    .card::before { content: ""; position: absolute; width: 220px; height: 220px; right: -110px; top: -120px; border-radius: 50%; background: radial-gradient(circle, rgba(168, 85, 247, .13), transparent 70%); pointer-events: none; }
     .eyebrow { position: relative; display: flex; align-items: center; gap: 7px; color: var(--accent); font-size: 10px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
     .eyebrow span:first-child { font-size: 16px; }
     .loading { min-height: 165px; display: grid; place-items: center; color: var(--muted); text-align: center; font-size: 13px; }
-    .spinner { width: 28px; height: 28px; margin: 0 auto 11px; border: 3px solid rgba(126, 232, 225, .16); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    .spinner { width: 28px; height: 28px; margin: 0 auto 11px; border: 3px solid rgba(168, 85, 247, .16); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .song { position: relative; display: none; padding-top: 18px; }
     .song.is-ready { display: block; }
-    .song-summary { display: flex; align-items: center; gap: 15px; margin-top: 4px; padding: 13px; background: var(--surface-soft); border: 1px solid rgba(126, 232, 225, .12); border-radius: 17px; }
-    .cover { width: 92px; height: 92px; flex: 0 0 92px; overflow: hidden; display: grid; place-items: center; color: var(--accent); background: linear-gradient(145deg, #203b5c, #111d30); border: 1px solid rgba(126, 232, 225, .18); border-radius: 15px; }
+    .song-summary { display: flex; align-items: center; gap: 15px; margin-top: 4px; padding: 13px; background: var(--surface-soft); border: 1px solid rgba(168, 85, 247, .12); border-radius: 17px; }
+    .cover { width: 92px; height: 92px; flex: 0 0 92px; overflow: hidden; display: grid; place-items: center; color: var(--accent); background: linear-gradient(145deg, #3b1d63, #1d1033); border: 1px solid rgba(168, 85, 247, .18); border-radius: 15px; }
     .cover img { width: 100%; height: 100%; display: block; object-fit: cover; }
     .cover img[hidden], .cover span[hidden] { display: none; }
     .cover span { font-size: 34px; }
@@ -52,11 +52,11 @@
     .artist { margin: 7px 0 0; overflow: hidden; color: var(--muted); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
     .description { margin: 16px 2px 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
     .cta { display: flex; margin-top: 19px; }
-    .cta a { width: 100%; min-height: 45px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 17px; color: #07111f; background: linear-gradient(105deg, var(--accent), var(--accent-2)); border-radius: 12px; font-size: 12px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 26px rgba(119, 169, 255, .18); transition: filter .18s ease, transform .18s ease; }
+    .cta a { width: 100%; min-height: 45px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 17px; color: #12071f; background: linear-gradient(105deg, var(--accent), var(--accent-2)); border-radius: 12px; font-size: 12px; font-weight: 900; text-decoration: none; box-shadow: 0 10px 26px rgba(168, 85, 247, .18); transition: filter .18s ease, transform .18s ease; }
     .cta a:hover { filter: brightness(1.07); transform: translateY(-1px); }
     .error { display: none; padding: 25px 2px 8px; text-align: center; }
     .error.is-visible { display: block; }
-    .error-icon { width: 46px; height: 46px; display: grid; place-items: center; margin: 0 auto 13px; color: #ffacb4; background: rgba(255, 143, 155, .1); border: 1px solid rgba(255, 143, 155, .22); border-radius: 14px; font-size: 21px; }
+    .error-icon { width: 46px; height: 46px; display: grid; place-items: center; margin: 0 auto 13px; color: #ffacb4; background: rgba(255, 143, 155, .1); border: 1px solid rgba(168, 85, 247, .2); border-radius: 14px; font-size: 21px; }
     .error h1 { font-size: 21px; white-space: normal; }
     .error p { margin: 9px auto 0; max-width: 380px; color: var(--muted); line-height: 1.5; font-size: 12px; }
     .error a { display: inline-block; margin-top: 18px; color: var(--accent); font-size: 12px; font-weight: 800; }

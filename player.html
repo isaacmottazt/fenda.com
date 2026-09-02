@@ -8,6 +8,8 @@
     />
     <title>Fenda Music</title>
     <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://ublmmwatrqvthbcmnrps.supabase.co" crossorigin />
     <link rel="stylesheet" href="/fonts/material-symbols.css" />
     <link rel="stylesheet" href="/css/base.css?v=lyrics-redesign-v3" />
     <link rel="stylesheet" href="/css/inicio.css" />
@@ -963,7 +965,7 @@
 
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js?v=112", { scope: "/", updateViaCache: "none" })
+            .register("/sw.js?v=113", { scope: "/", updateViaCache: "none" })
             .then((reg) => {
               console.log("[SW] Registrado:", reg.scope);
               // Verifica atualização toda vez que o app é aberto — sem isso,
